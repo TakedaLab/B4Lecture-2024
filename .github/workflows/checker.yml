@@ -1,0 +1,56 @@
+name: Code Checker
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  get-files-changed:
+    runs-on: ubuntu-latest
+    outputs:
+      files: ${{ steps.set-env.outputs.files }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # OR "2" -> To retrieve the preceding commit.
+      - name: Get all changed *.py file(s)
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            **/*.py
+      - name: Set env
+        id: set-env
+        run: echo "files=${{ steps.changed-files-specific.outputs.all_changed_files }}" >> "$GITHUB_OUTPUT"
+          
+  linter:
+    runs-on: ubuntu-latest
+    needs: get-files-changed
+    steps:
+      - uses: actions/checkout@v3
+      - uses: psf/black@stable
+        with:
+          options: "--check --diff"
+          src: "${{needs.get-files-changed.outputs.files}}"
+  formatter:
+    runs-on: ubuntu-latest
+    needs: get-files-changed
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install flake8 and its plugins
+        run: pip install flake8 flake8-docstrings
+      - name: Run flake8
+        run: |
+          flake8 ${{needs.get-files-changed.outputs.files}} --max-line-length=100 --ignore=H102,H103,W503,H238,E203
+  isort:
+    runs-on: ubuntu-latest
+    needs: get-files-changed
+    steps:
+      - uses: actions/checkout@v3
+      - uses: isort/isort-action@v1
+        with:
+          sort-paths: "${{needs.get-files-changed.outputs.files}}"

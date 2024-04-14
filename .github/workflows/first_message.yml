@@ -1,0 +1,52 @@
+name: First Message
+
+on:
+  pull_request_target:
+    branches:
+      - master
+    types:
+      - opened
+
+jobs:
+  post-message:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            @${{ github.event.pull_request.user.login }}
+            課題の提出お疲れ様です！
+            レビュアーが自動で割り当てられない場合はお知らせください．M1の方には自動で割り当てられないことがあります．
+            また，レビュアーが割り振られていても反応がない場合は，気づいていない可能性があるので催促してあげてください．
+            コーディングは自動でチェックされます．できる範囲で構わないのでエラーメッセージや[こちら](https://github.com/TakedaLab/B4Lecture-2023/blob/master/docs/TIPS.md#github-actionsのciによるコーディングチェック)を参考に修正してみてください．
+            Approve後も含めて**マージはしないようお願いします．**
+
+            ---
+
+            ## 確認事項
+
+            PRに関して以下の注意点があるので，毎回必ずご確認をお願いします．
+            **確認ができたらチェックを入れてください．** 自力で解決が難しい場合はお知らせください．
+
+            ### 提出するファイルだけ出してください
+
+            - [ ] 確認しました
+
+            例）第2回の課題を提出する場合
+            Files changedに`ex2/<your_dir>/**` **だけ**がある状態にしてください．
+
+            過去の課題などが混じっていると，ラベルやレビュアー割り当てがおかしくなるので気をつけてください．
+            もし間違えてしまったときは，内容を修正した後にActionsにてSet PR ReviewersをRe-run all jobsすると解決できます．
+
+            ### 配布されたファイルは変更しないでください
+
+            - [ ] 確認しました
+
+            課題で配布されたREADME.mdや図などは変更しないようにしてください．
+            コンフリクトの原因となる可能性があります．

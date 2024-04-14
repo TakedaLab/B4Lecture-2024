@@ -1,0 +1,91 @@
+name: Set PR Reviewers
+
+on:
+  pull_request_target:
+    branches:
+      - master
+    paths:
+      - 'ex[1-9]/**'
+
+jobs:
+  triage:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/labeler@v4
+    
+  set-reviewer:
+    runs-on: ubuntu-latest
+    needs: triage
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@master
+      - name: define envs
+        run: |
+          num_label=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels | jq -r '.[].name' | grep -c EX)
+          if [ ${num_label} -gt 0 ]; then
+            echo "is_labeled=true" >> ${GITHUB_ENV}
+          else
+            echo "is_labeled=false" >> ${GITHUB_ENV}
+          fi
+          num_requested=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/requested_reviewers | jq -r '.users[].login' | wc -l)
+          if [ ${num_requested} -gt 0 ]; then
+            echo "is_requested=true" >> ${GITHUB_ENV}
+          else
+            echo "is_requested=false" >> ${GITHUB_ENV}
+          fi
+      - name: Set Reviewers
+        id: set-reviewers
+        if: ${{ env.is_labeled == 'true' && env.is_requested == 'false' }}
+        shell: bash
+        working-directory: ci
+        run: |
+          csv_file="users.csv"
+          pr_reviewee=${{ github.event.pull_request.user.login }}
+          target_ex_column=$(curl -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels | jq -r '.[].name' | grep EX)
+
+          ex_number=$(echo ${target_ex_column} | awk '{print substr($0, 3)}')
+          column_index=$((ex_number + 4))
+
+          reviewers=()
+          reviewers_mention=()
+          while read -r line; do
+            reviewer_name=$(echo ${line} | cut -d, -f1)
+            assigned_reviewee_name=$(echo ${line} | cut -d, -f${column_index})
+            if [ "$assigned_reviewee_name" == "$pr_reviewee" ]; then
+              reviewers+=("$reviewer_name")
+              reviewers_mention+=("@$reviewer_name")
+            else
+              assigned_reviewee_name=$(echo ${assigned_reviewee_name} | awk '{print substr($0, 1, length($0)-1)}')
+              if [ "$assigned_reviewee_name" == "$pr_reviewee" ]; then
+              reviewers+=("$reviewer_name")
+              reviewers_mention+=("@$reviewer_name")
+              fi
+            fi
+          done < "$csv_file"
+          
+          echo "reviewers_mention=${reviewers_mention[*]}" >> ${GITHUB_ENV}
+
+          reviewers_string=$(printf '"%s", ' "${reviewers[@]}" | sed 's/, $//')
+          reviewers_string="[$reviewers_string]"
+          curl -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/requested_reviewers \
+            -d "{\"reviewers\": ${reviewers_string} }"
+          
+      - name: Comment PR
+        if: ${{ env.is_labeled == 'true' && env.is_requested == 'false' }}
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            ${{ env.reviewers_mention }}
+            このPRのレビュアーに指名されました．
+            M1、M2はレビューをして，**最後に忘れずapproveをしてください．**
+            B4は感想や参考になった点などなんでも良いのでコメントしてください．
+            マージはドクターの先輩が行います．

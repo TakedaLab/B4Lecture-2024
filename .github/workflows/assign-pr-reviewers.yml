@@ -1,0 +1,68 @@
+name: Assign PR Reviewers
+
+on:
+  workflow_dispatch:
+    inputs:
+      lecture:
+        description: 'Lecture No.'
+        required: true
+        default: 'EX1'
+        type: choice
+        options:
+        - EX1
+        - EX2
+        - EX3
+        - EX4
+        - EX5
+        - EX6
+        - EX7
+        - EX8
+        - EX9
+
+jobs:
+  assign-reviewers-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+      - name: install csvtomd
+        run: pip3 install csvtomd
+      - name: Install dependencies
+        run: pip3 install numpy pandas
+      - name: Run Python script
+        shell: bash
+        working-directory: ci
+        run: python ./assign_reviewers.py
+      - name: Make message
+        shell: bash
+        working-directory: ci
+        run: |
+          column_num=$(head -n 1 users.csv | grep -o -i , | wc -l)
+          column_num=$((column_num+1))
+          echo "NEW_ASSIGN<<EOF" >> ${GITHUB_ENV}
+          echo "$(cut -d ',' -f 1,${column_num} ./users.csv | csvtomd -)" >> ${GITHUB_ENV}
+          echo "EOF" >> ${GITHUB_ENV}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: "[${{ inputs.lecture }}] Assign reviewers"
+          branch: "feature/assign-reviewers-csv"
+          branch-suffix: "timestamp"
+          delete-branch: true
+          commit-message: "update users.csv"
+          labels: |
+            assignment
+            auto-pr
+          reviewers: |
+            chomeyama
+            tkmyamamoto
+          body: |
+            users.csv を更新しました．
+            
+            ${{ inputs.lecture }}のレビュアーを割り当てました．
+            ${{ env.NEW_ASSIGN }}
+            
+            このPRをマージ後，この割り当てに基づいて自動でレビュアーが指定されます．

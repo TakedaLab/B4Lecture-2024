@@ -1,0 +1,34 @@
+name: Check Directory Name
+
+on:
+  pull_request_target:
+    branches:
+      - master
+    types:
+      - opened
+    paths-ignore:
+      - 'ex[1-9]/**'
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'ex[1-9]/**'
+
+jobs:
+  comment:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: |
+            @${{ github.event.pull_request.user.login }}
+            ディレクトリ名が正しくない可能性があります．`ex1/x_xxxxxx`の形であるか確認し，必要であれば修正してください．正しく修正ができた時はこのPRにラベルが付与されます．
+            正しくない例：　`ex01/x_xxxxxx`， `EX1/x_xxxxxx`など
+      - name: Raise an error
+        run: exit 1
