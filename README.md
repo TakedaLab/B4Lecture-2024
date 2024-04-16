@@ -18,8 +18,8 @@
 4. 本家リポジトリを登録 (upstreamという名前でなくてもいい)
 
     ```bash
-    $ cd B4Lecture-2023
-    $ git remote add upstream https://github.com/TakedaLab/B4Lecture-2023.git
+    $ cd B4Lecture-2024
+    $ git remote add upstream https://github.com/TakedaLab/B4Lecture-2024.git
     ```
 
 
@@ -27,7 +27,7 @@
 
 1. masterブランチに戻る
   ```bash
-  $ cd B4Lecture-2023
+  $ cd B4Lecture-2024
   $ git checkout master
   ```
 2. 本家リポジトリから更新されたソースをマージする
@@ -41,7 +41,7 @@
   ```
 3. 自分の名前のディレクトリを作成する
   ```bash
-  $ mkdir -p exXX/d_yoshioka
+  $ mkdir -p exXX/t_suzuki
   ```
 6. ディレクトリ内でスクリプトを作成する
 
