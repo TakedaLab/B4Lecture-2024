@@ -57,8 +57,10 @@ jobs:
             assignment
             auto-pr
           reviewers: |
-            chomeyama
-            tkmyamamoto
+            SZucchini
+            AtsushiMiyashita317
+            Rikuhei-ynwa
+            TakuyaFujimura
           body: |
             users.csv を更新しました．
             
