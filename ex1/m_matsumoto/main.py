@@ -53,11 +53,6 @@ def main():
     time = np.arange(0, len(data)) / rate
 
     
-    ### 波形をプロットする
-    plt.plot(time, data) # 時間と振幅を描画
-    plt.xlabel("Time [sec]") 
-    plt.ylabel("Amplitude")
-    plt.show() # 描画
 
     ### STFT(short-time Fourier transform)のそれぞれのパラメータ
     nfft = args.nfft # 窓の大きさ
@@ -89,19 +84,6 @@ def main():
             # スペクトグラムに付与する．
             )[: 1 + nfft // 2]
 
-
-    ### スペクトログラムの描画
-    plt.figure()
-    plt.imshow(
-        # spectrogramは複素数なので，2乗して描画する．
-        20 * np.log10(np.abs(spectrogram)), origin="lower", aspect="auto", cmap="jet" # 対数グラフで描画している．
-    )
-    plt.xlabel("Time (s)")
-    plt.ylabel("Frequency (Hz)")
-    plt.colorbar()
-    plt.title("Spectrogram")
-    plt.show()
-
     ### 逆変換の計算
     time_signal = np.zeros(len(data)) # 初期値の設定
     # 時間でループさせて，逆変換を行う．
@@ -116,12 +98,38 @@ def main():
             axis=0
             )) * window_func # 窓関数
 
-    # 逆変換した波形のプロット
-    plt.figure()
-    plt.plot(time, time_signal) # 時間と振幅に変換と逆変換を施したものを描画
+    plt.figure(figsize=(8, 8))
+    # グラフ1: 時間と振幅
+    plt.subplot(311)
+    plt.plot(time, data)
+    # plt.xlabel("Time [sec]")
+    plt.ylabel("Amplitude")
+    plt.title("Input Signal")
+    plt.xticks([])  # x軸のメモリを非表示にする
+
+    # グラフ2: スペクトログラム
+    plt.subplot(312)
+    im = plt.imshow(
+        20 * np.log10(np.abs(spectrogram)), origin="lower", aspect="auto", cmap="jet"
+    )
+    # plt.xlabel("Time (s)")
+    plt.ylabel("Frequency (Hz)")
+    plt.title("Spectrogram")
+    plt.xticks([])  # x軸のメモリを非表示にする
+    plt.colorbar(im)  # カラーバーを追加
+
+
+    # グラフ3: 逆変換された信号
+    plt.subplot(313)
+    plt.plot(time, time_signal)
     plt.xlabel("Time [sec]")
     plt.ylabel("Amplitude")
     plt.title("Inverse Transform")
+
+    # グラフ間の間隔を調整
+    plt.subplots_adjust(hspace=0.5)
+
+    # 描画
     plt.show()
 
 
