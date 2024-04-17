@@ -20,7 +20,7 @@
    - 取り組んだ内容を周りにわかるように説明
    - コードの説明はGithubのページをそのまま使ってもいいよ
    - 発表者は当日にランダムに決めるので**スライドは全員準備**
-4. スライドを`Procyon/発表資料/B4輪講/2024`にアップロード
+4. スライドをTeamsにアップロード
 ## 結果例
 
 ![結果例](figs/result.png)
@@ -51,10 +51,10 @@
    - `virtualenv`や`pyenv`などを使ってライブラリの管理をすると便利です。が、最初はなくても良いと思います。
    - **Python を使う場合は必ず3系を利用しましょう！！！！ (2系はそのうちサポート終了します。)**
    - 武田研究室の場合はセットアップで作成した`virtualenv`環境を利用すること（やってない疑惑？）
-      - アクティベート例：`source ~/workspace3/myvenv/bin/activate`  
+      - アクティベート例：`source ~/workspace3/myvenv/bin/activate`
       - アクティベート後`pip install ...`でライブラリのインストールを行う
    - Pythonには `PEP8` というコードのスタイルガイドがあります。これにそってコーディングを行いましょう。
       - [参考](https://blog-ja.sideci.com/entry/python-lint-pickup-5tools)
-- `spectrogram`関数（MATLAB）などを使って波形データからスペクトログラムを直接求めないこと  
-- `matplotlib.pyplot.specgram`関数（Python）を使って波形データからスペクトログラムを直接描画しないこと  
-- `librosa.core.stft`関数（Python）などを使って波形データからスペクトログラムを直接求めないこと  
+- `spectrogram`関数（MATLAB）などを使って波形データからスペクトログラムを直接求めないこと
+- `matplotlib.pyplot.specgram`関数（Python）を使って波形データからスペクトログラムを直接描画しないこと
+- `librosa.core.stft`関数（Python）などを使って波形データからスペクトログラムを直接求めないこと
