@@ -3,8 +3,24 @@ import matplotlib.pyplot as plt
 import librosa
 import sys
 
-#音声波形からスペクトログラムを作成
 def create_spectrogram(signal, n_fft, hop_length):
+    '''
+    音声波形からスペクトログラムを作成する
+    
+    Parameters
+    -------------
+    signal : ndarray
+        波形データ
+    n_fft : int
+        fftを行う窓の幅
+    hop_length : int
+        窓ごとの間隔
+
+    Returns
+    ------------
+    spectrogram : ndarray
+        スペクトログラム
+    '''
     n_frames = 1 + int((len(signal) - n_fft) / hop_length) #窓のサイズと窓ごとの間隔でフレーム数を決定
     spectrogram = np.zeros((n_fft, n_frames), dtype=np.complex_) #データを格納するndarrayを作成
 
@@ -20,6 +36,23 @@ def create_spectrogram(signal, n_fft, hop_length):
 
 #スペクトログラムから音声波形を復元
 def inverse_spectrogram(spectrogram, n_fft, hop_length):
+    '''
+    音声波形からスペクトログラムを作成する
+    
+    Parameters
+    -------------
+    spectrogram : ndarray
+        スペクトログラム
+    n_fft : int
+        fftを行う窓の幅
+    hop_length : int
+        窓ごとの間隔
+
+    Returns
+    ------------
+    spectrogram : ndarray
+        スペクトログラム
+    '''
     n_frames = spectrogram.shape[1]
     output_length = n_fft + hop_length * (n_frames - 1)
     signal = np.zeros(output_length)
