@@ -19,7 +19,7 @@ def create_spectrogram(signal, n_fft, hop_length):
     Returns
     ------------
     spectrogram : ndarray
-        スペクトログラム
+        波形データから計算されたスペクトログラム
     '''
     n_frames = 1 + int((len(signal) - n_fft) / hop_length) #窓のサイズと窓ごとの間隔でフレーム数を決定
     spectrogram = np.zeros((n_fft, n_frames), dtype=np.complex_) #データを格納するndarrayを作成
@@ -50,8 +50,8 @@ def inverse_spectrogram(spectrogram, n_fft, hop_length):
 
     Returns
     ------------
-    spectrogram : ndarray
-        スペクトログラム
+    signal : ndarray
+        スペクトログラムから計算された波形データ
     '''
     n_frames = spectrogram.shape[1]
     output_length = n_fft + hop_length * (n_frames - 1)
