@@ -44,11 +44,14 @@ def main():
 
     # 波形をプロットする
     time = np.arange(0, len(data)) / rate # 横軸（時間）の範囲内で、等差数列をndarrayとして生成
-    plt.subplot(311)
-    plt.plot(time, data) # 横軸：時間　縦軸：信号
-    plt.xlabel("Time [sec]")
-    plt.ylabel("Amplitude")
-    plt.title("Time Signal")
+    fig, axs = plt.subplots(3, 2, gridspec_kw=dict(width_ratios=[9,1]), figsize=(7, 7))
+    axs[0][1].axis("off")
+    axs[1][1].axis("off")
+    axs[2][1].axis("off")
+    axs[0][0].plot(time, data) # 横軸：時間　縦軸：信号
+    axs[0][0].set_xlabel("Time [sec]")
+    axs[0][0].set_ylabel("Amplitude")
+    axs[0][0].set_title("Time Signal")
     #plt.savefig("Time_Signal.png") # 表示（時間信号）
 
     # STFTのそれぞれのパラメータ
@@ -69,19 +72,18 @@ def main():
 
     # スペクトログラムの描画
     #plt.figure() # 描画領域全体を生成する
-    plt.subplot(312)
-    plt.imshow(
+    im = axs[1][0].imshow(
         20 * np.log10(np.abs(spectrogram)), # 画像データ。振幅とデシベルの変換式
         origin="lower", # origin:[0,0]を左上に置くか左下に置くか
         aspect="auto", # aspect:軸のアス比, autoで軸に収まるように歪む
         cmap="jet", # ColorMap
         extent=(0, len(data) / rate, 0, spectrogram.shape[0]) # (x開始, x終了, y開始, y終了)
     )
-    plt.xlabel("Time [sec]")
-    plt.ylabel("Frequency (Hz)")
-    plt.colorbar() # 図にカラーバーを表示
-    plt.title("Spectrogram")
-    plt.savefig("Spectrogram.png")
+    axs[1][0].set_xlabel("Time [sec]")
+    axs[1][0].set_ylabel("Frequency (Hz)")
+    cbar = plt.colorbar(im, ax=axs[1][1]) # 図にカラーバーを表示
+    axs[1][0].set_title("Spectrogram")
+    #plt.savefig("Spectrogram.png")
 
     # 逆変換の計算
     time_signal = np.zeros(len(data)) # 時間信号用の0配列を用意
@@ -93,11 +95,10 @@ def main():
 
     # 逆変換した波形のプロット
     #plt.figure()
-    plt.subplot(313)
-    plt.plot(time, time_signal)
-    plt.xlabel("Time [sec]")
-    plt.ylabel("Amplitude")
-    plt.title("Inverse Transform")
+    axs[2][0].plot(time, time_signal)
+    axs[2][0].set_xlabel("Time [sec]")
+    axs[2][0].set_ylabel("Amplitude")
+    axs[2][0].set_title("Inverse Transform")
     #plt.savefig("Inverse_Transform.png")
 
     plt.subplots_adjust(left=0.2, hspace=1)
