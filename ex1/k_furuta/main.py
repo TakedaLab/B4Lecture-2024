@@ -3,6 +3,7 @@
 元の音声データ、スペクトログラム、復元された音声データをグラフで表示する
 コマンドライン引数でファイルを指定する(python3 main.py FILE_NAME)
 """
+
 import sys
 
 import librosa
@@ -31,9 +32,9 @@ def create_spectrogram(signal, n_fft, hop_length):
 
     # フレームごとに窓関数を掛けてスペクトルを計算
     for i in range(n_frames):
-        frame = signal[i * hop_length:i * hop_length + n_fft]
+        frame = signal[i * hop_length : i * hop_length + n_fft]
         # フレームが足りない場合は0埋め
-        frame = np.pad(frame, (0, max(0, n_fft - len(frame))), mode='constant')
+        frame = np.pad(frame, (0, max(0, n_fft - len(frame))), mode="constant")
         windowed = frame * np.hanning(n_fft)
         fft_result = np.fft.fft(windowed)
         spectrogram[:, i] = fft_result
@@ -66,7 +67,7 @@ def inverse_spectrogram(spectrogram, n_fft, hop_length):
         frame = np.fft.ifft(spectrogram[:, i])
         start = i * hop_length
         # ifftの実数部分のみ利用(丸め誤差で微小な虚部が発生している、結果には影響しない)
-        signal[start:start + n_fft] += frame.real * np.hanning(n_fft)
+        signal[start : start + n_fft] += frame.real * np.hanning(n_fft)
     return signal
 
 
@@ -105,17 +106,20 @@ if __name__ == "__main__":
     # x軸とy軸の表示範囲
     # x軸は音声の時間
     # サンプリング定理よりy軸はサンプリング周波数の半分？
-    extent = (0, len(signal)/rate, 0, rate/2)
+    extent = (0, len(signal) / rate, 0, rate / 2)
     # 実数信号なので周波数はsymmetricになっているため半分だけ表示
     # デシベルと振幅の変換 振幅:x -> デシベル:20*log_10(x)
     plt.imshow(
-        20 * np.log10(np.abs(spectrogram)[:n_fft // 2, :]),
-        extent=extent, aspect='auto', origin='lower', cmap='viridis'
+        20 * np.log10(np.abs(spectrogram)[: n_fft // 2, :]),
+        extent=extent,
+        aspect="auto",
+        origin="lower",
+        cmap="viridis",
     )
 
-    plt.title('Spectrogram')
-    plt.xlabel('Time [sec]')
-    plt.ylabel('Frequency [hz]')
+    plt.title("Spectrogram")
+    plt.xlabel("Time [sec]")
+    plt.ylabel("Frequency [hz]")
 
     plt.subplot(223)
     plt.plot(time, reconstructed_signal)
