@@ -44,12 +44,12 @@ def main():
 
     # 波形をプロットする
     time = np.arange(0, len(data)) / rate # 横軸（時間）の範囲内で、等差数列をndarrayとして生成
-    plt.figure()
+    plt.subplot(311)
     plt.plot(time, data) # 横軸：時間　縦軸：信号
     plt.xlabel("Time [sec]")
     plt.ylabel("Amplitude")
     plt.title("Time Signal")
-    plt.savefig("Time_Signal.png") # 表示（時間信号）
+    #plt.savefig("Time_Signal.png") # 表示（時間信号）
 
     # STFTのそれぞれのパラメータ
     nfft = args.nfft # デフォルト1024
@@ -68,7 +68,8 @@ def main():
         spectrogram[:, i] = spectrum # おそらく縦方向ごとに計算してスペクトログラムに代入している
 
     # スペクトログラムの描画
-    plt.figure() # 描画領域全体を生成する
+    #plt.figure() # 描画領域全体を生成する
+    plt.subplot(312)
     plt.imshow(
         20 * np.log10(np.abs(spectrogram)), # 画像データ。振幅とデシベルの変換式
         origin="lower", # origin:[0,0]を左上に置くか左下に置くか
@@ -91,12 +92,16 @@ def main():
         time_signal[i * hop_length : i * hop_length + nfft] += segment # 時間信号の[]の範囲に計算したやつを代入している、[]はおそらく窓を掛ける範囲？
 
     # 逆変換した波形のプロット
-    plt.figure()
+    #plt.figure()
+    plt.subplot(313)
     plt.plot(time, time_signal)
     plt.xlabel("Time [sec]")
     plt.ylabel("Amplitude")
     plt.title("Inverse Transform")
-    plt.savefig("Inverse_Transform.png")
+    #plt.savefig("Inverse_Transform.png")
+
+    plt.subplots_adjust(left=0.2, hspace=1)
+    plt.savefig("result.png")
 
 
 if __name__ == "__main__":
