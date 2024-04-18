@@ -13,6 +13,8 @@ import scipy.fftpack as fftpack
 import scipy.io.wavfile as wavfile
 import scipy.signal as signal
 
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 """
 This module parse variables from execution options. 
 """
@@ -98,40 +100,37 @@ def main():
             axis=0
             )) * window_func # 窓関数
 
-    plt.figure(figsize=(8, 8))
+
+    # オブジェクト指向描画
+    fig, axs = plt.subplots(3, 1, figsize=(8, 8))
+
     # グラフ1: 時間と振幅
-    plt.subplot(311)
-    plt.plot(time, data)
-    # plt.xlabel("Time [sec]")
-    plt.ylabel("Amplitude")
-    plt.title("Input Signal")
-    plt.xticks([])  # x軸のメモリを非表示にする
+    axs[0].plot(time, data)
+    axs[0].set_xlabel("Time [sec]")
+    axs[0].set_ylabel("Amplitude")
+    axs[0].set_title("Input Signal")
 
     # グラフ2: スペクトログラム
-    plt.subplot(312)
-    im = plt.imshow(
-        20 * np.log10(np.abs(spectrogram)), origin="lower", aspect="auto", cmap="jet"
-    )
-    # plt.xlabel("Time (s)")
-    plt.ylabel("Frequency (Hz)")
-    plt.title("Spectrogram")
-    plt.xticks([])  # x軸のメモリを非表示にする
-    plt.colorbar(im)  # カラーバーを追加
-
+    im = axs[1].imshow(20 * np.log10(np.abs(spectrogram)), origin="lower", aspect="auto", cmap="jet")
+    axs[1].set_xlabel("Divided Index")
+    axs[1].set_ylabel("Frequency (Hz)")
+    axs[1].set_title("Spectrogram")
+    divider = make_axes_locatable(axs[1])
+    ax_cb = divider.new_horizontal(size="2%", pad=-0.05)
+    fig.add_axes(ax_cb)
+    _cbar = fig.colorbar(im, ax=axs[1], pad=0.1, shrink=0.8, cax=ax_cb)
 
     # グラフ3: 逆変換された信号
-    plt.subplot(313)
-    plt.plot(time, time_signal)
-    plt.xlabel("Time [sec]")
-    plt.ylabel("Amplitude")
-    plt.title("Inverse Transform")
+    axs[2].plot(time, time_signal)
+    axs[2].set_xlabel("Time [sec]")
+    axs[2].set_ylabel("Amplitude")
+    axs[2].set_title("Inverse Transform")
 
     # グラフ間の間隔を調整
     plt.subplots_adjust(hspace=0.5)
 
     # 描画
     plt.show()
-
 
 if __name__ == "__main__":
     main()
