@@ -1,7 +1,9 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import librosa
 import sys
+
+import librosa
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 def create_spectrogram(signal, n_fft, hop_length):
     '''
@@ -64,53 +66,55 @@ def inverse_spectrogram(spectrogram, n_fft, hop_length):
         signal[start:start + n_fft] += frame.real * np.hanning(n_fft)  
     return signal
 
-# コマンドライン引数ファイルを読み込む
-args = sys.argv
-if len(args)==1:
-    #ファイル名未指定の場合のエラー処理
-    print("usage:main.py INPUT_FILE")
-    exit()
 
-filename = args[1]
-signal, rate = librosa.load(filename, sr=None)
+if __name__ == "__main__":
+    # コマンドライン引数ファイルを読み込む
+    args = sys.argv
+    if len(args)==1:
+        #ファイル名未指定の場合のエラー処理
+        print("usage:main.py INPUT_FILE")
+        exit()
 
-# パラメータ
-n_fft = 1024
-hop_length = 512
+    filename = args[1]
+    signal, rate = librosa.load(filename, sr=None)
 
-# スペクトログラムの生成
-spectrogram = create_spectrogram(signal, n_fft, hop_length)
+    # パラメータ
+    n_fft = 1024
+    hop_length = 512
 
-# 逆変換
-reconstructed_signal = inverse_spectrogram(spectrogram, n_fft, hop_length)
+    # スペクトログラムの生成
+    spectrogram = create_spectrogram(signal, n_fft, hop_length)
 
-# スペクトログラムと信号の表示
-time = np.arange(0, len(signal)) / rate # 音声波形をプロットするための時間データ
+    # 逆変換
+    reconstructed_signal = inverse_spectrogram(spectrogram, n_fft, hop_length)
 
-plt.subplots_adjust(wspace=0.4, hspace=1.0)
-plt.subplot(221)
-plt.plot(time, signal)
-plt.title("Original Audio Signal")
-plt.xlabel("Time [sec]")
-plt.ylabel("Amplitude")
+    # スペクトログラムと信号の表示
+    time = np.arange(0, len(signal)) / rate # 音声波形をプロットするための時間データ
 
-plt.subplot(122)
-#x軸とy軸の表示範囲
-#  x軸は音声の時間
-#  サンプリング定理よりy軸はサンプリング周波数の半分？
-extent = (0, len(signal)/rate, 0, rate/2)
-#実数信号なので周波数はsymmetricになっているため半分だけ表示
-#デシベルと振幅の変換 振幅:x -> デシベル:20*log_10(x) 
-plt.imshow(20 * np.log10(np.abs(spectrogram)[:n_fft // 2, :]), extent=extent, aspect='auto', origin='lower', cmap='viridis')
+    plt.subplots_adjust(wspace=0.4, hspace=1.0)
+    plt.subplot(221)
+    plt.plot(time, signal)
+    plt.title("Original Audio Signal")
+    plt.xlabel("Time [sec]")
+    plt.ylabel("Amplitude")
 
-plt.title('Spectrogram')
-plt.xlabel('Time [sec]')
-plt.ylabel('Frequency [hz]')
+    plt.subplot(122)
+    #x軸とy軸の表示範囲
+    #  x軸は音声の時間
+    #  サンプリング定理よりy軸はサンプリング周波数の半分？
+    extent = (0, len(signal)/rate, 0, rate/2)
+    #実数信号なので周波数はsymmetricになっているため半分だけ表示
+    #デシベルと振幅の変換 振幅:x -> デシベル:20*log_10(x) 
+    plt.imshow(20 * np.log10(np.abs(spectrogram)[:n_fft // 2, :]), extent=extent, aspect='auto', origin='lower', cmap='viridis')
 
-plt.subplot(223)
-plt.plot(time, reconstructed_signal)
-plt.title("Restored Audio Signal")
-plt.xlabel("Time [sec]")
-plt.ylabel("Amplitude")
+    plt.title('Spectrogram')
+    plt.xlabel('Time [sec]')
+    plt.ylabel('Frequency [hz]')
 
-plt.show()
+    plt.subplot(223)
+    plt.plot(time, reconstructed_signal)
+    plt.title("Restored Audio Signal")
+    plt.xlabel("Time [sec]")
+    plt.ylabel("Amplitude")
+
+    plt.show()
