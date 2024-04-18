@@ -9,7 +9,7 @@ import numpy as np
 import resampy
 import soundfile as sf
 
-from arg_reader import io_path
+import arg_reader as ar
 
 """
 Description shows on the first line.
@@ -40,6 +40,6 @@ def main(
 
 
 if __name__ == "__main__":
-    args = io_path(True, True)
+    args = ar.io_path(True, True)
 
     main(args.input_path, args.output_path)
