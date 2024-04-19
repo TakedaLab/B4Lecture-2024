@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt  # グラフ作成用
 # スペクトログラムを作成する
 def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
     """
-    離散フーリエ変換を行い、スペクトログラムを計算します。
+    離散フーリエ変換を行い、スペクトログラムを計算します.
 
     Args:
         waveSize: フレーム数
@@ -21,7 +21,7 @@ def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
         sr: サンプリング周波数
         frameSize: フレームの大きさ
         overlap: オーバーラップさせるサンプル数
-    
+
     Returns:
         離散フーリエ変換の結果を格納したものを返す
     """
@@ -46,7 +46,7 @@ def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
 # 変換して元の波形にする
 def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
     """
-    逆変換を行い、結果を返します。
+    逆変換を行い、結果を返します.
 
     Args:
         waveSize: フレーム数
@@ -54,7 +54,7 @@ def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
         sr: サンプリング周波数
         frameSize: フレームの大きさ
         overlap: オーバーラップさせるサンプル数
-    
+
     Returns:
         逆変換の結果を格納したものを返す
     """
@@ -76,6 +76,16 @@ def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
 
 
 def main():
+    """
+    コマンドラインからファイル名を受け取り、音声ファイルの読み込み、スペクトログラムの作成、逆変換を行い、それぞれの結果をプロットして表示する.
+
+    Args:
+        なし
+
+    Returns:
+        なし
+    """
+    
     args = sys.argv
     filename = args[1]  # filename をコマンドラインから取得
     y, sr = librosa.load(filename, sr=None)  # 音声データを取得　srはサンプリング周波数
