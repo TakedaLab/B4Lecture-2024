@@ -1,5 +1,6 @@
 """
-wav形式の音声ファイルの波形、スペクトログラムを作成し、逆変換によって元の信号も出力する
+wav形式の音声ファイルの波形、スペクトログラムを作成する。
+逆変換によって元の信号も出力する。
 """
 
 import sys
@@ -10,6 +11,18 @@ import matplotlib.pyplot as plt  # グラフ作成用
 
 # スペクトログラムを作成する
 def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
+    """
+    Args:
+        waveSize: フレーム数
+        wave: 波形の値
+        sr: サンプリング周波数
+        flameSize: フレームの大きさ
+        overlap: オーバーラップさせるサンプル数
+    
+    Returns:
+        離散フーリエ変換の結果を格納したものを返す
+    """
+
     spectrogram = []  # 保持用
     window = np.hanning(flameSize)  # 窓関数としてハニング窓を採用
     flameStart = int(
@@ -29,6 +42,18 @@ def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
 
 # 変換して元の波形にする
 def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
+    """
+    Args:
+        waveSize: フレーム数
+        Spectrogram: スペクトログラム
+        sr: サンプリング周波数
+        flameSize: フレームの大きさ
+        overlap: オーバーラップさせるサンプル数
+    
+    Returns:
+        逆変換の結果を格納したものを返す
+    """
+
     iWave = np.zeros(waveSize)  # 保持用の配列を波のフレーム数だけ用意する
     flameStart = int(sr / 10)  # スキップした分だけ遅らせる
     window = np.hanning(flameSize)  # 窓関数としてハニング窓を採用
@@ -93,4 +118,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
