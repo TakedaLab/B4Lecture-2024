@@ -1,5 +1,6 @@
 """
-wav形式の音声ファイルの波形、スペクトログラムを作成する。
+wav形式の音声ファイルの波形、スペクトログラムを作成する.
+
 逆変換によって元の信号も出力する。
 """
 
@@ -12,11 +13,13 @@ import matplotlib.pyplot as plt  # グラフ作成用
 # スペクトログラムを作成する
 def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
     """
+    離散フーリエ変換を行い、スペクトログラムを計算します。
+
     Args:
         waveSize: フレーム数
         wave: 波形の値
         sr: サンプリング周波数
-        flameSize: フレームの大きさ
+        frameSize: フレームの大きさ
         overlap: オーバーラップさせるサンプル数
     
     Returns:
@@ -43,11 +46,13 @@ def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
 # 変換して元の波形にする
 def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
     """
+    逆変換を行い、結果を返します。
+
     Args:
         waveSize: フレーム数
         Spectrogram: スペクトログラム
         sr: サンプリング周波数
-        flameSize: フレームの大きさ
+        frameSize: フレームの大きさ
         overlap: オーバーラップさせるサンプル数
     
     Returns:
