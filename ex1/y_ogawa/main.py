@@ -49,7 +49,7 @@ def main():
     args = sys.argv
     filename = args[1]  # filename をコマンドラインから取得
     y, sr = librosa.load(filename, sr=None)  # 音声データを取得　srはサンプリング周波数
-    time = np.arange(0, y.size / sr, 1 / sr)  # 時間軸を配列に格納　
+    time = np.arange(0, y.size / sr, 1 / sr)  # 時間軸を配列に格納
 
     # 元の波形を表示する
     plt.subplot(3, 1, 1)
@@ -69,11 +69,11 @@ def main():
     plt.subplot(3, 1, 2)
     # フーリエ変換の実数部分だけをみるので半分だけ
     plt.imshow(
-        spectrogram_db[:int(len(spectrogram) / 2)],
-        extent = extent,
+        spectrogram_db[: int(len(spectrogram) / 2)],
+        extent=extent,
         origin="lower",
         aspect="auto",
-        cmap="jet"
+        cmap="jet",
     )
     plt.xlabel("Time [sec]")
     plt.ylabel("Frequency [Hz]")
@@ -87,7 +87,6 @@ def main():
     plt.xlabel("Time [sec]")
     plt.ylabel("Amplitude")
     plt.plot(time, iWave)
-
     plt.tight_layout()
     plt.show()
 
