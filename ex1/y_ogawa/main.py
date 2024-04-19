@@ -1,4 +1,5 @@
 """
+
 wav形式の音声ファイルの波形、スペクトログラムを作成する.
 
 逆変換によって元の信号も出力する。
@@ -46,6 +47,7 @@ def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
 # 変換して元の波形にする
 def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
     """
+
     逆変換を行い、結果を返します.
 
     Args:
@@ -77,6 +79,7 @@ def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
 
 def main():
     """
+
     コマンドラインからファイル名を受け取り、音声ファイルの読み込み、スペクトログラムの作成、逆変換を行い、それぞれの結果をプロットして表示する.
 
     Args:
@@ -85,7 +88,7 @@ def main():
     Returns:
         なし
     """
-    
+
     args = sys.argv
     filename = args[1]  # filename をコマンドラインから取得
     y, sr = librosa.load(filename, sr=None)  # 音声データを取得　srはサンプリング周波数
