@@ -47,7 +47,6 @@ def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
 # 変換して元の波形にする
 def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
     """
-
     逆変換を行い、結果を返します.
 
     Args:
@@ -79,7 +78,6 @@ def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
 
 def main():
     """
-
     コマンドラインからファイル名を受け取り、音声ファイルの読み込み、スペクトログラムの作成、逆変換を行い、それぞれの結果をプロットして表示する.
 
     Args:
