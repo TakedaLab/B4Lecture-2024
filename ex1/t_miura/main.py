@@ -151,7 +151,6 @@ def main():
     spectrogram              : スペクトログラム
     restore_wavedata_ndarray : スペクトログラムから復元した波形のndarray
     """
-    
     # 音声ファイル名を取得
     filename = get_filename()
 
