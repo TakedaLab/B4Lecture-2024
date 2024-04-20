@@ -9,9 +9,9 @@ scipy      : 窓関数
 
 import sys
 import wave
-import numpy as np
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
+import numpy as np
 from scipy import signal
 
 
