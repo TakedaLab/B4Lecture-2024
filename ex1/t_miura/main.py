@@ -135,13 +135,7 @@ def restore_waveform(spectrogram: np.ndarray, n_samples: int, skip_width: int):
 
 
 def main():
-    """コマンドライン引数から音声ファイル名を取得.
-    -> 波形のndarrayを取得
-    -> 波形を表示
-    -> スペクトログラムの作成
-    -> スペクトログラムを表示
-    -> スペクトログラムから波形を復元
-    -> 復元した波形を表示
+    """main関数.
 
     filename                 : 音声ファイル名
     wavedata_ndarray         : 波形のndarray
