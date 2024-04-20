@@ -18,7 +18,7 @@ def get_filename():
         return
 
 
-def get_wavedata(filename: str):    
+def get_wavedata(filename: str):
     # Wave_read objectを取得
     wave_read_obj = wave.open(filename, mode="rb")
 
