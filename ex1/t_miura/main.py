@@ -88,7 +88,7 @@ def plot_spectrogram(
         amp == 0, np.nan, amp
     )  # divide by zero encountered in log10を回避するため0をnanに置き換え
     x_val = np.arange(len(spectrogram)) * sampling_rate * skip_width  # 横軸の定義
-    y_val = np.fft.fftfreq(n_samples, d=sampling_rate)[:n_samples // 2]  # 縦軸の定義
+    y_val = np.fft.fftfreq(n_samples, d=sampling_rate)[: n_samples // 2]  # 縦軸の定義
     plt.pcolor(x_val, y_val, 20 * np.log10(amp_nonzero).T, shading="auto", cmap="jet")
     plt.xlabel("Time [sec]")
     plt.ylabel("Frequency [Hz]")
