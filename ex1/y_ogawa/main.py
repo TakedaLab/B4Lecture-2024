@@ -26,7 +26,6 @@ def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
     Returns:
         離散フーリエ変換の結果を格納したものを返す
     """
-
     spectrogram = []  # 保持用
     window = np.hanning(flameSize)  # 窓関数としてハニング窓を採用
     flameStart = int(
@@ -58,7 +57,6 @@ def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
     Returns:
         逆変換の結果を格納したものを返す
     """
-
     iWave = np.zeros(waveSize)  # 保持用の配列を波のフレーム数だけ用意する
     flameStart = int(sr / 10)  # スキップした分だけ遅らせる
     window = np.hanning(flameSize)  # 窓関数としてハニング窓を採用
@@ -84,7 +82,6 @@ def main():
     Returns:
         なし
     """
-
     args = sys.argv
     filename = args[1]  # filename をコマンドラインから取得
     y, sr = librosa.load(filename, sr=None)  # 音声データを取得　srはサンプリング周波数
