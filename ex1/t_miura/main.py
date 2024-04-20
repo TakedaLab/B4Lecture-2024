@@ -1,6 +1,4 @@
-"""
-音声データのスペクトログラムを作成し、
-逆変換で元の時間信号を復元する
+"""音声データのスペクトログラムを作成し、逆変換で元の時間信号を復元する.
 
 sys        : コマンドライン引数の取得
 wave       : 音声ファイルの取得
@@ -137,8 +135,7 @@ def restore_waveform(spectrogram: np.ndarray, n_samples: int, skip_width: int):
 
 
 def main():
-    """
-    コマンドライン引数から音声ファイル名を取得.
+    """コマンドライン引数から音声ファイル名を取得.
     -> 波形のndarrayを取得
     -> 波形を表示
     -> スペクトログラムの作成
@@ -154,6 +151,7 @@ def main():
     spectrogram              : スペクトログラム
     restore_wavedata_ndarray : スペクトログラムから復元した波形のndarray
     """
+    
     # 音声ファイル名を取得
     filename = get_filename()
 
