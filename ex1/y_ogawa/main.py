@@ -6,6 +6,7 @@ wav形式の音声ファイルの波形、スペクトログラムを作成す�
 """
 
 import sys
+
 import librosa  # 音声読み込み用
 import matplotlib.pyplot as plt  # グラフ作成用
 import numpy as np
