@@ -14,7 +14,7 @@ import numpy as np
 
 # スペクトログラムを作成する
 def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
-    """離散フーリエ変換を行い、スペクトログラムを計算します.
+    """短時間フーリエ変換を行い、スペクトログラムを計算します.
 
     Args:
         waveSize: フレーム数
@@ -24,7 +24,7 @@ def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
         overlap: オーバーラップさせるサンプル数
 
     Returns:
-        離散フーリエ変換の結果を格納したものを返す
+        短時間フーリエ変換の結果を格納したものを返す
     """
     spectrogram = []  # 保持用
     window = np.hanning(flameSize)  # 窓関数としてハニング窓を採用
@@ -98,7 +98,7 @@ def main():
     flameSize = 1024  # フレームサイズ
     overlap = int(flameSize / 2)  # オーバーラップ数
     spectrogram = makeSpectrogram(y.size, y, sr, flameSize, overlap)
-    spectrogram_db = 20 * np.log(np.abs(spectrogram).T)  # 位をdbに変換する
+    spectrogram_db = 20 * np.log(np.abs(spectrogram).T)  # 単位をdbに変換する
 
     # スペクトログラムを表示する
     extent = (0.1, y.size / sr, 0, sr / 2)  # 縦軸はナイキスト周波数まで
