@@ -15,15 +15,13 @@ import argparse
 
 def main():
     """
-    This function draws a spectrogram from a wavfile and returns it to the original.
-    
+    draws a spectrogram from a wavfile and returns it to the original.
     FFT a wavfile into a spectrogram.
     IFFT the spectrogram back to the original data.
     """
     parser = argparse.ArgumentParser(description="wavfileからスペクトログラムを描画し、元に戻す")
     parser.add_argument("-file", help="ファイルを入力")
     args = parser.parse_args()
-    
     # データを読み込み
     data, rate = sf.read(args.file)
 
