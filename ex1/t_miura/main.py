@@ -154,7 +154,7 @@ def restore_waveform(spectrogram: np.ndarray, n_samples: int, skip_width: int):
 
 def main():
     """main関数.
-    
+
     -> None
 
     filename                 : 音声ファイル名
