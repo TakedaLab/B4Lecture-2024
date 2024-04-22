@@ -77,7 +77,9 @@ def plot_waveform(
     plt.show()
 
 
-def calculate_spectrogram(wavedata_ndarray: np.ndarray, n_samples: int, skip_width: int):
+def calculate_spectrogram(
+    wavedata_ndarray: np.ndarray, n_samples: int, skip_width: int
+):
     """スペクトログラムを作成.
 
     -> スペクトログラム: np.ndarray
