@@ -27,7 +27,7 @@ def create_spectrogram(signal: np.ndarray, n_fft: int, hop_length: int) -> np.nd
     spectrogram : ndarray, shape=(frequency, time)
         波形データから計算されたスペクトログラム
     """
-    n_frames = 1 + int((len(signal) - n_fft) / hop_length)  # フレーム数を決定
+    n_frames = 1 + (len(signal) - n_fft) // hop_length  # フレーム数を決定
     spectrogram = np.zeros((n_fft, n_frames), dtype=np.complex_)  # データ用配列
 
     # フレームごとに窓関数を掛けてスペクトルを計算
