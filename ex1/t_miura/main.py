@@ -18,7 +18,7 @@ from scipy import signal
 def get_filename():
     """コマンドライン引数を取得.
 
-    -> None
+    -> ファイル名: str
     """
     args = sys.argv  # args=["main.py", str(FILENAME)]
 
@@ -77,7 +77,7 @@ def plot_waveform(
     plt.show()
 
 
-def get_spectrogram(wavedata_ndarray: np.ndarray, n_samples: int, skip_width: int):
+def calculate_spectrogram(wavedata_ndarray: np.ndarray, n_samples: int, skip_width: int):
     """スペクトログラムを作成.
 
     -> スペクトログラム: np.ndarray
@@ -187,7 +187,7 @@ def main():
     SKIP_WIDTH = N_SAMPLES // 2
 
     # スペクトログラムの計算
-    spectrogram = get_spectrogram(wavedata_ndarray, N_SAMPLES, SKIP_WIDTH)
+    spectrogram = calculate_spectrogram(wavedata_ndarray, N_SAMPLES, SKIP_WIDTH)
 
     # スペクトログラムの表示
     plot_spectrogram(spectrogram, sampling_rate, N_SAMPLES, SKIP_WIDTH)
