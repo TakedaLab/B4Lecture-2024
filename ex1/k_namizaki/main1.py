@@ -16,11 +16,13 @@ import argparse
 def main():
     """
     Draws a spectrogram from a wavfile and returns it to the original.
-    
+
     FFT a wavfile into a spectrogram.
     IFFT the spectrogram back to the original data.
     """
-    parser = argparse.ArgumentParser(description="wavfileからスペクトログラムを描画し、元に戻す")
+    parser = argparse.ArgumentParser(
+        description="wavfileからスペクトログラムを描画し、元に戻す"
+    )
     parser.add_argument("-file", help="ファイルを入力")
     args = parser.parse_args()
     # データを読み込み
@@ -42,11 +44,13 @@ def main():
 
     # スペクトログラムの計算
     # スペクトログラムを格納(dtype=complexじゃないと複素数を実数に格納しようとしていることになってしまう)
-    spectrogram = np.zeros([N // 2, len(data) // shift - (N // shift - 1)], dtype=complex)
+    spectrogram = np.zeros(
+        [N // 2, len(data) // shift - (N // shift - 1)], dtype=complex
+    )
 
     for i in range(spectrogram.shape[1]):
         # 窓関数をかける
-        segment = data[i * shift: i * shift + N] * window
+        segment = data[i * shift : i * shift + N] * window
         # fft
         spectrum = fftpack.fft(segment, n=N)[: N // 2]
         # スペクトログラムに格納
@@ -60,9 +64,10 @@ def main():
     # スペクトログラムの表示
     plt.figure()
     # imshowは2次元配列をカラーマップで表示(originは原点の位置)
-    plt.imshow(dB_spectrogram,
-               origin="lower",
-               )
+    plt.imshow(
+        dB_spectrogram,
+        origin="lower",
+    )
     plt.xlabel("Time [s]")
     plt.ylabel("Frequency [Hz]")
     plt.title("Spectrogram")
@@ -75,7 +80,7 @@ def main():
         spectrum = spectrogram[:, i]
         segment = fftpack.ifft(spectrum, n=N)
         segment = np.real(segment) * window
-        after_data[i * shift: i * shift + N] += segment
+        after_data[i * shift : i * shift + N] += segment
 
     # オリジナルの波形データをplot
     plt.figure()
