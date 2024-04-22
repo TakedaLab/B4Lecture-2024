@@ -24,7 +24,7 @@ def create_spectrogram(signal: np.ndarray, n_fft: int, hop_length: int) -> np.nd
         窓ごとの間隔
     Returns
     ------------
-    spectrogram : ndarray
+    spectrogram : ndarray, shape=(frequency, time)
         波形データから計算されたスペクトログラム
     """
     n_frames = 1 + int((len(signal) - n_fft) / hop_length)  # フレーム数を決定
