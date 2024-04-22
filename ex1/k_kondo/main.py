@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io.wavfile as wavfile
 
-def STFT(data, Lw, step):
+def STFT(data, Lw, step):   
+    # STFTの実行
+    # data 信号,　Lw 窓幅, step 切り出し幅
     l = data.shape[0]
     win = np.hanning(Lw)
     Mf = Lw//2 + 1
@@ -17,6 +19,8 @@ def STFT(data, Lw, step):
     return S
 
 def ISTFT(S, Lw, step):
+    # 逆変換の実行
+    # S スペクトログラム
     Mf, Nf = S.shape
     l = int((Nf - 1) * step + Lw)
 
@@ -31,14 +35,18 @@ def ISTFT(S, Lw, step):
     return x
 
 def main():
+    # コマンドプロンプトからファイル名を受け取り
     args = sys.argv
-    file_name = args[1]
-    
+    if(len(args) == 2):
+        file_name = args[1]
+    else:
+        print("Usage: python main.py <file_name>")
 
     rate, data = wavfile.read(file_name)
     data = np.array(data, dtype=float)
-
     time = np.arange(0, len(data))/rate
+
+    # 波形を表示
     plt.plot(time, data)
     plt.xlabel("Time[sec]")
     plt.ylabel("Amplitude")
@@ -49,6 +57,7 @@ def main():
 
     spectrogrum = STFT(data, length_window, step)
     
+    # スペクトログラムを表示
     P = 20*np.log10(np.abs(spectrogrum))
     plt.figure()
     plt.imshow(P, origin="lower", aspect="auto")
@@ -59,6 +68,7 @@ def main():
 
     time_signal = ISTFT(spectrogrum, length_window, step)
 
+    # 逆変換後の波形を表示
     time_adjusted = np.arange(0, len(time_signal)) * step / rate
     plt.figure()
     plt.plot(time_adjusted, time_signal)
