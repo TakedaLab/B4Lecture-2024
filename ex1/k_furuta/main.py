@@ -28,16 +28,16 @@ def create_spectrogram(signal: np.ndarray, n_fft: int, hop_length: int) -> np.nd
         波形データから計算されたスペクトログラム
     """
     n_frames = 1 + (len(signal) - n_fft) // hop_length  # フレーム数を決定
-    spectrogram = np.zeros((n_fft, n_frames), dtype=np.complex_)  # データ用配列
-
-    # フレームごとに窓関数を掛けてスペクトルを計算
-    for i in range(n_frames):
-        frame = signal[i * hop_length : i * hop_length + n_fft]
-        # フレームが足りない場合は0埋め
-        frame = np.pad(frame, (0, max(0, n_fft - len(frame))), mode="constant")
-        windowed = frame * np.hanning(n_fft)
-        fft_result = np.fft.fft(windowed)
-        spectrogram[:, i] = fft_result
+    # hop_lengthだけずらしながら切り出した行列を作成 shape=(n_fft, n_frames)
+    framed_signal = np.lib.stride_tricks.as_strided(
+        signal,
+        shape=(n_fft, n_frames),
+        strides=(signal.strides[0], signal.strides[0] * hop_length)
+    )
+    # ブロードキャストするために，窓関数に軸を追加
+    windowed_signal = framed_signal * np.hanning(n_fft)[:, np.newaxis]
+    # 0番目の軸に沿ってfftをかける
+    spectrogram = np.fft.fft(windowed_signal, axis=0)
 
     return spectrogram
 
