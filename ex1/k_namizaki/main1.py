@@ -5,12 +5,14 @@ FFT a wavfile into a spectrogram.
 IFFT the spectrogram back to the original data.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-import soundfile as sf
-import scipy.signal as signal
-import scipy.fftpack as fftpack
 import argparse
+
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy.fftpack as fftpack
+import scipy.signal as signal
+import soundfile as sf
+
 
 
 def main():
