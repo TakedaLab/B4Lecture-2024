@@ -14,7 +14,6 @@ import scipy.signal as signal
 import soundfile as sf
 
 
-
 def main():
     """
     Draws a spectrogram from a wavfile and returns it to the original.
