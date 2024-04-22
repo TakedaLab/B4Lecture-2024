@@ -5,10 +5,12 @@
 """
 
 import sys
+import argparse
 
 import librosa
 import matplotlib.pyplot as plt
 import numpy as np
+import soundfile as sf
 
 
 def create_spectrogram(signal: np.ndarray, n_fft: int, hop_length: int) -> np.ndarray:
@@ -43,7 +45,7 @@ def create_spectrogram(signal: np.ndarray, n_fft: int, hop_length: int) -> np.nd
 
 
 # スペクトログラムから音声波形を復元
-def inverse_spectrogram(spectrogram, n_fft, hop_length):
+def inverse_spectrogram(spectrogram: np.ndarray, n_fft: int, hop_length: int) -> np.ndarray:
     """音声波形からスペクトログラムを作成する.
 
     Parameters
@@ -56,15 +58,18 @@ def inverse_spectrogram(spectrogram, n_fft, hop_length):
         窓ごとの間隔
     Returns
     ------------
-    signal : ndarray
+    signal : ndarray , shape=(time)
         スペクトログラムから計算された波形データ
     """
     n_frames = spectrogram.shape[1]
     output_length = n_fft + hop_length * (n_frames - 1)
     signal = np.zeros(output_length)
 
+    framed_signal = np.fft.ifft(spectrogram, axis=0)
+
+    # for文除去できるらしい
     for i in range(n_frames):
-        frame = np.fft.ifft(spectrogram[:, i])
+        frame = framed_signal[:, i]
         start = i * hop_length
         # ifftの実数部分のみ利用(丸め誤差で微小な虚部が発生している、結果には影響しない)
         signal[start : start + n_fft] += frame.real * np.hanning(n_fft)
@@ -72,14 +77,11 @@ def inverse_spectrogram(spectrogram, n_fft, hop_length):
 
 
 if __name__ == "__main__":
-    # コマンドライン引数ファイルを読み込む
-    args = sys.argv
-    if len(args) == 1:
-        # ファイル名未指定の場合のエラー処理
-        print("usage:main.py INPUT_FILE")
-        exit()
-
-    filename = args[1]
+    # argparserでファイル名を読み込む
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--filename", type=str, required=True)
+    
+    filename = parser.parse_args().filename
     signal, rate = librosa.load(filename, sr=None)
 
     # パラメータ
@@ -128,3 +130,6 @@ if __name__ == "__main__":
     plt.ylabel("Amplitude")
 
     plt.show()
+
+    # 復元した波形をwavファイルに再構成(なぜかノイズが発生している)
+    sf.write(f"reconstructed_{filename}", reconstructed_signal, rate)
