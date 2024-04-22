@@ -4,7 +4,6 @@
 コマンドライン引数でファイルを指定する(python3 main.py FILE_NAME)
 """
 
-import sys
 import argparse
 
 import librosa
@@ -34,7 +33,7 @@ def create_spectrogram(signal: np.ndarray, n_fft: int, hop_length: int) -> np.nd
     framed_signal = np.lib.stride_tricks.as_strided(
         signal,
         shape=(n_fft, n_frames),
-        strides=(signal.strides[0], signal.strides[0] * hop_length)
+        strides=(signal.strides[0], signal.strides[0] * hop_length),
     )
     # ブロードキャストするために，窓関数に軸を追加
     windowed_signal = framed_signal * np.hanning(n_fft)[:, np.newaxis]
@@ -45,7 +44,9 @@ def create_spectrogram(signal: np.ndarray, n_fft: int, hop_length: int) -> np.nd
 
 
 # スペクトログラムから音声波形を復元
-def inverse_spectrogram(spectrogram: np.ndarray, n_fft: int, hop_length: int) -> np.ndarray:
+def inverse_spectrogram(
+    spectrogram: np.ndarray, n_fft: int, hop_length: int
+) -> np.ndarray:
     """音声波形からスペクトログラムを作成する.
 
     Parameters
@@ -80,7 +81,7 @@ if __name__ == "__main__":
     # argparserでファイル名を読み込む
     parser = argparse.ArgumentParser()
     parser.add_argument("--filename", type=str, required=True)
-    
+
     filename = parser.parse_args().filename
     signal, rate = librosa.load(filename, sr=None)
 
