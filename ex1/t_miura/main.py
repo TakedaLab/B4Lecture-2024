@@ -17,7 +17,9 @@ from scipy import signal
 
 def get_filename():
     """コマンドライン引数を取得.
-    -> None"""
+
+    -> None
+    """
     args = sys.argv  # args=["main.py", str(FILENAME)]
 
     if len(args) == 2:
@@ -30,7 +32,9 @@ def get_filename():
 
 def get_wavedata(filename: str):
     """波形の配列を取得.
-    -> 波形の配列: np.ndarray, サンプリング周期: float"""
+
+    -> 波形の配列: np.ndarray, サンプリング周期: float
+    """
     wave_read_obj = wave.open(filename, mode="rb")
 
     # バイナリデータを取得
@@ -56,7 +60,9 @@ def plot_waveform(
     wavedata_ndarray: np.ndarray, sampling_rate: float, picture_name_option: str = ""
 ):
     """波形を表示する.
-    -> None"""
+
+    -> None
+    """
     # 波形を表示する準備
     x_val = np.arange(len(wavedata_ndarray)) * sampling_rate  # 横軸の定義
     plt.plot(x_val, wavedata_ndarray)
@@ -73,7 +79,9 @@ def plot_waveform(
 
 def get_spectrogram(wavedata_ndarray: np.ndarray, n_samples: int, skip_width: int):
     """スペクトログラムを作成.
-    -> スペクトログラム: np.ndarray"""
+
+    -> スペクトログラム: np.ndarray
+    """
     # 空の行列を準備
     spectrogram = np.zeros(
         (1 + (len(wavedata_ndarray) - n_samples) // skip_width, n_samples // 2),
@@ -98,7 +106,9 @@ def plot_spectrogram(
     spectrogram: np.ndarray, sampling_rate: float, n_samples: int, skip_width: int
 ):
     """スペクトログラムを表示.
-    -> None"""
+
+    -> None
+    """
     # スペクトログラムを表示する準備
     amp = np.abs(spectrogram)  # 振幅を計算
     amp_nonzero = np.where(
@@ -121,7 +131,9 @@ def plot_spectrogram(
 
 def restore_waveform(spectrogram: np.ndarray, n_samples: int, skip_width: int):
     """波形を復元.
-    -> 復元された波形: np.ndarray"""
+
+    -> 復元された波形: np.ndarray
+    """
     # 空の配列を準備
     restore_waveform_ndarray = np.zeros((len(spectrogram) - 1) * skip_width + n_samples)
 
@@ -142,6 +154,7 @@ def restore_waveform(spectrogram: np.ndarray, n_samples: int, skip_width: int):
 
 def main():
     """main関数.
+    
     -> None
 
     filename                 : 音声ファイル名
