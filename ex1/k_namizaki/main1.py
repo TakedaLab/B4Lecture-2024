@@ -15,7 +15,8 @@ import argparse
 
 def main():
     """
-    draws a spectrogram from a wavfile and returns it to the original.
+    Draws a spectrogram from a wavfile and returns it to the original.
+    
     FFT a wavfile into a spectrogram.
     IFFT the spectrogram back to the original data.
     """
