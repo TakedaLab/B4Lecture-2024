@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def create_spectrogram(signal, n_fft, hop_length):
+def create_spectrogram(signal: np.ndarray, n_fft: int, hop_length: int) -> np.ndarray:
     """音声波形からスペクトログラムを作成する.
 
     Parameters
