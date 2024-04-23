@@ -26,7 +26,9 @@ def STFT(data, Lw, step):
         start = int(i * step)
         end = int(start + Lw)
         segment = (
-            data[start:end] if end <= wavelength else np.append(data[start:], np.zeros(end - wavelength))
+            data[start:end] 
+            if end <= wavelength 
+            else np.append(data[start:], np.zeros(end - wavelength))
         )
         S[:, i] = np.fft.rfft(segment * win, n=Lw, axis=0)
     return S
