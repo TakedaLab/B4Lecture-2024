@@ -1,3 +1,5 @@
+"""STFTとその逆変換の実行と結果の描画"""
+
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
@@ -5,31 +7,47 @@ import scipy.io.wavfile as wavfile
 
 
 def STFT(data, Lw, step):
-    # STFTの実行
-    # data 信号,　Lw 窓幅, step 切り出し幅
-    l = data.shape[0]
+    """短時間フーリエ変換の実行
+
+    Args:
+        data (_np.array_): _入力信号_
+        Lw (_int_): _窓幅_
+        step (_int_): _切り出し幅_
+
+    Returns:
+        _np.array_: _スペクトログラム_
+    """
+    wavelength = data.shape[0]
     win = np.hanning(Lw)
     Mf = Lw // 2 + 1
-    Nf = int(np.ceil((l - Lw + step) / step))
+    Nf = int(np.ceil((wavelength - Lw + step) / step))
     S = np.empty([Mf, Nf], dtype=np.complex128)
     for i in range(Nf):
         start = int(i * step)
         end = int(start + Lw)
         segment = (
-            data[start:end] if end <= l else np.append(data[start:], np.zeros(end - l))
+            data[start:end] if end <= wavelength else np.append(data[start:], np.zeros(end - wavelength))
         )
         S[:, i] = np.fft.rfft(segment * win, n=Lw, axis=0)
     return S
 
 
 def ISTFT(S, Lw, step):
-    # 逆変換の実行
-    # S スペクトログラム
-    Mf, Nf = S.shape
-    l = int((Nf - 1) * step + Lw)
+    """逆変換の実行
+
+    Args:
+        S (_np.array_): _スペクトログラム_
+        Lw (_int_): _窓幅_
+        step (_int_): _切り出し幅_
+
+    Returns:
+        _np.array_: _音声信号_
+    """
+    Nf = S.shape[1]
+    wavelength = int((Nf - 1) * step + Lw)
 
     win = np.hanning(Lw)
-    x = np.zeros(l)
+    x = np.zeros(wavelength)
 
     for i in range(Nf):
         start = int(i * step)
