@@ -14,6 +14,37 @@ import scipy.signal as signal
 import soundfile as sf
 
 
+def compute_spectrogram(data, N=1024, shift=512):
+
+    """
+    Create a spectrogram from an audio file.
+    Parameters
+    -------------
+    data (ndarray) : 音声波形
+    N (int) : fftの窓幅
+    shift (int) : ホップサイズ
+    Returns
+    ------------
+    spectrogram (ndarray) : スペクトログラム
+    """
+
+    # スペクトログラムの計算
+    # スペクトログラムを格納(dtype=complexじゃないと複素数を実数に格納しようとしていることになってしまう)
+    spectrogram = np.zeros(
+        [N // 2, len(data) // shift - (N // shift - 1)], dtype=complex
+    )
+    
+    window = signal.get_window("hann", N)
+
+    for i in range(spectrogram.shape[1]):
+        # 窓関数をかける
+        segment = data[i * shift : i * shift + N] * window
+        # fft
+        spectrum = fftpack.fft(segment, n=N)[: N // 2]
+        # スペクトログラムに格納
+        spectrogram[:, i] = spectrum
+    return spectrogram
+
 def main():
     """
     Draws a spectrogram from a wavfile and returns it to the original.
@@ -25,6 +56,8 @@ def main():
         description="wavfileからスペクトログラムを描画し、元に戻す"
     )
     parser.add_argument("-file", help="ファイルを入力")
+    parser.add_argument("-nfft", help="FFTサイズ")
+    parser.add_argument("-shift", help="ホップサイズ")
     args = parser.parse_args()
     # データを読み込み
     data, rate = sf.read(args.file)
@@ -42,21 +75,9 @@ def main():
     shift = N // 2  # フレーム間のシフト量
 
     window = signal.get_window("hann", N)  # 窓関数
-
-    # スペクトログラムの計算
-    # スペクトログラムを格納(dtype=complexじゃないと複素数を実数に格納しようとしていることになってしまう)
-    spectrogram = np.zeros(
-        [N // 2, len(data) // shift - (N // shift - 1)], dtype=complex
-    )
-
-    for i in range(spectrogram.shape[1]):
-        # 窓関数をかける
-        segment = data[i * shift : i * shift + N] * window
-        # fft
-        spectrum = fftpack.fft(segment, n=N)[: N // 2]
-        # スペクトログラムに格納
-        spectrogram[:, i] = spectrum
-
+    
+    spectrogram = compute_spectrogram(data, N, shift)
+    
     # デシベル変換
     dB_spectrogram = np.zeros([N // 2, len(data) // shift - (N // shift - 1)])
     eps = np.finfo(float).eps  # ゼロ除算を回避するための微小な値
