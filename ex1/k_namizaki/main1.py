@@ -15,8 +15,7 @@ import soundfile as sf
 
 
 def compute_spectrogram(data, N=1024, shift=512):
-    """
-    Create a spectrogram from an audio file.
+    """Create a spectrogram from an audio file.
 
     Parameters
     -------------
