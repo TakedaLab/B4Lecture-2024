@@ -15,7 +15,6 @@ import soundfile as sf
 
 
 def compute_spectrogram(data, N=1024, shift=512):
-
     """
     Create a spectrogram from an audio file.
 
@@ -29,8 +28,6 @@ def compute_spectrogram(data, N=1024, shift=512):
     ------------
     spectrogram (ndarray) : スペクトログラム
     """
-
-    # スペクトログラムの計算
     # スペクトログラムの計算
     # スペクトログラムを格納(dtype=complexじゃないと複素数を実数に格納しようとしていることになってしまう)
     spectrogram = np.zeros(
