@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+音声波形とスペクトログラムを表示するコード。
+ステレオ音声をモノラルに変換する処理を最初に行います。
+"""
+
 from pydub import AudioSegment
 import soundfile
 import numpy as np
