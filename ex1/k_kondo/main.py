@@ -1,6 +1,7 @@
 """STFTとその逆変換の実行と結果の描画."""
 
 import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io.wavfile as wavfile
