@@ -1,4 +1,4 @@
-"""STFTとその逆変換の実行と結果の描画"""
+"""STFTとその逆変換の実行と結果の描画."""
 
 import sys
 import matplotlib.pyplot as plt
@@ -7,7 +7,7 @@ import scipy.io.wavfile as wavfile
 
 
 def STFT(data, Lw, step):
-    """短時間フーリエ変換の実行
+    """短時間フーリエ変換の実行.
 
     Args:
         data (_np.array_): _入力信号_
@@ -35,7 +35,7 @@ def STFT(data, Lw, step):
 
 
 def ISTFT(S, Lw, step):
-    """逆変換の実行
+    """逆変換の実行.
 
     Args:
         S (_np.array_): _スペクトログラム_
@@ -60,6 +60,7 @@ def ISTFT(S, Lw, step):
 
 
 def main():
+    """メイン関数."""
     # コマンドプロンプトからファイル名を受け取り
     args = sys.argv
     if len(args) == 2:
