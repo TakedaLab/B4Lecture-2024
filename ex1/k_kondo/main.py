@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.io.wavfile as wavfile
 
-def STFT(data, Lw, step):   
+
+def STFT(data, Lw, step):
     # STFTの実行
     # data 信号,　Lw 窓幅, step 切り出し幅
     l = data.shape[0]
