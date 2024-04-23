@@ -23,11 +23,13 @@ def compute_spectrogram(data, N=1024, shift=512):
     data (ndarray) : 音声波形
     N (int) : fftの窓幅
     shift (int) : ホップサイズ
+
     Returns
     ------------
     spectrogram (ndarray) : スペクトログラム
     """
 
+    # スペクトログラムの計算
     # スペクトログラムの計算
     # スペクトログラムを格納(dtype=complexじゃないと複素数を実数に格納しようとしていることになってしまう)
     spectrogram = np.zeros(
