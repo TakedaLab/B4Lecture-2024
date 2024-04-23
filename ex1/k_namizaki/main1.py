@@ -15,7 +15,6 @@ import soundfile as sf
 
 
 def compute_spectrogram(data, N=1024, shift=512):
-
     """
     Create a spectrogram from an audio file.
     Parameters
@@ -33,7 +32,6 @@ def compute_spectrogram(data, N=1024, shift=512):
     spectrogram = np.zeros(
         [N // 2, len(data) // shift - (N // shift - 1)], dtype=complex
     )
-    
     window = signal.get_window("hann", N)
 
     for i in range(spectrogram.shape[1]):
@@ -44,6 +42,7 @@ def compute_spectrogram(data, N=1024, shift=512):
         # スペクトログラムに格納
         spectrogram[:, i] = spectrum
     return spectrogram
+
 
 def main():
     """
@@ -75,9 +74,9 @@ def main():
     shift = N // 2  # フレーム間のシフト量
 
     window = signal.get_window("hann", N)  # 窓関数
-    
+
     spectrogram = compute_spectrogram(data, N, shift)
-    
+
     # デシベル変換
     dB_spectrogram = np.zeros([N // 2, len(data) // shift - (N // shift - 1)])
     eps = np.finfo(float).eps  # ゼロ除算を回避するための微小な値
