@@ -15,7 +15,7 @@ audio_path = "mono_shuffle.wav"
 data, samplerate = soundfile.read(
     audio_path
 )  # オーディオデータとサンプリングレートの取り出し
-N = len(data) # オーディオデータのサイズを取得
+N = len(data)  # オーディオデータのサイズを取得
 
 time = np.arange(0, N) / samplerate  # 音声データの時間を取得
 plt.plot(time, data)  # 音声ファイルの波形を描写
@@ -34,12 +34,12 @@ wd = sp.hamming(fs)  # 切り出すフレーム幅で窓関数を用意（今回
 
 cut_start = 0  # 切り出していくフレーム位置
 while cut_start + fs <= N:
-    frame = data[cut_start:cut_start + fs]  # 音声データから切り出し
+    frame = data[cut_start : cut_start + fs]  # 音声データから切り出し
     fft_frame = np.fft.fft(frame * wd)  # 切り出したデータに窓関数をかけ、フーリエ変換
     fft_data.append(fft_frame)  # フーリエ変換後のデータを保存
     cut_start += cut_surplus  # 切り出し開始位置を更新
 
-fft_data_copy = copy.deepcopy(fft_data) # 逆変換用
+fft_data_copy = copy.deepcopy(fft_data)  # 逆変換用
 fft_data = np.array(fft_data)  # np.absを使いたいので
 fft_abs = np.abs(
     fft_data[:, :cut_surplus]
