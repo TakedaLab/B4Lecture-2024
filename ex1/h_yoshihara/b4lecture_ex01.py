@@ -7,12 +7,13 @@
 
 """
 
-from pydub import AudioSegment
-import soundfile
-import numpy as np
-import matplotlib.pylab as plt
-import scipy.signal as sp
 import copy
+
+import matplotlib.pylab as plt
+import numpy as np
+import scipy.signal as sp
+import soundfile
+from pydub import AudioSegment
 
 # 音声ファイルがステレオなのでモノラルに変換
 stereo_audio = "月まで届け.wav"  # 音声ファイルのパス
