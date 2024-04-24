@@ -32,13 +32,13 @@
 
    - **割り振り**
 
-     * LPF: Kimihiro Hattori, Koki Morita
+     * LPF:
 
-     * HPF: Kenjiro Ide, Takehiro Imamura
+     * HPF:
 
-     * BPF: Tatsuru Kawanishi, Shunsuke Iwashita
+     * BPF:
 
-     * BEF: Kenichi Ogita, Ryoya Sakaki
+     * BEF: 
 
 3. 畳み込み
 
