@@ -32,13 +32,13 @@
 
    - **割り振り**
 
-     * LPF:
+     * LPF: Takumi Miura, Yohei Ogawa
 
-     * HPF:
+     * HPF: Kyousuke Namizaki, Hikaru Yoshihara
 
-     * BPF:
+     * BPF: Kenta Kondo, Kyohei Furuta
 
-     * BEF: 
+     * BEF: Masaaki Matsumoto, Hikari Miyaji
 
 3. 畳み込み
 
