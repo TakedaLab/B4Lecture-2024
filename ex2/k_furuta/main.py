@@ -78,9 +78,7 @@ def parse_args():
     parser.add_argument(
         "--input-file", type=str, required=True, help="name of input wav file"
     )
-    parser.add_argument(
-        "--nfft", type=int, default=1024, help="number of FFT points"
-    )
+    parser.add_argument("--nfft", type=int, default=1024, help="number of FFT points")
     parser.add_argument(
         "--hop-length",
         type=int,
@@ -88,16 +86,13 @@ def parse_args():
         help="number of samples between successive STFT columns",
     )
     parser.add_argument(
-        "--low", type=int, default=2000,
-        help="left end point of the bandpass filter"
+        "--low", type=int, default=2000, help="left end point of the bandpass filter"
     )
     parser.add_argument(
-        "--high", type=int, default=5000,
-        help="right end point of the bandpass filter"
+        "--high", type=int, default=5000, help="right end point of the bandpass filter"
     )
     parser.add_argument(
-        "--filter-length", type=int, default=101,
-        help="size of bandpass filter"
+        "--filter-length", type=int, default=101, help="size of bandpass filter"
     )
     return parser.parse_args()
 
@@ -121,9 +116,7 @@ if __name__ == "__main__":
     filtered_signal = convolve(signal, bpf)
 
     # フィルタ前後のスペクトログラムの作成
-    original_spectrogram = ex1.create_spectrogram(
-        signal, args.nfft, args.hop_length
-    )
+    original_spectrogram = ex1.create_spectrogram(signal, args.nfft, args.hop_length)
     filtered_spectrogram = ex1.create_spectrogram(
         filtered_signal, args.nfft, args.hop_length
     )
