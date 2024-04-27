@@ -31,7 +31,7 @@
    - 周波数特性を描画．グラフの各軸はきちんと明記
 
    - **割り振り**
-
+   
      * LPF: Takumi Miura, Yohei Ogawa
 
      * HPF: Kyousuke Namizaki, Hikaru Yoshihara
