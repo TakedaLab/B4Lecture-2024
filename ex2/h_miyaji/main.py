@@ -141,7 +141,7 @@ def show_freq_responce(h: np.ndarray, samplerate: int) -> None:
     amp = 20 * np.log10(np.abs(H))
 
     # 位相特性[rad]
-    deg = np.angle(h)
+    deg = np.unwrap(np.angle(H, deg=True))
 
     # グラフ描画
     freq = np.linspace(0, samplerate, h.size)
@@ -157,7 +157,7 @@ def show_freq_responce(h: np.ndarray, samplerate: int) -> None:
     ax2 = plt.subplot(2, 1, 2)
     ax2.plot(freq[: h.size // 2], deg[: h.size // 2], label="位相特性")
     ax2.set_xlabel("Frequency (Hz)")
-    ax2.set_ylabel("Degree (rad)")
+    ax2.set_ylabel("Degree")
     plt.subplots_adjust(hspace=0.7)
 
     plt.savefig("freq_responce.png")
@@ -220,7 +220,7 @@ def main():
     )
 
     # フィルタリングされた信号のwavファイル作成
-    sf.write("filtered_req.wav", np.abs(data_filtered), samplerate)
+    sf.write("filtered_rec.wav", np.abs(data_filtered), samplerate)
 
 
 if __name__ == "__main__":
