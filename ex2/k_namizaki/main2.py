@@ -73,9 +73,8 @@ def hpf(fs, fc, N):
 
 def main():
     """
-    This code does the following.
-
     Make the high pass filter.
+
     Do the convolution.
     Draw the spectrogram.
     """
