@@ -6,6 +6,7 @@ import scipy.fftpack as fftpack
 import scipy.signal as signal
 import soundfile as sf
 
+
 def convolution(input, filter):
     """
     _summary_
@@ -18,26 +19,26 @@ def convolution(input, filter):
 
     Returns
     ------------
-    output : 出力
+    output : 出力データ
     """
     # 畳み込みを行う(https://data-analytics.fun/2021/11/23/understanding-convolution/)
-    output = np.zeros(len(input)+len(filter)-1)
+    output = np.zeros(len(input) + len(filter) - 1)
     # inputの配列の前後に0を追加。
-    add = np.zeros(len(filter)-1)
+    add = np.zeros(len(filter) - 1)
     input = np.concatenate((add, input))
     input = np.concatenate((input, add))
     # フィルタ配列を反転
     filter = filter[::-1]
     # 今回は一次元だから内積でいい
     for i in range(len(output)):
-        output[i] = np.dot(input[i:i+len(filter)],filter)
+        output[i] = np.dot(input[i : i + len(filter)], filter)
     return output
 
 
 def hpf(fs, fc, N):
     """
     _summary_
-    make the high pass filter.
+    Make the high pass filter.
 
     Parameters
     ----------
@@ -49,16 +50,16 @@ def hpf(fs, fc, N):
     -------
     filter : フィルター
     """
-    omega_c = 2.0 * np.pi * (fc/fs)
-    window = signal.windows.hann(2*N+1)
+    omega_c = 2.0 * np.pi * (fc / fs)
+    window = signal.windows.hann(2 * N + 1)
 
     # 理想ハイパスフィルタを作成
-    n = np.arange(1,N+1)
-    ideal_fil = np.zeros(2*N+1)
-    ideal_fil_half = -2 * (fc/fs) * np.sin(omega_c * n) / (omega_c * n)
+    n = np.arange(1, N + 1)
+    ideal_fil = np.zeros(2 * N + 1)
+    ideal_fil_half = -2 * (fc / fs) * np.sin(omega_c * n) / (omega_c * n)
     ideal_fil[0:N] = ideal_fil_half[::-1]
-    ideal_fil[N] = 1 - 2 * (fc/fs)
-    ideal_fil[N+1:2*N+1] = ideal_fil_half
+    ideal_fil[N] = 1 - 2 * (fc / fs)
+    ideal_fil[N + 1 : 2 * N + 1] = ideal_fil_half
 
     # 窓関数をかける
     filter = ideal_fil * window
@@ -66,12 +67,18 @@ def hpf(fs, fc, N):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="wavfileからスペクトログラムを描画し、"
+    """
+    _summary_
+    Make the high pass filter
+    and do the convolution
+    and draw the spectrogram.
+    """
+    parser = argparse.ArgumentParser(description="hpfをつくり、wavfileのdataと畳み込みして、スペクトログラムを描画する")
+    parser.add_argument(
+        "-file", help="ファイルを入力", default=r"C:\Users\kyskn\B4Lecture-2024\ex2\k_namizaki\reco20240428.wav"
     )
-    parser.add_argument("-file", help="ファイルを入力")
-    parser.add_argument("-cut", help="カットオフ周波数", default = 5000)
-    parser.add_argument("-n", help="次数", default = 64)
+    parser.add_argument("-cut", help="カットオフ周波数", default=5000)
+    parser.add_argument("-n", help="次数", default=64)
     args = parser.parse_args()
 
     # データを読み込み
@@ -90,27 +97,23 @@ def main():
     # フィルタの位相特性を計算(unwrapなしだと2pi分が毎回巻き戻されてしまう)
     phase = np.unwrap(np.angle(np.fft.fft(filter, 1024)))
     # 角度に変更
-    phase = phase * 180/np.pi
+    phase = phase * 180 / np.pi
 
     # filterの振幅を描画
-    plt.figure(figsize=(10, 6))
-    plt.plot(freq_axis[:len(mag)//2], mag_db[:len(mag)//2])
-    plt.title("high pass filter")
+    plt.plot(freq_axis[: len(mag) // 2], mag_db[: len(mag) // 2])
+    plt.title("high pass filter(amplitude)")
     plt.xlabel("Frequency [Hz]")
     plt.ylabel("Amplitude [dB]")
-    plt.grid(True)
     plt.show()
     # filterの位相を描画
-    plt.figure(figsize=(10, 6))
-    plt.plot(freq_axis[:len(mag)//2], phase[:len(mag)//2])
-    plt.title("high pass filter")
+    plt.plot(freq_axis[: len(mag) // 2], phase[: len(mag) // 2])
+    plt.title("high pass filter(degree)")
     plt.xlabel("Frequency [Hz]")
-    plt.ylabel("Digree [°]")
-    plt.grid(True)
+    plt.ylabel("Degree [°]")
     plt.show()
 
     # dataとhpfを畳み込み
-    filteredData = convolution(data,filter)
+    filteredData = convolution(data, filter)
 
     # 入力と出力の大きさをそろえる
     length = len(data)
@@ -119,23 +122,26 @@ def main():
     f, t, Sxx = signal.spectrogram(data, rate)
 
     # フィルター前のスペクトログラムの描画
-    plt.pcolormesh(t, f, 10*np.log(Sxx), shading="gouraud") #intensityを修正
+    plt.pcolormesh(t, f, 10 * np.log(Sxx), shading="gouraud")
+    plt.title("spectrogram(original)")
     plt.ylabel("Frequency [Hz]")
     plt.xlabel("Time [sec]")
-    cbar = plt.colorbar() #カラーバー表示のため追加
-    cbar.ax.set_ylabel("Intensity [dB]") #カラーバーの名称表示のため追加
+    cbar = plt.colorbar()
+    cbar.ax.set_ylabel("Intensity [dB]")
     plt.show()
 
     # フィルター後のスペクトログラム分析
     f, t, Sxx = signal.spectrogram(filteredData, rate)
 
     # フィルター後のスペクトログラムの描画
-    plt.pcolormesh(t, f, 10*np.log(Sxx), shading="gouraud") #intensityを修正
+    plt.pcolormesh(t, f, 10 * np.log(Sxx), shading="gouraud")
+    plt.title("spectrogram(filtered)")
     plt.ylabel("Frequency [Hz]")
     plt.xlabel("Time [sec]")
-    cbar = plt.colorbar() #カラーバー表示のため追加
-    cbar.ax.set_ylabel("Intensity [dB]") #カラーバーの名称表示のため追加
+    cbar = plt.colorbar()
+    cbar.ax.set_ylabel("Intensity [dB]")
     plt.show()
+
 
 if __name__ == "__main__":
     main()
