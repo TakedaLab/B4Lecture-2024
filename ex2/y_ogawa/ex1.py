@@ -35,7 +35,7 @@ def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
         flameStart + flameSize <= waveSize
     ):  # フレームの端が波のサンプル数を超えるまで繰り返す
         cutWave = wave[
-            flameStart: flameStart + flameSize
+            flameStart : flameStart + flameSize
         ]  # 音声波形から短時間区間を切り出す
         fft = np.fft.fft(window * cutWave)  # 窓関数をかけて高速フーリエ変換
         spectrogram.append(fft[0:flameSize])  # 結果を格納する
@@ -65,7 +65,7 @@ def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
         flameStart + flameSize <= waveSize
     ):  # フレームの端が波のサンプル数を超えるまで繰り返す
         frame = np.fft.ifft(spectrogram[i]) / window  # スペクトログラムを逆変換する
-        iWave[flameStart: flameStart + overlap] += np.real(
+        iWave[flameStart : flameStart + overlap] += np.real(
             frame[:overlap]
         )  # 実数部分を窓関数で割ってiWaveに格納する
         flameStart += overlap  # 次のフレーム
