@@ -84,42 +84,20 @@ def make_bef(
     H_filter[: int(f1 * time)] = 1
     H_filter[int(f2 * time) :] = 1
 
-    # TODO: 確認用：理想のフィルタ振幅特性
-    # freq = np.linspace(0, samplerate, size)
-    # mf.plot_any(freq, H_filter, "Freq", "Amp", "Amp of filter")
-
     # 単位インパルス応答
     h_filter = fftpack.ifft(H_filter, n=size, axis=0)
 
-    # TODO: 確認用：理想のフィルタに対する単位インパルス応答
-    # mf.plot_any(freq[:200], h_filter[:200], "Time", "Amp", "impulse")
-
     # 時間シフト
     h_filter = np.roll(h_filter, N)
-
-    # TODO: 確認用：時間シフト後
-    # mf.plot_any(freq[:200], h_filter[:200], "Time", "Amp", "after roll")
 
     # 単位インパルス * 窓関数
     h_filter[:wlen] = h_filter[:wlen] * window_func
     h_filter[wlen + 1 :] = 0
 
-    # TODO: 確認用：窓関数乗算後
-    # mf.plot_any(freq[:200], h_filter[:200], "Time", "Amp", "h * window")
-
     # 時間シフト
     h_filter = fftpack.ifftshift(h_filter)
     h_filter = np.roll(h_filter, -N)
 
-    # TODO: 確認用：中央に寄せた後
-    # mf.plot_any(freq, h_filter, "Time", "Amp", "after timeshift")
-    # mf.plot_any(
-    #    freq[size // 2 - N : size // 2 + N],
-    #    h_filter[size // 2 - N : size // 2 + N],
-    #    "Time",
-    #    "Amp",
-    #    "after timeshift",
-    # )
     return h_filter
 
 
@@ -158,8 +136,8 @@ def show_freq_responce(h: np.ndarray, samplerate: int) -> None:
     ax2.plot(freq[: h.size // 2], deg[: h.size // 2], label="位相特性")
     ax2.set_xlabel("Frequency (Hz)")
     ax2.set_ylabel("Degree")
-    plt.subplots_adjust(hspace=0.7)
 
+    plt.subplots_adjust(hspace=0.7)
     plt.savefig("freq_responce.png")
 
     return None
@@ -172,16 +150,12 @@ def main():
     # 音声ファイルを読み込む, data:信号のデータ, samplerate:サンプリング周波数
     data, samplerate = sf.read(args.input_file)
 
-    # 時間領域のプロット
-    # mf.show_wave(data, samplerate)
-
     # argsの取得
     nfft = args.nfft
     hop_length = args.hop_length
     window = args.window
     f1 = args.f1
     f2 = args.f2
-    # window_func = signal.get_window(window, nfft)
 
     # BEF作成
     h_bef = make_bef(len(data), f1, f2, window, 161, samplerate)
@@ -200,9 +174,7 @@ def main():
     data_filtered = conv_new(data, h)
 
     # TODO: debug フィルタリング後の波形を表示
-    print(data_filtered.shape)
-    print(data_filtered.dtype)
-    mf.show_wave(data_filtered, samplerate, "filtered wave")
+    # mf.show_wave(data_filtered, samplerate, "filtered wave")
 
     # 周波数特性の図示
     show_freq_responce(h_bef, samplerate)
