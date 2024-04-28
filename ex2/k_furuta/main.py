@@ -129,22 +129,31 @@ if __name__ == "__main__":
     plt.figure(figsize=(7, 8))
     plt.subplots_adjust(wspace=0.4, hspace=1.0)
 
-    # プロット用の時間配列
+    # 周波数特性プロット用配列
+    freq = np.arange(response.shape[0] // 2)
 
     # 周波数特性の表示
     plt.subplot(411)
     # デシベルと振幅の変換 振幅:x -> デシベル:20*log_10(x)
-    plt.plot(20 * np.log10(np.abs(response))[: args.filter_length // 2])
+    plt.plot(
+        freq * rate / 2 / freq.shape[0],
+        20 * np.log10(np.abs(response))[: args.filter_length // 2],
+    )
     plt.title("Frequency responce of bandpass filter")
-    plt.xlabel("Time [sec]")
+    plt.xlabel("Frequency [hz]")
     plt.ylabel("Amplitude[db]")
+
+    # プロット範囲
+    extent = (0, rate / 2, -np.pi, np.pi)
 
     # 周波数特性の表示
     plt.subplot(412)
     # デシベルと振幅の変換 振幅:x -> デシベル:20*log_10(x)
-    plt.plot(np.angle(response)[: args.filter_length // 2])
+    plt.plot(
+        freq * rate / 2 / freq.shape[0], np.angle(response)[: args.filter_length // 2]
+    )
     plt.title("Phase responce of bandpass filter")
-    plt.xlabel("Time [sec]")
+    plt.xlabel("Frequency [hz]")
     plt.ylabel("phase[rad]")
 
     # x軸とy軸の表示範囲
@@ -185,7 +194,7 @@ if __name__ == "__main__":
     plt.ylabel("Frequency [hz]")
 
     # 画像として保存するときはコメントアウトを外す
-    # plt.savefig("result.png")
+    plt.savefig("result.png")
 
     plt.show()
 
