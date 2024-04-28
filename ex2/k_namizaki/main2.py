@@ -126,8 +126,7 @@ def main():
     plt.title("spectrogram(original)")
     plt.ylabel("Frequency [Hz]")
     plt.xlabel("Time [sec]")
-    cbar = plt.colorbar()
-    cbar.ax.set_ylabel("Intensity [dB]")
+    plt.colorbar()
     plt.show()
 
     # フィルター後のスペクトログラム分析
@@ -138,8 +137,7 @@ def main():
     plt.title("spectrogram(filtered)")
     plt.ylabel("Frequency [Hz]")
     plt.xlabel("Time [sec]")
-    cbar = plt.colorbar()
-    cbar.ax.set_ylabel("Intensity [dB]")
+    plt.colorbar()
     plt.show()
 
 
