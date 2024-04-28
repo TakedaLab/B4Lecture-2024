@@ -1,8 +1,4 @@
-"""This module BEFフィルタを窓関数法で作成し、フィルタリングを行う.
-
-It reads an input WAV file and フィルタリング
-
-"""
+"""This module BEFフィルタを窓関数法で作成し, フィルタリングを行う."""
 
 import matplotlib.pyplot as plt  # グラフ描画
 import myfunc as mf
@@ -13,7 +9,7 @@ import soundfile as sf  # 音声読み込み
 
 
 def conv(x: np.ndarray, h: np.ndarray, mode: str = "circ") -> np.ndarray:
-    """2つのndarray配列に対して畳み込み演算を実行する
+    """2つのndarray配列に対して畳み込み演算を実行する.
 
     Args:
         x (np.ndarray): 畳み込み演算の対象1
@@ -44,7 +40,7 @@ def conv(x: np.ndarray, h: np.ndarray, mode: str = "circ") -> np.ndarray:
 
 
 def conv_new(x: np.ndarray, h: np.ndarray) -> np.ndarray:
-    """2つのndarray配列に対して畳み込み演算を実行する
+    """2つのndarray配列に対して畳み込み演算を実行する.
 
     Args:
         x (np.ndarray): 畳み込み演算の対象1
@@ -60,7 +56,7 @@ def conv_new(x: np.ndarray, h: np.ndarray) -> np.ndarray:
 def make_bef(
     size: int, f1: float, f2: float, window: str, wlen: int, samplerate: int
 ) -> np.ndarray:
-    """帯域消去フィルタの作成
+    """帯域消去フィルタを作成する.
 
     Args:
         size (int): フィルタのサイズ
@@ -102,7 +98,7 @@ def make_bef(
 
 
 def show_freq_responce(h: np.ndarray, samplerate: int) -> None:
-    """周波数特性を図示する
+    """周波数特性を図示する.
 
     Args:
         h (np.ndarray): 単位インパルス応答
@@ -144,7 +140,7 @@ def show_freq_responce(h: np.ndarray, samplerate: int) -> None:
 
 
 def main():
-    """入力信号をBEFでフィルタリングする"""
+    """入力信号をBEFでフィルタリングを行う."""
     args = mf.parse_args()  # 引数情報
 
     # 音声ファイルを読み込む, data:信号のデータ, samplerate:サンプリング周波数

@@ -61,7 +61,7 @@ def parse_args():
 
 # 波形をプロットする, 横軸範囲は録音時間[sec]
 def show_wave(data: np.ndarray, samplerate: int, title: str = "Time Signal") -> None:
-    """波形を時間領域でプロットする
+    """波形を時間領域でプロットする.
 
     Args:
         data (np.ndarray): 信号のデータ
@@ -90,7 +90,7 @@ def calc_spectrogram(
     hop_length: int,
     window: str,
 ) -> np.ndarray:
-    """スペクトログラムの計算
+    """スペクトログラムを計算する.
 
     Args:
         data (np.ndarray): 信号のデータ
@@ -126,7 +126,7 @@ def calc_spectrogram(
 def show_spectrogram(
     spectrogram: np.ndarray, samplerate: int, len_data: int, title: str = "Spectrogram"
 ) -> None:
-    """スペクトログラムを描画し, 画像を保存する
+    """スペクトログラムを描画し, 画像を保存する.
 
     Args:
         spectrogram (np.ndarray): スペクトログラム
@@ -166,7 +166,7 @@ def show_spectrogram(
 def calc_inv_signal(
     len_data: int, spectrogram: np.ndarray, nfft: int, hop_length: int, window: str
 ) -> np.ndarray:
-    """スペクトログラムから時間信号を復元する
+    """スペクトログラムから時間信号を復元する.
 
     Args:
         len_data (int): 信号のデータ長
@@ -199,7 +199,7 @@ def plot_any(
     title: str = "plot",
     save: bool = False,
 ) -> None:
-    """グラフ描画（保存）を行う
+    """グラフ描画（保存）を行う.
 
     Args:
         x (np.ndarray): x軸
