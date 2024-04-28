@@ -1,5 +1,9 @@
 """
-Make the high pass filter and do the convolution and draw the spectrogram.
+This code does the following.
+
+Make the high pass filter.
+Do the convolution.
+Draw the spectrogram.
 """
 
 import argparse
