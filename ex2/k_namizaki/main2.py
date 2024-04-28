@@ -21,7 +21,7 @@ def convolution(input, filter):
     ------------
     output : 出力データ
     """
-    # 畳み込みを行う(https://data-analytics.fun/2021/11/23/understanding-convolution/)
+    # 畳み込みを行う
     output = np.zeros(len(input) + len(filter) - 1)
     # inputの配列の前後に0を追加。
     add = np.zeros(len(filter) - 1)
