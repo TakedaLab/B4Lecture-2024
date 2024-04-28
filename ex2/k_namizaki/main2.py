@@ -73,7 +73,11 @@ def hpf(fs, fc, N):
 
 def main():
     """
-    Make the high pass filter and do the convolution and draw the spectrogram.
+    This code does the following.
+
+    Make the high pass filter.
+    Do the convolution.
+    Draw the spectrogram.
     """
     parser = argparse.ArgumentParser(
         description="hpfをつくり、wavfileのdataと畳み込みして、スペクトログラムを描画する"
