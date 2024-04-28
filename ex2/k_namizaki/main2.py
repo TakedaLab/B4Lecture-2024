@@ -1,7 +1,5 @@
 """
-Make the high pass filter
-and do the convolution
-and draw the spectrogram.
+Make the high pass filter and do the convolution and draw the spectrogram.
 """
 
 import argparse
@@ -71,11 +69,11 @@ def hpf(fs, fc, N):
 
 def main():
     """
-    Make the high pass filter
-    and do the convolution
-    and draw the spectrogram.
+    Make the high pass filter and do the convolution and draw the spectrogram.
     """
-    parser = argparse.ArgumentParser(description="hpfをつくり、wavfileのdataと畳み込みして、スペクトログラムを描画する")
+    parser = argparse.ArgumentParser(
+        description="hpfをつくり、wavfileのdataと畳み込みして、スペクトログラムを描画する"
+    )
     parser.add_argument(
         "-file",
         help="ファイルを入力",
