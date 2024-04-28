@@ -2,9 +2,9 @@
 
 import argparse
 
-import numpy as np  # 線形代数
-import matplotlib.pyplot as plt  # グラフ作成用
 import librosa
+import matplotlib.pyplot as plt  # グラフ作成用
+import numpy as np  # 線形代数
 import soundfile as sf
 
 import ex1
@@ -26,7 +26,7 @@ def conv(x: np.ndarray, h: np.ndarray):
 
     # 畳み込みの実施
     for i in range(len(x)):
-        y[i: i + len(h)] += x[i] * h
+        y[i : i + len(h)] += x[i] * h
 
     return y
 
@@ -39,27 +39,10 @@ def parse_args():
     cutoff_freq: カットオフ周波数
     fft_size: 高速フーリエ変換の窓の大きさ
     """
-    parser = argparse.ArgumentParser(
-        description="LPF"
-    )
-    parser.add_argument(
-        "--filename",
-        type=str,
-        required=True,
-        help="name of file"
-    )
-    parser.add_argument(
-        "--cutoff_freq",
-        type=float,
-        default=5000,
-        help="cutoff freq"
-    )
-    parser.add_argument(
-        "--fft_size",
-        type=int,
-        default=1024,
-        help="size of FFT"
-    )
+    parser = argparse.ArgumentParser(description="LPF")
+    parser.add_argument("--filename", type=str, required=True, help="name of file")
+    parser.add_argument("--cutoff_freq", type=float, default=5000, help="cutoff freq")
+    parser.add_argument("--fft_size", type=int, default=1024, help="size of FFT")
     return parser.parse_args()
 
 
@@ -74,7 +57,7 @@ def make_LPF(cutoff_freq, sr):
     Returns:
         lpf: ローパスフィルタを返す
     """
-    tap_number = 101    # タップの数
+    tap_number = 101  # タップの数
     time = np.arange(-(tap_number // 2), tap_number // 2 + 1)
     # インパルス応答
     lpf = (np.sinc(2 * cutoff_freq / sr * time)) * 2 * cutoff_freq / sr
@@ -104,20 +87,20 @@ def plot_filter_response(LPF, sr, fft_size):
     ax1 = fig.add_subplot(3, 3, 1)
     ax1.plot(
         freq * sr / 2 / freq.shape[0],
-        20 * np.log(np.abs(lpf_freq_response))[: plot_freq_size],
-        label="LPF Amplitude Response"
+        20 * np.log(np.abs(lpf_freq_response))[:plot_freq_size],
+        label="LPF Amplitude Response",
     )
-    ax1.set_xlabel('Frequency (Hz)')
-    ax1.set_ylabel('Amplitude (dB)')
+    ax1.set_xlabel("Frequency (Hz)")
+    ax1.set_ylabel("Amplitude (dB)")
     # 位相特性の図示
     ax2 = fig.add_subplot(3, 3, 7)
     ax2.plot(
         freq * sr / 2 / freq.shape[0],
-        np.unwrap(np.angle(lpf_freq_response)[: plot_freq_size]),
-        label="LPF Phase Response"
+        np.unwrap(np.angle(lpf_freq_response)[:plot_freq_size]),
+        label="LPF Phase Response",
     )
-    ax2.set_xlabel('Frequency (Hz)')
-    ax2.set_ylabel('Phase (rad)')
+    ax2.set_xlabel("Frequency (Hz)")
+    ax2.set_ylabel("Phase (rad)")
 
 
 # 　スペクトログラムの図示
@@ -151,28 +134,26 @@ def plot_spectrogram(spectrogram, sr, y, title_name, locate):
 
 
 def main():
-    """LPFでフィルタリングし、スペクトログラムを表示"""
+    """LPFでフィルタリングし、スペクトログラムを表示."""
     #   引数を受け取る
     args = parse_args()
 
-    y, sr = librosa.load(args.filename, sr=None)  # 音声データを取得　srはサンプリング周波数
-    LPF = make_LPF(args.cutoff_freq, sr)    # LPFを実装
-    plot_filter_response(LPF, sr, args.fft_size)    # LPFの特性を図示
+    y, sr = librosa.load(
+        args.filename, sr=None
+    )  # 音声データを取得　srはサンプリング周波数
+    LPF = make_LPF(args.cutoff_freq, sr)  # LPFを実装
+    plot_filter_response(LPF, sr, args.fft_size)  # LPFの特性を図示
     filter_data = conv(y, LPF)  # 畳み込みの計算
     # スペクトログラムを作成する
     plot_spectrogram(
-        ex1.makeSpectrogram(y.size, y, sr, 1024, 512),
-        sr,
-        y,
-        "origin supectrogram",
-        3
+        ex1.makeSpectrogram(y.size, y, sr, 1024, 512), sr, y, "origin supectrogram", 3
     )
     plot_spectrogram(
         ex1.makeSpectrogram(filter_data.size, filter_data, sr, 1024, 512),
         sr,
         filter_data,
         "filtered spectrogram",
-        9
+        9,
     )
     plt.savefig("Figure.png")
     plt.show()
