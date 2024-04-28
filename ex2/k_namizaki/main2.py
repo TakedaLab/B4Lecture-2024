@@ -1,15 +1,19 @@
+"""
+Make the high pass filter
+and do the convolution
+and draw the spectrogram.
+"""
+
 import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.fftpack as fftpack
 import scipy.signal as signal
 import soundfile as sf
 
 
 def convolution(input, filter):
     """
-    _summary_
     Do the convolution.
 
     Parameters
@@ -37,7 +41,6 @@ def convolution(input, filter):
 
 def hpf(fs, fc, N):
     """
-    _summary_
     Make the high pass filter.
 
     Parameters
@@ -68,14 +71,15 @@ def hpf(fs, fc, N):
 
 def main():
     """
-    _summary_
     Make the high pass filter
     and do the convolution
     and draw the spectrogram.
     """
     parser = argparse.ArgumentParser(description="hpfをつくり、wavfileのdataと畳み込みして、スペクトログラムを描画する")
     parser.add_argument(
-        "-file", help="ファイルを入力", default=r"C:\Users\kyskn\B4Lecture-2024\ex2\k_namizaki\reco20240428.wav"
+        "-file",
+        help="ファイルを入力",
+        default=r"C:\Users\kyskn\B4Lecture-2024\ex2\k_namizaki\reco20240428.wav",
     )
     parser.add_argument("-cut", help="カットオフ周波数", default=5000)
     parser.add_argument("-n", help="次数", default=64)
