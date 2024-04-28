@@ -1,12 +1,11 @@
 """This module BEFフィルタを窓関数法で作成し, フィルタリングを行う."""
 
 import matplotlib.pyplot as plt  # グラフ描画
+import myfunc as mf
 import numpy as np  # 線形代数
 import scipy.fftpack as fftpack  # フーリエ変
 import scipy.signal as signal  # 窓関数
 import soundfile as sf  # 音声読み込み
-
-import myfunc as mf
 
 
 def conv(x: np.ndarray, h: np.ndarray, mode: str = "circ") -> np.ndarray:
