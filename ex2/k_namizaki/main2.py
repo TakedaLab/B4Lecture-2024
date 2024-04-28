@@ -69,13 +69,13 @@ def main():
     parser = argparse.ArgumentParser(
         description="wavfileからスペクトログラムを描画し、"
     )
-    #parser.add_argument("-file", help="ファイルを入力")
+    parser.add_argument("-file", help="ファイルを入力")
     parser.add_argument("-cut", help="カットオフ周波数", default = 5000)
     parser.add_argument("-n", help="次数", default = 64)
     args = parser.parse_args()
 
     # データを読み込み
-    data, rate = sf.read(r"C:\Users\kyskn\B4Lecture-2024\ex2\k_namizaki\20240428173142.wav")
+    data, rate = sf.read(args.file)
     fc = args.cut
     N = args.n
 
