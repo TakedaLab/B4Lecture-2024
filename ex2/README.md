@@ -31,14 +31,14 @@
    - 周波数特性を描画．グラフの各軸はきちんと明記
 
    - **割り振り**
+   
+     * LPF: Takumi Miura, Yohei Ogawa
 
-     * LPF: Kimihiro Hattori, Koki Morita
+     * HPF: Kyousuke Namizaki, Hikaru Yoshihara
 
-     * HPF: Kenjiro Ide, Takehiro Imamura
+     * BPF: Kenta Kondo, Kyohei Furuta
 
-     * BPF: Tatsuru Kawanishi, Shunsuke Iwashita
-
-     * BEF: Kenichi Ogita, Ryoya Sakaki
+     * BEF: Masaaki Matsumoto, Hikari Miyaji
 
 3. 畳み込み
 
