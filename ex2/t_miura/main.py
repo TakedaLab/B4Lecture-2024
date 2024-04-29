@@ -40,8 +40,8 @@ def convolution(data1: np.ndarray, data2: np.ndarray):
 
     for i in range(n1 + n2 - 1):
         temp = (
-            data1[max(0, i - n2 + 1): min(i + 1, n1)]
-            * data2_reversed[max(0,n2 - i - 1): min(n2, n1 + n2 - i - 1)]
+            data1[max(0, i - n2 + 1) : min(i + 1, n1)]
+            * data2_reversed[max(0, n2 - i - 1) : min(n2, n1 + n2 - i - 1)]
         )  # x1[k]✕x2[n-k]
         output[i] = np.sum(temp)  # 総和をとる
 
@@ -156,7 +156,7 @@ def main():
 
     # 入力波形とインパルス応答を畳み込み
     filtered_wavedata = convolution(wavedata_ndarray, impulse_response)[
-        N_IMPULSE_RESPONSE: -N_IMPULSE_RESPONSE
+        N_IMPULSE_RESPONSE:-N_IMPULSE_RESPONSE
     ]
 
     # パラメータ
