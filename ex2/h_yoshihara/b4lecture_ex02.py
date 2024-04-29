@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""
+音声データにハイパスフィルタをかけるコード.
+"""
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,6 +11,7 @@ from pydub import AudioSegment
 
 
 def stereo_to_mono(audio_name):
+    """ステレオ音声データをモノラルに変換."""
     sound = AudioSegment.from_wav(audio_name)
     mono_audio = sound.set_channels(1)
     mono_audio.export("mono_shuffle.wav", format="wav")
@@ -15,7 +20,7 @@ def stereo_to_mono(audio_name):
 
 
 def sinc(x):
-    """sinc関数、numpyのやつだとなぜか上手くいかなかった(?)ので自作"""
+    """sinc関数、numpyのやつだとなぜか上手くいかなかった(?)ので自作."""
     if x == 0.0:
         return 1.0
     else:
@@ -23,7 +28,7 @@ def sinc(x):
 
 
 def hpf_filter(edge_f, delta):
-    """フィルタの作成"""
+    """フィルタの作成."""
     # フィルタ係数が奇数になるように調整
     coefficient = round(3.1 / delta) - 1
     if (coefficient + 1) % 2 == 0:
@@ -44,7 +49,7 @@ def hpf_filter(edge_f, delta):
 
 
 def conv(input_x, filter_h):
-    """ハイパスフィルタをかける"""
+    """ハイパスフィルタをかける."""
     conv_y = np.zeros(len(input_x) + len(filter_h))  # 出力用の信号
     for i in range(len(input_x)):
         conv_y[i : i + len(filter_h)] += input_x[i] * filter_h
@@ -52,7 +57,7 @@ def conv(input_x, filter_h):
 
 
 def spec_display(wave_data, data_length, wave_samplerate):
-    """前回作成した、スペクトログラムを表示する関数"""
+    """前回作成した、スペクトログラムを表示する関数."""
     fft_data = []  # フーリエ変換後のデータを逐次保存
     f_width = 1024  # 切り出すフレームの幅
     overlap = 512  # オーバーラップするフレーム幅（今回は50%で）
