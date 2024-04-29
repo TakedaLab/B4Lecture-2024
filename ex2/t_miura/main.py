@@ -1,18 +1,19 @@
 """畳み込み演算の実装とディジタルフィルタの設計を行い、フィルタリングの影響をスペクトログラムと音声ファイルで確認する.
 
+wave       : 音声ファイルの取得
 matplotlib : グラフやスペクトログラムの描画
 numpy      : 行列,fft
 scipy      : 窓関数
-wave       : 音声ファイルの取得
 ex1        : 課題1で作成した関数
 """
+
+import wave
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal
-import wave
 
-from ex1 import get_filename, get_wavedata, calculate_spectrogram, plot_spectrogram
+import ex1
 
 
 def convolution(data1: np.ndarray, data2: np.ndarray):
@@ -130,14 +131,14 @@ def main():
     -> None
     """
     # 音声ファイル名を取得
-    filename = get_filename()
+    filename = ex1.get_filename()
 
     # 音声ファイル名を取得できなければ終了
     if filename is None:
         return
 
     # 波形のndarrayを取得
-    wavedata_ndarray, sampling_rate = get_wavedata(filename)
+    wavedata_ndarray, sampling_rate = ex1.get_wavedata(filename)
 
     # 波形のndarrayを取得できなければ終了
     if wavedata_ndarray is None:
@@ -163,8 +164,8 @@ def main():
     SKIP_WIDTH = N_SAMPLES // 2
 
     # 入力波形とフィルタリング結果のスペクトログラムを計算、表示
-    spectrogram = calculate_spectrogram(wavedata_ndarray, N_SAMPLES, SKIP_WIDTH)
-    plot_spectrogram(
+    spectrogram = ex1.calculate_spectrogram(wavedata_ndarray, N_SAMPLES, SKIP_WIDTH)
+    ex1.plot_spectrogram(
         spectrogram,
         sampling_rate,
         N_SAMPLES,
@@ -172,10 +173,10 @@ def main():
         name_option="_original",
     )
 
-    filtered_spectrogram = calculate_spectrogram(
+    filtered_spectrogram = ex1.calculate_spectrogram(
         filtered_wavedata, N_SAMPLES, SKIP_WIDTH
     )
-    plot_spectrogram(
+    ex1.plot_spectrogram(
         filtered_spectrogram,
         sampling_rate,
         N_SAMPLES,
