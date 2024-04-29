@@ -14,31 +14,31 @@ import scipy.signal as signal
 import soundfile as sf
 
 
-def convolution(input, filter):
+def convolution(inputs, filt):
     """
     Do the convolution.
 
     Parameters
     -------------
-    input : 入力データ
-    filter : filter
+    inputs : 入力データ
+    filt : filter
 
     Returns
     ------------
     output : 出力データ
     """
     # 畳み込みを行う
-    output = np.zeros(len(input) + len(filter) - 1)
+    outputs = np.zeros(len(inputs) + len(filt) - 1)
     # inputの配列の前後に0を追加。
-    add = np.zeros(len(filter) - 1)
-    input = np.concatenate((add, input))
-    input = np.concatenate((input, add))
+    add = np.zeros(len(filt) - 1)
+    inputs = np.concatenate((add, inputs))
+    inputs = np.concatenate((inputs, add))
     # フィルタ配列を反転
-    filter = filter[::-1]
+    filt = filt[::-1]
     # 今回は一次元だから内積でいい
-    for i in range(len(output)):
-        output[i] = np.dot(input[i : i + len(filter)], filter)
-    return output
+    for i in range(len(outputs)):
+        outputs[i] = np.dot(inputs[i : i + len(filt)], filt)
+    return outputs
 
 
 def hpf(fs, fc, N):
@@ -67,8 +67,8 @@ def hpf(fs, fc, N):
     ideal_fil[N + 1 : 2 * N + 1] = ideal_fil_half
 
     # 窓関数をかける
-    filter = ideal_fil * window
-    return filter
+    filt = ideal_fil * window
+    return filt
 
 
 def main():
@@ -86,8 +86,8 @@ def main():
         help="ファイルを入力",
         default=r"C:\Users\kyskn\B4Lecture-2024\ex2\k_namizaki\reco20240428.wav",
     )
-    parser.add_argument("-cut", help="カットオフ周波数", default=5000)
-    parser.add_argument("-n", help="次数", default=64)
+    parser.add_argument("-cut", help="カットオフ周波数", default=5000, type=int)
+    parser.add_argument("-n", help="次数", default=64, type=int)
     args = parser.parse_args()
 
     # データを読み込み
@@ -96,15 +96,15 @@ def main():
     N = args.n
 
     # filterの作成
-    filter = hpf(rate, fc, N)
+    filt = hpf(rate, fc, N)
 
     # フィルタの振幅特性を計算
-    mag = np.abs(np.fft.fft(filter, 1024))
+    mag = np.abs(np.fft.fft(filt, 1024))
     mag_db = 20 * np.log10(mag)
     # 周波数軸の計算
     freq_axis = np.linspace(0, rate, 1024)
     # フィルタの位相特性を計算(unwrapなしだと2pi分が毎回巻き戻されてしまう)
-    phase = np.unwrap(np.angle(np.fft.fft(filter, 1024)))
+    phase = np.unwrap(np.angle(np.fft.fft(filt, 1024)))
     # 角度に変更
     phase = phase * 180 / np.pi
 
@@ -122,7 +122,7 @@ def main():
     plt.show()
 
     # dataとhpfを畳み込み
-    filteredData = convolution(data, filter)
+    filteredData = convolution(data, filt)
 
     # 入力と出力の大きさをそろえる
     length = len(data)
