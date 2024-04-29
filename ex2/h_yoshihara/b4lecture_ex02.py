@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-
 音声データにハイパスフィルタをかけるコード.
-
 """
+
 import math
 import matplotlib.pyplot as plt
 import numpy as np
