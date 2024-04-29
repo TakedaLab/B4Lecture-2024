@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.signal as sp
 import soundfile
-import struct
 from pydub import AudioSegment
 
 
@@ -149,12 +148,5 @@ if __name__ == "__main__":
     )
     fig2.savefig("frequency_response.png")
 
-    # フィルタをかける前の音声データのスペクトログラム
-    spec_display(
-        data, N, samplerate
-    )
-
-    # フィルタをかけた後の音声データのスペクトログラム
-    spec_display(
-        filtered_data, N, samplerate
-    )
+    spec_display(data, N, samplerate)  # フィルタをかける前の音声データのスペクトログラム
+    spec_display(filtered_data, N, samplerate)  # フィルタをかけた後の音声データのスペクトログラム
