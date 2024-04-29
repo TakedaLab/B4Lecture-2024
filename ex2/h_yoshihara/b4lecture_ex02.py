@@ -20,7 +20,7 @@ def stereo_to_mono(audio_name):
 
 
 def sinc(x):
-    """sinc関数、numpyのやつだとなぜか上手くいかなかった(?)ので自作."""
+    """sinc関数、numpyのやつだとなぜか上手くいかなかった(?)ので自作しました."""
     if x == 0.0:
         return 1.0
     else:
