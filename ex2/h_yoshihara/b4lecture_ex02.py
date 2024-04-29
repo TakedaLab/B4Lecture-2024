@@ -33,7 +33,7 @@ def hpf_filter(edge_f, delta):
 
     # 遷移帯域幅を満たすフィルタ係数の導出
     b = []
-    for i in range(int(-coefficient/2), int(coefficient/2) + 1):
+    for i in range(int(-coefficient / 2), int(coefficient / 2) + 1):
         x = math.pi * i
         b.append(sinc(x) - 2.0 * edge_f * sinc(2.0 * edge_f * x))
 
@@ -48,7 +48,7 @@ def conv(input_x, filter_h):
     """ハイパスフィルタをかける"""
     conv_y = np.zeros(len(input_x) + len(filter_h))  # 出力用の信号
     for i in range(len(input_x)):
-        conv_y[i:i+len(filter_h)] += input_x[i] * filter_h
+        conv_y[i : i + len(filter_h)] += input_x[i] * filter_h
     return conv_y
 
 
@@ -59,12 +59,16 @@ def spec_display(wave_data, data_length, wave_samplerate):
     overlap = 512  # オーバーラップするフレーム幅（今回は50%で）
     cut_surplus = f_width - overlap  # 切り出していくフレーム間の幅
 
-    wd = sp.windows.hamming(f_width)  # 切り出すフレーム幅で窓関数を用意（今回はハミング窓）
+    wd = sp.windows.hamming(
+        f_width
+    )  # 切り出すフレーム幅で窓関数を用意（今回はハミング窓）
 
     cut_start = 0  # 切り出していくフレーム位置
     while cut_start + f_width <= data_length:
-        frame = wave_data[cut_start:cut_start + f_width]  # 音声データから切り出し
-        fft_frame = np.fft.fft(frame * wd)  # 切り出したデータに窓関数をかけ、フーリエ変換
+        frame = wave_data[cut_start : cut_start + f_width]  # 音声データから切り出し
+        fft_frame = np.fft.fft(
+            frame * wd
+        )  # 切り出したデータに窓関数をかけ、フーリエ変換
         fft_data.append(fft_frame)  # フーリエ変換後のデータを保存
         cut_start += cut_surplus  # 切り出し開始位置を更新
 
@@ -112,12 +116,7 @@ if __name__ == "__main__":
     filtered_time = np.arange(0, len(filtered_data)) / samplerate
 
     # フィルタをかける前後の音声データの波形の比較
-    fig1, ax1 = plt.subplots(
-        1,
-        1,
-        figsize=(6, 3),
-        tight_layout=True
-    )
+    fig1, ax1 = plt.subplots(1, 1, figsize=(6, 3), tight_layout=True)
     ax1.plot(time, data, label="original")
     ax1.plot(filtered_time, filtered_data, label="filtered")
     ax1.set(
@@ -137,13 +136,7 @@ if __name__ == "__main__":
     frequency = np.linspace(0, samplerate / 2, len(fil_phase)) / 1000
 
     # 今回したフィルタの周波数特性を表示
-    fig2, ax2 = plt.subplots(
-        2,
-        1,
-        figsize=(6, 6),
-        tight_layout=True,
-        sharex=True
-    )
+    fig2, ax2 = plt.subplots(2, 1, figsize=(6, 6), tight_layout=True, sharex=True)
     ax2[0].plot(frequency, amp)
     ax2[0].set(
         title="Frequency response of BPF",
@@ -156,5 +149,12 @@ if __name__ == "__main__":
     )
     fig2.savefig("frequency_response.png")
 
-    spec_display(data, N, samplerate)  # フィルタをかける前の音声データのスペクトログラム
-    spec_display(filtered_data, N, samplerate)  # フィルタをかけた後の音声データのスペクトログラム
+    # フィルタをかける前の音声データのスペクトログラム
+    spec_display(
+        data, N, samplerate
+    )
+
+    # フィルタをかけた後の音声データのスペクトログラム
+    spec_display(
+        filtered_data, N, samplerate
+    )
