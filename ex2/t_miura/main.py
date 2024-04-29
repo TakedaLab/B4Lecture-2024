@@ -1,17 +1,16 @@
 """畳み込み演算の実装とディジタルフィルタの設計を行い、フィルタリングの影響をスペクトログラムと音声ファイルで確認する.
 
-wave       : 音声ファイルの取得
 matplotlib : グラフやスペクトログラムの描画
 numpy      : 行列,fft
 scipy      : 窓関数
+wave       : 音声ファイルの取得
 ex1        : 課題1で作成した関数
 """
-
-import wave
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import signal
+import wave
 
 from ex1 import get_filename, get_wavedata, calculate_spectrogram, plot_spectrogram
 
