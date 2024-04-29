@@ -148,5 +148,9 @@ if __name__ == "__main__":
     )
     fig2.savefig("frequency_response.png")
 
-    spec_display(data, N, samplerate)  # フィルタをかける前の音声データのスペクトログラム
-    spec_display(filtered_data, N, samplerate)  # フィルタをかけた後の音声データのスペクトログラム
+    spec_display(
+        data, N, samplerate
+    )  # フィルタをかける前の音声データのスペクトログラム
+    spec_display(
+        filtered_data, N, samplerate
+    )  # フィルタをかけた後の音声データのスペクトログラム
