@@ -105,7 +105,11 @@ def calculate_spectrogram(
 
 
 def plot_spectrogram(
-    spectrogram: np.ndarray, sampling_rate: float, n_samples: int, skip_width: int, name_option: str = ""
+    spectrogram: np.ndarray,
+    sampling_rate: float,
+    n_samples: int,
+    skip_width: int,
+    name_option: str = "",
 ):
     """スペクトログラムを表示.
 

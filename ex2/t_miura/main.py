@@ -39,7 +39,10 @@ def convolution(data1: np.ndarray, data2: np.ndarray):
     output = np.zeros(n1 + n2 - 1)
 
     for i in range(n1 + n2 - 1):
-        temp = data1[max(0, i - n2 + 1): min(i + 1, n1)] * data2_reversed[max(0,n2 - i - 1): min(n2, n1 + n2 - i - 1)]  # x1[k]✕x2[n-k]
+        temp = (
+            data1[max(0, i - n2 + 1): min(i + 1, n1)]
+            * data2_reversed[max(0,n2 - i - 1): min(n2, n1 + n2 - i - 1)]
+        )  # x1[k]✕x2[n-k]
         output[i] = np.sum(temp)  # 総和をとる
 
     return output
@@ -53,7 +56,9 @@ def calc_low_pass_filer(fc: int, n_impulse_response: int, sampling_rate: float):
     # omega_cを計算
     omega_c = 2 * fc * sampling_rate
     # h[n] = (omega_c / pi) * sinc(omega_c * n)
-    impulse_response = omega_c * np.sinc(np.arange(-n_impulse_response, n_impulse_response + 1) * omega_c)
+    impulse_response = omega_c * np.sinc(
+        np.arange(-n_impulse_response, n_impulse_response + 1) * omega_c
+    )
 
     # ハニング窓をh[n]にかける
     window = signal.hann(2 * n_impulse_response + 1)
@@ -62,17 +67,23 @@ def calc_low_pass_filer(fc: int, n_impulse_response: int, sampling_rate: float):
     return impulse_response
 
 
-def plot_frequency_response(impulse_response: np.ndarray, n_impulse_response: int, sampling_rate: float):
+def plot_frequency_response(
+    impulse_response: np.ndarray, n_impulse_response: int, sampling_rate: float
+):
     """振幅特性と位相特性を描画.
 
     -> None
     """
     len_impulse_response = 2 * n_impulse_response + 1
     # インパルス応答をfftして周波数応答を求める
-    frequency_resp = np.fft.fft(impulse_response, n=len_impulse_response, axis=0)[: len_impulse_response // 2]
+    frequency_resp = np.fft.fft(impulse_response, n=len_impulse_response, axis=0)[
+        : len_impulse_response // 2
+    ]
 
     # 横軸の定義
-    x_val = np.fft.fftfreq(len_impulse_response, d=sampling_rate)[: len_impulse_response // 2]
+    x_val = np.fft.fftfreq(len_impulse_response, d=sampling_rate)[
+        : len_impulse_response // 2
+    ]
 
     # 振幅特性を描画
     amp = np.abs(frequency_resp)  # 振幅を計算
@@ -102,12 +113,12 @@ def output_wav(wave_data: np.ndarray, sampling_rate: float, file_name: str):
     -> None
     """
     # 波形データをint16に変換
-    data=wave_data.astype(np.int16)
+    data = wave_data.astype(np.int16)
 
     with wave.open(file_name, "w") as wf:
         wf.setnchannels(1)  # チャンネル数
         wf.setsampwidth(2)  # サンプル幅
-        wf.setframerate(round(1/sampling_rate))  # サンプリング周波数
+        wf.setframerate(round(1 / sampling_rate))  # サンプリング周波数
         wf.writeframes(data)  # データ
         wf.close()
 
@@ -144,7 +155,9 @@ def main():
     plot_frequency_response(impulse_response, N_IMPULSE_RESPONSE, sampling_rate)
 
     # 入力波形とインパルス応答を畳み込み
-    filtered_wavedata = convolution(wavedata_ndarray, impulse_response)[N_IMPULSE_RESPONSE: -N_IMPULSE_RESPONSE]
+    filtered_wavedata = convolution(wavedata_ndarray, impulse_response)[
+        N_IMPULSE_RESPONSE: -N_IMPULSE_RESPONSE
+    ]
 
     # パラメータ
     N_SAMPLES = 1024
@@ -152,10 +165,24 @@ def main():
 
     # 入力波形とフィルタリング結果のスペクトログラムを計算、表示
     spectrogram = calculate_spectrogram(wavedata_ndarray, N_SAMPLES, SKIP_WIDTH)
-    plot_spectrogram(spectrogram, sampling_rate, N_SAMPLES, SKIP_WIDTH, name_option="_original")
+    plot_spectrogram(
+        spectrogram,
+        sampling_rate,
+        N_SAMPLES,
+        SKIP_WIDTH,
+        name_option="_original",
+    )
 
-    filtered_spectrogram = calculate_spectrogram(filtered_wavedata, N_SAMPLES, SKIP_WIDTH)
-    plot_spectrogram(filtered_spectrogram, sampling_rate, N_SAMPLES, SKIP_WIDTH, name_option="_filtered")
+    filtered_spectrogram = calculate_spectrogram(
+        filtered_wavedata, N_SAMPLES, SKIP_WIDTH
+    )
+    plot_spectrogram(
+        filtered_spectrogram,
+        sampling_rate,
+        N_SAMPLES,
+        SKIP_WIDTH,
+        name_option="_filtered",
+    )
 
     # フィルタリングされた波形をwavファイルに出力
     output_wav(filtered_wavedata, sampling_rate, "filtered_sample.wav")
