@@ -102,30 +102,20 @@ def plot_scatter_diag(
 def plot_reg_model(
     dataset: np.ndarray,
     ax,
+    label: str,
     dim: int = 2,
 ):
     """散布図に回帰モデルを重ねて表示する.
 
     Args:
         dataset (np.ndarray): 回帰モデルのデータ
-        ax (Axis, optional): プロットを追加したい場所を示すAxisオブジェクト.
+        ax (Axis): プロットを追加したい場所を示すAxisオブジェクト.
+        label (str): 凡例.
         dim (int, optional): 2Dグラフ or 3Dグラフ. Defaults to 2.
 
     Returns:
         ax: Axisオブジェクト
     """
-
-    # if ax is None:
-    #    fig = plt.figure()
-    #    ax = fig.add_subplot(111, projection="3d")
-    #    ax.grid()
-    #    col = "blue"
-    # else:
-    #    col = "orange"
-
-    # TODO: labelつくりたい
-    label = "creating..."
-
     if dim == 2:  # x-yグラフ
         ax.scatter(
             dataset[0], dataset[1], color="orange", label=label, alpha=0.2, marker="."
@@ -198,7 +188,7 @@ def calc_weight(y: np.ndarray, X: np.ndarray, lamb: float = 0) -> np.ndarray:
 def calc_reg_model(
     dataset: np.ndarray, w: np.ndarray, N: int, point: int = 10000
 ) -> list:
-    """回帰係数を用いて, 回帰モデルをプロットするためのデータを計算する.
+    """回帰係数を用いて, 回帰モデルをプロットするためのデータを計算し, 回帰式を求める.
 
     Args:
         dataset (np.ndarray): csvデータ.
@@ -207,7 +197,7 @@ def calc_reg_model(
         point (int, optional): プロット数. Defaults to 10000.
 
     Returns:
-        list: 回帰モデルのx軸, y軸(, z軸)をまとめたリスト.
+        list, str: 回帰モデルのx軸,y軸(,z軸)をまとめたリスト, 回帰式.
     """
     # 散布図の軸数（x-y / x-y-z）
     dim = len(dataset[0])
@@ -223,6 +213,13 @@ def calc_reg_model(
         fx = axis_x @ w  # y = Xw
         model_dataset = [x, fx]
 
+        # 回帰式(str)作成
+        xlabel = f"{w[1][0]:+3.3f}x_1 {w[0][0]:+3.3f}"
+        if N != 1:
+            for i in range(N - 1):
+                xlabel = f"{w[i + 2][0]:+3.3f}x_1^{i + 2} {xlabel}"
+        reg_formula = f"$x_2 = {xlabel[1:]}$"
+
     elif dim == 3:  # x-y-z
         y = np.linspace(min(dataset[:, 1]), max(dataset[:, 1]), point)
         XX, YY = np.meshgrid(x, y)
@@ -235,13 +232,20 @@ def calc_reg_model(
             fx += (YY ** (i + 1)) * w[(2 * i) + 2]
         model_dataset = [XX, YY, fx]
 
-    return model_dataset
+        # 回帰式(str)作成
+        xlabel = f"{w[1][0]:+3.3f}x_1 {w[2][0]:+3.3f}x_2 {w[0][0]:+3.3f}"
+        if N != 1:
+            for i in range(N - 1):
+                xlabel = f"{w[(2 * i) + 3][0]:+3.3f}x_1^{i + 2} {w[(2 * i) + 4][0]:+3.3f}x_2^{i + 2} {xlabel}"
+        reg_formula = f"$x_3 = {xlabel[1:]}$"
+
+    return model_dataset, reg_formula
 
 
 def create_reg_model(
     dataset: np.ndarray, N: int, lamb: float = 0, point: int = 10000
 ) -> list:
-    """csvデータから回帰モデルを生成する.
+    """csvデータから回帰モデルを生成し, 回帰式を求める.
 
     Args:
         dataset (np.ndarray): csvデータ.
@@ -250,16 +254,16 @@ def create_reg_model(
         point (int, optional): 回帰モデルのプロット数. Defaults to 10000.
 
     Returns:
-        list: 回帰モデルのx軸, y軸(, z軸)をまとめたリスト.
+        list: 回帰モデルのx軸,y軸(,z軸)をまとめたリスト.
     """
     y = dataset[:, -1].reshape(-1, 1)  # 従属変数
     X = calc_ind_var(dataset, N)  # 説明変数
 
     w = calc_weight(y, X, lamb)  # 回帰係数
 
-    reg_model = calc_reg_model(dataset, w, N, point)  # 回帰モデル
+    reg_model, reg_formula = calc_reg_model(dataset, w, N, point)  # 回帰モデル, 回帰式
 
-    return reg_model
+    return reg_model, reg_formula
 
 
 def main():
@@ -279,15 +283,15 @@ def main():
     dim = len(data[0])
 
     # 散布図のプロット
-    ax = plot_scatter_diag(data)
+    ax = plot_scatter_diag(data, title=filename[2:-4])
 
     # ep = y - (X @ w) 誤差項
 
     # 回帰モデル作成
-    reg_model = create_reg_model(data, N, lamb, point)
+    reg_model, reg_formula = create_reg_model(data, N, lamb, point)
 
     # 回帰モデルのプロット
-    plot_reg_model(reg_model, ax, dim)
+    plot_reg_model(reg_model, ax, reg_formula, dim)
 
 
 if __name__ == "__main__":
