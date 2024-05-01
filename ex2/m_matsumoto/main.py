@@ -1,24 +1,10 @@
 """Execute BEF(Band Eliminate Filter)."""
 
-import argparse
-
 import filter
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 import soundfile
-
-
-def arg_parse() -> argparse.ArgumentParser:
-    """Dependency Injection."""
-    parser = argparse.ArgumentParser(description="Args.")
-
-    parser.add_argument("-i-wav", type=str)
-
-    parser.add_argument("-o-wav", type=str)
-    parser.add_argument("-o-fig-before", type=str)
-    parser.add_argument("-o-fig-after", type=str)
-    return parser
 
 
 def spectrogram(
@@ -63,7 +49,6 @@ def soundwave(
 
 
 if __name__ == "__main__":
-    args = arg_parse()
     fig, ax = plt.subplots(4, 1, layout="constrained", sharex=True)
     fig2, ax2 = plt.subplots(3, 1, layout="constrained")
 
