@@ -30,32 +30,36 @@ def plot_scatter_diag(
 
     Args:
         dataset (np.ndarray): csvデータ
-        dim (int, optional): グラフの次元数（2 or 3）. Defaults to 2.
         title (str, optional): グラフタイトル. Defaults to "scatter diagram".
+        label (str, optional): 凡例. Default to "Observed data".
         xlabel (str, optional): X軸のラベル名. Defaults to "x1".
         ylabel (str, optional): Y軸のラベル名. Defaults to "x2".
         zlabel (str, optional): Z軸のラベル名. Defaults to "x3".
 
     Returns:
-        ax: Axisオブジェクト
+        ax: グラフの描画領域を示すAxisオブジェクト.
     """
-
-    fig = plt.figure()
-
+    # グラフの次元を取得
     dim = len(dataset[0])
+
+    # グラフ描画の設定
+    fig = plt.figure()
 
     x1 = dataset[:, 0]
     x2 = dataset[:, 1]
 
-    if dim == 2:
+    if dim == 2:  # x-yグラフ
         ax = fig.add_subplot(111)
         ax.scatter(x1, x2, label=label, color="b", marker=".")
-    elif dim == 3:
-        ax = fig.add_subplot(111, projection="3d")
+
+    elif dim == 3:  # x-y-zグラフ
         x3 = dataset[:, 2]
+        ax = fig.add_subplot(111, projection="3d")
         ax.scatter(x1, x2, x3, label=label, color="b", marker=".")
+
         ax.set_zlabel(zlabel)
 
+    # グラフ描画の設定
     ax.set_title(title)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
@@ -77,7 +81,6 @@ def plot_reg_model(
         ax (Axis, optional): プロットを追加したい場所を示すAxisオブジェクト.
         dim (int, optional): 2Dグラフ or 3Dグラフ. Defaults to 2.
 
-
     Returns:
         ax: Axisオブジェクト
     """
@@ -90,13 +93,23 @@ def plot_reg_model(
     # else:
     #    col = "orange"
 
-    # labelつくりたい
+    # TODO: labelつくりたい
+    label = "creating..."
 
-    if dim == 2:
-        ax.scatter(dataset[0], dataset[1], color="orange", alpha=0.1, marker=".")
-    elif dim == 3:
+    if dim == 2:  # x-yグラフ
         ax.scatter(
-            dataset[0], dataset[1], dataset[2], color="orange", alpha=0.1, marker="."
+            dataset[0], dataset[1], color="orange", label=label, alpha=0.2, marker="."
+        )
+
+    elif dim == 3:  # x-y-zグラフ
+        ax.scatter(
+            dataset[0],
+            dataset[1],
+            dataset[2],
+            color="orange",
+            label=label,
+            alpha=0.2,
+            marker=".",
         )
 
     ax.legend()
@@ -104,28 +117,27 @@ def plot_reg_model(
     return ax
 
 
-def calc_obj_var(dataset: np.ndarray) -> np.ndarray:
-
-    # 目的変数
-    y = dataset[:, -1].reshape(-1, 1)
-    return y
-
-
 def calc_ind_var(dataset: np.ndarray, N: int) -> np.ndarray:
+    """線形回帰モデルの説明変数を示す配列を求める.
 
-    # 独立変数
+    Args:
+        dataset (np.ndarray): csvデータ.
+        N (int): 説明変数の次数.
+
+    Returns:
+        np.ndarray: 説明変数の配列.
+    """
     # 行列X作成
     X = np.ones((len(dataset), 1), dtype=float)
-    # X = np.hstack((X, dataset[:, 0].reshape(-1, 1)))
 
     # 散布図の軸数（x-y / x-y-z）
     dim = len(dataset[0])
 
-    if dim == 2:  # x-y：次元数分だけ増やす
+    if dim == 2:  # x-y: y = 1*w0 + x*w1 + x^2*w2 + x^3*w4 + ...
         for i in range(N):
             X = np.hstack((X, dataset[:, 0].reshape(-1, 1) ** (i + 1)))
 
-    elif dim == 3:  # x-y-z：xとyを増やす
+    elif dim == 3:  # x-y-z: y = 1*w0 + x*w1 + y*w2 + x^2*w3 + y^2*w4 + ...
         for i in range(N):
             X = np.hstack((X, dataset[:, 0].reshape(-1, 1) ** (i + 1)))
             X = np.hstack((X, dataset[:, 1].reshape(-1, 1) ** (i + 1)))
@@ -133,71 +145,89 @@ def calc_ind_var(dataset: np.ndarray, N: int) -> np.ndarray:
     return X
 
 
-def calc_beta_ols(y: np.ndarray, X: np.ndarray) -> np.ndarray:
-    # 行列betaを0で初期化　TODO: いらない？
-    # beta = np.zeros((1 + N, 1))
+def calc_weight(y: np.ndarray, X: np.ndarray, lamb: float = 0) -> np.ndarray:
+    """回帰係数（重み）を計算する.
 
-    # beta計算　TODO: ここに正規化を入れる？
-    beta = np.linalg.inv(X.T @ X) @ X.T @ y
+    Args:
+        y (np.ndarray): 従属変数を表す行列.
+        X (np.ndarray): 独立変数を表す行列.
+        lamb (float, optional): 正則化係数. Defaults to 0.
 
-    return beta
+    Returns:
+        np.ndarray: 回帰係数.
+    """
+    # 単位行列の生成
+    Ident_matrix = np.eye(X.shape[1], dtype=float)
+
+    # 重みの計算
+    w = np.linalg.inv(X.T @ X + lamb * Ident_matrix) @ X.T @ y
+
+    return w
 
 
-def calc_e(y: np.ndarray, X: np.ndarray, beta: np.ndarray) -> np.ndarray:
-    # 行列eを0で初期化　TODO: いらない？
-    # e = np.zeros((len(y), 1))
-
-    # e 計算
-    e = y - (X @ beta)
-    return e
-
-
-def calc_axis_x(
-    dataset: np.ndarray, beta: np.ndarray, N: int, point: int = 10000
+def calc_reg_model(
+    dataset: np.ndarray, w: np.ndarray, N: int, point: int = 10000
 ) -> list:
+    """回帰係数を用いて, 回帰モデルをプロットするためのデータを計算する.
 
-    # 行列X作成
-    # point = len(dataset)
-    axis_x = np.ones((point, 1), dtype=float)
-    # X = np.hstack((X, dataset[:, 0].reshape(-1, 1)))
+    Args:
+        dataset (np.ndarray): csvデータ.
+        w (np.ndarray): 回帰係数（重み）.
+        N (int): 回帰の次数.
+        point (int, optional): プロット数(データが3次元の場合, point*point). Defaults to 10000.
 
-    x = np.linspace(min(dataset[:, 0]), max(dataset[:, 0]), point)
-
+    Returns:
+        list: 回帰モデルのx軸, y軸(, z軸)をまとめたリスト.
+    """
     # 散布図の軸数（x-y / x-y-z）
     dim = len(dataset[0])
 
-    if dim == 2:  # x-y：次元数分だけ増やす
+    x = np.linspace(min(dataset[:, 0]), max(dataset[:, 0]), point)
+
+    if dim == 2:  # x-y
+        axis_x = np.ones((point, 1), dtype=float)
         for i in range(N):
             axis_x = np.hstack((axis_x, x.reshape(-1, 1) ** (i + 1)))
-        fx = axis_x @ beta
+        fx = axis_x @ w  # y = Xw
         model_dataset = [x, fx]
 
-    elif dim == 3:  # x-y-z：xとyを次元数分だけ増やす
+    elif dim == 3:  # x-y-z
         y = np.linspace(min(dataset[:, 1]), max(dataset[:, 1]), point)
         XX, YY = np.meshgrid(x, y)
+
+        # y = 1*w0 + x*w1 + y*w2 + x^2*w3 + y^2*w4 + ...
         fx = np.zeros((point, point))
-        fx += beta[0]
-        for i in range(N):
-            fx += (XX ** (i + 1)) * beta[(2 * i) + 1]
-            fx += (YY ** (i + 1)) * beta[(2 * i) + 2]
+        fx += w[0]  # 1*w0
+        for i in range(N):  # x*w1 + y*w2 + x^2*w3 + y^2*w4 + ...
+            fx += (XX ** (i + 1)) * w[(2 * i) + 1]
+            fx += (YY ** (i + 1)) * w[(2 * i) + 2]
         model_dataset = [XX, YY, fx]
 
     return model_dataset
 
 
-def create_reg_model(dataset: np.ndarray, N: int, point: int = 10000) -> list:
+def create_reg_model(
+    dataset: np.ndarray, N: int, lamb: float = 0, point: int = 10000
+) -> list:
+    """csvデータから回帰モデルを生成する.
 
+    Args:
+        dataset (np.ndarray): csvデータ.
+        N (int): 回帰の次数.
+        lamb (float, optional): 正則化係数. Defaults to 0.
+        point (int, optional): 回帰モデルのプロット数(データが3次元の場合, point*point). Defaults to 10000.
+
+    Returns:
+        list: 回帰モデルのx軸, y軸(, z軸)をまとめたリスト.
+    """
     # dim = len(dataset[0])
 
-    y = calc_obj_var(dataset)
+    y = dataset[:, -1].reshape(-1, 1)
     X = calc_ind_var(dataset, N)
 
-    beta = calc_beta_ols(y, X)
+    w = calc_weight(y, X, lamb)
 
-    reg_model = calc_axis_x(dataset, beta, N, point)
-
-    print(reg_model[0].shape)
-    print(reg_model[1].shape)
+    reg_model = calc_reg_model(dataset, w, N, point)
 
     return reg_model
 
@@ -206,24 +236,25 @@ def main():
     """csvファイルからデータを読み込み, 回帰分析を行う."""
 
     # csvファイル読み込み
-    data1 = load_data("data1.csv")
-    data2 = load_data("data2.csv")
+    # data1 = load_data("data1.csv")
+    # data2 = load_data("data2.csv")
     data3 = load_data("data3.csv")
 
     # 散布図のプロット
-    ax1 = plot_scatter_diag(data1)
-    ax2 = plot_scatter_diag(data2)
+    # ax1 = plot_scatter_diag(data1)
+    # ax2 = plot_scatter_diag(data2)
     ax3 = plot_scatter_diag(data3)
 
-    # ep = calc_e(y, X, beta)
+    # ep = y - (X @ w) 誤差項
 
-    reg_model1 = create_reg_model(data1, N=1)
-    reg_model2 = create_reg_model(data2, N=3)
-    reg_model3 = create_reg_model(data3, N=2, point=100)
+    # reg_model1 = create_reg_model(data1, N=1)
+    # reg_model2 = create_reg_model(data2, N=3)
+    reg_model3 = create_reg_model(data3, N=10, point=100)
 
-    plot_reg_model(reg_model1, ax=ax1)
-    plot_reg_model(reg_model2, ax=ax2)
+    # plot_reg_model(reg_model1, ax=ax1)
+    # plot_reg_model(reg_model2, ax=ax2)
     plot_reg_model(reg_model3, ax=ax3, dim=3)
+
     # plt.show()
 
 
