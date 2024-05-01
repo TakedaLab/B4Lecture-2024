@@ -133,7 +133,8 @@ def plot_reg_model(
         )
 
     ax.legend()
-    plt.show()
+    plt.savefig("figs\\result1.png")
+    # plt.show()
     return ax
 
 
