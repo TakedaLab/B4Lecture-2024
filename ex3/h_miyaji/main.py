@@ -1,8 +1,38 @@
 """最小二乗法を用いて回帰分析を行う."""
 
+import argparse  # 引数の解析
+
 import matplotlib.pyplot as plt  # グラフ描画
 import numpy as np  # 線形代数
 from mpl_toolkits.mplot3d import Axes3D
+
+
+def parse_args():
+    """Retrieve variables from the command prompt."""
+    parser = argparse.ArgumentParser(description="最小二乗法を用いて回帰分析を行う.")
+
+    # csvファイル名
+    parser.add_argument("--input-file", type=str, required=True, help="input csv file")
+
+    # 回帰の次数
+    parser.add_argument("--reg-order", type=int, default=1, help="regression order")
+
+    # 正則化係数
+    parser.add_argument(
+        "--regular-coef",
+        type=int,
+        default=0,
+        help="coefficient of regularization",
+    )
+
+    # 回帰モデルのプロット数
+    parser.add_argument(
+        "--plot-num",
+        type=int,
+        default=10000,
+        help="number of plot",
+    )
+    return parser.parse_args()
 
 
 def load_data(filename: str) -> np.ndarray:
@@ -174,13 +204,15 @@ def calc_reg_model(
         dataset (np.ndarray): csvデータ.
         w (np.ndarray): 回帰係数（重み）.
         N (int): 回帰の次数.
-        point (int, optional): プロット数(データが3次元の場合, point*point). Defaults to 10000.
+        point (int, optional): プロット数. Defaults to 10000.
 
     Returns:
         list: 回帰モデルのx軸, y軸(, z軸)をまとめたリスト.
     """
     # 散布図の軸数（x-y / x-y-z）
     dim = len(dataset[0])
+    if dim == 3:
+        point = int(point**0.5)
 
     x = np.linspace(min(dataset[:, 0]), max(dataset[:, 0]), point)
 
@@ -215,19 +247,17 @@ def create_reg_model(
         dataset (np.ndarray): csvデータ.
         N (int): 回帰の次数.
         lamb (float, optional): 正則化係数. Defaults to 0.
-        point (int, optional): 回帰モデルのプロット数(データが3次元の場合, point*point). Defaults to 10000.
+        point (int, optional): 回帰モデルのプロット数. Defaults to 10000.
 
     Returns:
         list: 回帰モデルのx軸, y軸(, z軸)をまとめたリスト.
     """
-    # dim = len(dataset[0])
+    y = dataset[:, -1].reshape(-1, 1)  # 従属変数
+    X = calc_ind_var(dataset, N)  # 説明変数
 
-    y = dataset[:, -1].reshape(-1, 1)
-    X = calc_ind_var(dataset, N)
+    w = calc_weight(y, X, lamb)  # 回帰係数
 
-    w = calc_weight(y, X, lamb)
-
-    reg_model = calc_reg_model(dataset, w, N, point)
+    reg_model = calc_reg_model(dataset, w, N, point)  # 回帰モデル
 
     return reg_model
 
@@ -235,27 +265,29 @@ def create_reg_model(
 def main():
     """csvファイルからデータを読み込み, 回帰分析を行う."""
 
+    # 引数情報の取得
+    args = parse_args()
+    filename = args.input_file  # csvファイル名
+    N = args.reg_order  # 回帰の次数
+    lamb = args.regular_coef  # 正則化係数
+    point = args.plot_num  # 回帰モデルのプロット数
+
     # csvファイル読み込み
-    # data1 = load_data("data1.csv")
-    # data2 = load_data("data2.csv")
-    data3 = load_data("data3.csv")
+    data = load_data(filename)
+
+    # 次元数
+    dim = len(data[0])
 
     # 散布図のプロット
-    # ax1 = plot_scatter_diag(data1)
-    # ax2 = plot_scatter_diag(data2)
-    ax3 = plot_scatter_diag(data3)
+    ax = plot_scatter_diag(data)
 
     # ep = y - (X @ w) 誤差項
 
-    # reg_model1 = create_reg_model(data1, N=1)
-    # reg_model2 = create_reg_model(data2, N=3)
-    reg_model3 = create_reg_model(data3, N=10, point=100)
+    # 回帰モデル作成
+    reg_model = create_reg_model(data, N, lamb, point)
 
-    # plot_reg_model(reg_model1, ax=ax1)
-    # plot_reg_model(reg_model2, ax=ax2)
-    plot_reg_model(reg_model3, ax=ax3, dim=3)
-
-    # plt.show()
+    # 回帰モデルのプロット
+    plot_reg_model(reg_model, ax, dim)
 
 
 if __name__ == "__main__":
