@@ -35,7 +35,6 @@ def convolution(inputs, filt):
     inputs = np.concatenate((inputs, add))
     # フィルタ配列を反転
     filt = filt[::-1]
-    # 今回は一次元だから内積でいい
     for i in range(len(outputs)):
         outputs[i] = np.dot(inputs[i : i + len(filt)], filt)
     return outputs
@@ -55,15 +54,18 @@ def hpf(fs, fc, N):
     -------
     filter : フィルター
     """
+    # 一度ローパスフィルターを作るためfcを反対に
+    fc = fs/2 - fc
     omega_c = 2.0 * np.pi * (fc / fs)
     window = signal.windows.hann(2 * N + 1)
 
     # 理想ハイパスフィルタを作成
     n = np.arange(1, N + 1)
     ideal_fil = np.zeros(2 * N + 1)
-    ideal_fil_half = -2 * (fc / fs) * np.sin(omega_c * n) / (omega_c * n)
+    # 理想ローパスフィルタを反転
+    ideal_fil_half = np.cos(n * np.pi) * 2 * (fc / fs) * np.sin(omega_c * n) / (omega_c * n)
     ideal_fil[0:N] = ideal_fil_half[::-1]
-    ideal_fil[N] = 1 - 2 * (fc / fs)
+    ideal_fil[N] = 2 * (fc / fs)
     ideal_fil[N + 1 : 2 * N + 1] = ideal_fil_half
 
     # 窓関数をかける
