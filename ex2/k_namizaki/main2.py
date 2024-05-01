@@ -86,7 +86,7 @@ def main():
     parser.add_argument(
         "-file",
         help="ファイルを入力",
-        default=r"C:\Users\kyskn\B4Lecture-2024\ex2\k_namizaki\reco20240428.wav",
+        default=r"C:\Users\kyskn\B4Lecture-2024\ex2\k_namizaki\recoMono.wav",
     )
     parser.add_argument("-cut", help="カットオフ周波数", default=5000, type=int)
     parser.add_argument("-n", help="次数", default=64, type=int)
