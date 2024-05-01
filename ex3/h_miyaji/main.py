@@ -4,7 +4,6 @@ import argparse  # 引数の解析
 
 import matplotlib.pyplot as plt  # グラフ描画
 import numpy as np  # 線形代数
-from mpl_toolkits.mplot3d import Axes3D
 
 
 def parse_args():
@@ -133,8 +132,8 @@ def plot_reg_model(
         )
 
     ax.legend()
-    plt.savefig("figs\\result1.png")
-    # plt.show()
+    # plt.savefig("figs\\result1.png")
+    plt.show()
     return ax
 
 
@@ -237,7 +236,9 @@ def calc_reg_model(
         xlabel = f"{w[1][0]:+3.3f}x_1 {w[2][0]:+3.3f}x_2 {w[0][0]:+3.3f}"
         if N != 1:
             for i in range(N - 1):
-                xlabel = f"{w[(2 * i) + 3][0]:+3.3f}x_1^{i + 2} {w[(2 * i) + 4][0]:+3.3f}x_2^{i + 2} {xlabel}"
+                xlabel = "{:+3.3f}x_1^{} {:+3.3f}x_2^{} {}".format(
+                    w[(2 * i) + 3][0], i + 2, w[(2 * i) + 4][0], i + 2, xlabel
+                )
         reg_formula = f"$x_3 = {xlabel[1:]}$"
 
     return model_dataset, reg_formula
@@ -269,7 +270,6 @@ def create_reg_model(
 
 def main():
     """csvファイルからデータを読み込み, 回帰分析を行う."""
-
     # 引数情報の取得
     args = parse_args()
     filename = args.input_file  # csvファイル名
