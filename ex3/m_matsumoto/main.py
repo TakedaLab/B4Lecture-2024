@@ -152,7 +152,8 @@ class clsRegression2:
         """
         # x_axes division num.
         DIVIDE = 100
-        FIGSIZE = (6, 6)
+        FIGSIZE = (15, 10)
+        COLORS = ["blue", "orange"]
         fig = plt.figure(figsize=FIGSIZE)
         ax = fig.add_subplot(121, projection="3d")
 
@@ -172,13 +173,7 @@ class clsRegression2:
                 + [self.x2**i for i in range(1, N2 + 1)],
                 axis=1,
             )
-            # print(X.shape)
-            # exit()
-            # print(x1_axis)
-            # print(x2_axis)
-            # exit()
-
-            for alpha in alphas:
+            for i, alpha in enumerate(alphas):
                 # 正規方程式
                 beta = self._beta(X, self.y, alpha)
                 ax.plot_wireframe(
@@ -186,6 +181,7 @@ class clsRegression2:
                     x2_mesh,
                     self._expect(beta, N1, N2, x1_mesh, x2_mesh),
                     label=self._equation(beta, N1, N2),
+                    color=COLORS[i],
                 )
 
         if is_label:
@@ -225,8 +221,6 @@ class clsRegression2:
 
         y = np.zeros_like(x1_mesh)
         for i in range(N1):
-            # print(y.shape, beta[i].shape, x1_mesh.shape)
-            # exit()
             y += beta[i] * x1_mesh**i
         for i in range(1, N2 + 1):
             y += beta[N1 + i] * x2_mesh**i
@@ -262,15 +256,12 @@ class clsRegression2:
 
 
 if __name__ == "__main__":
-    # data1 = load_csv("../data2.csv")
 
-    # reg1 = clsRegression1(data1)
+    reg1 = clsRegression1(load_csv("../data1.csv"))
+    reg1.draw(True, 1, [0.0, 1.0], True)
 
-    # reg1.draw(False, 3, [0.0, 1.0], True)
+    reg2 = clsRegression1(load_csv("../data2.csv"))
+    reg2.draw(True, 3, [0.0, 1.0], True)
 
-    data3 = load_csv("../data3.csv")
-
-    # グラフ描画の関係があるから，同一クラスはやめた．
-    reg2 = clsRegression2(data3)
-
-    reg2.draw(True, 1, 2, [0.0, 10.0], True)
+    reg3 = clsRegression2(load_csv("../data3.csv"))
+    reg3.draw(True, 1, 2, [0.0, 1.0], True)
