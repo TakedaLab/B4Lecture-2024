@@ -1,6 +1,5 @@
 """Read CSV and Do Linear Regression."""
 
-import csv
 from typing import List
 
 import matplotlib.pyplot as plt
@@ -21,33 +20,51 @@ def load_csv(str_path: str, int_skip_header: int = 1) -> np.ndarray[float]:
 
 
 class clsRegression1:
+    """Regression with 1 Independent Valuable."""
 
     def __init__(self, data: np.ndarray) -> None:
+        """Initialize.
+
+        Args:
+            data (np.ndarray): data= (x, y)
+
+        Raises:
+            ValueError: x has to be 1 dimention
+        """
         if data.shape[1] != 2:
             raise ValueError(f"data must be (x, 2) but got {data.shape}")
 
         self.x: np.ndarray = data[:, 0].reshape(-1, 1)
         self.y: np.ndarray = data[:, 1].reshape(-1, 1)
 
-    def draw(self, is_expect: bool, N: int = 1, alphas: List[float] = []) -> None:
+    def draw(
+        self,
+        is_expect: bool,
+        N: int = -1,
+        alphas: List[float] = [0.0],
+        label: bool = True,
+    ) -> None:
+        """Draw Graph.
+
+        Args:
+            is_expect (bool): Do Linear Regression.
+            N (int, optional): N-Polinominal Regression. Without regression, needless.
+            alphas (List[float], optional): Uses for calculating Beta.
+                0.0 is neccesary for without regularized regression.
+            label (bool): Graph with label.
+        """
+        # x_axis division num.
         DIVIDE = 100
         plt.scatter(
             self.x, self.y, facecolor="None", edgecolors="red", label="Observed"
         )
 
+        # 回帰描画するとき
         if is_expect:
             # X軸
             x_axis = np.linspace(min(self.x), max(self.x), DIVIDE)
-            # print(self.x)
             # 0~N次のxの配列
             X: np.ndarray = np.concatenate([self.x**i for i in range(0, N + 1)], axis=1)
-            print(X)
-            # 正規方程式
-            beta = self._beta(X, self.y, 0.0)
-            # print(beta)
-            # 正則化をせずに描画
-            plt.plot(x_axis, self._expect(beta, x_axis), label=self._equation(beta))
-
             for alpha in alphas:
                 # 正規方程式
                 beta = self._beta(X, self.y, alpha)
@@ -84,10 +101,8 @@ class clsRegression1:
 
 
 if __name__ == "__main__":
-    data1 = load_csv(
-        r"/Users/mattsunkun/research/bm-rinko/B4Lecture-2024/ex3/data1.csv"
-    )
+    data1 = load_csv("../data2.csv")
 
     reg1 = clsRegression1(data1)
 
-    reg1.draw(True, 1, [])
+    reg1.draw(True, 3, [0.0, 1.0])
