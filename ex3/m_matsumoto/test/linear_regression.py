@@ -127,6 +127,8 @@ def expect2d(beta, N1, N2, x1_mesh, x2_mesh):
 
     y = np.zeros_like(x1_mesh)
     for i in range(0, N1 + 1):
+        print(y.shape, beta[i].shape, x1_mesh.shape)
+        exit()
         y += beta[i] * x1_mesh**i
     for i in range(1, N2 + 1):
         y += beta[N1 + i] * x2_mesh**i
