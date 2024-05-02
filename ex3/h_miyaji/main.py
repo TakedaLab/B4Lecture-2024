@@ -131,7 +131,7 @@ def plot_reg_model(
             marker=".",
         )
 
-    ax.legend()
+    ax.legend(fontsize=5.5)
     # plt.savefig("figs\\result1.png")
     plt.show()
     return ax
@@ -215,9 +215,8 @@ def calc_reg_model(
 
         # 回帰式(str)作成
         xlabel = f"{w[1][0]:+3.3f}x_1 {w[0][0]:+3.3f}"
-        if N != 1:
-            for i in range(N - 1):
-                xlabel = f"{w[i + 2][0]:+3.3f}x_1^{i + 2} {xlabel}"
+        for i in range(N - 1):
+            xlabel = f"{w[i + 2][0]:+3.3f}x_1^{{{i + 2}}}  {xlabel}"
         reg_formula = f"$x_2 = {xlabel[1:]}$"
 
     elif dim == 3:  # x-y-z
@@ -234,11 +233,10 @@ def calc_reg_model(
 
         # 回帰式(str)作成
         xlabel = f"{w[1][0]:+3.3f}x_1 {w[2][0]:+3.3f}x_2 {w[0][0]:+3.3f}"
-        if N != 1:
-            for i in range(N - 1):
-                xlabel = "{:+3.3f}x_1^{} {:+3.3f}x_2^{} {}".format(
-                    w[(2 * i) + 3][0], i + 2, w[(2 * i) + 4][0], i + 2, xlabel
-                )
+        for i in range(N - 1):
+            xlabel = "{:+3.3f}x_1^{{{}}} {:+3.3f}x_2^{{{}}} {}".format(
+                w[(2 * i) + 3][0], i + 2, w[(2 * i) + 4][0], i + 2, xlabel
+            )
         reg_formula = f"$x_3 = {xlabel[1:]}$"
 
     return model_dataset, reg_formula
