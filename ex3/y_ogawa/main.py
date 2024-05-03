@@ -82,7 +82,7 @@ def make_graph(x_data, y_data, w, degree):
         ax.set_xlabel("x")
         ax.set_ylabel("y")
         ax.set_title("Linear Regression degree="+str(degree))
-        plt.savefig("data2_normalization.png")
+        plt.savefig("result.png")
         plt.show()
 
     # 独立変数が2つの時の散布図描画
