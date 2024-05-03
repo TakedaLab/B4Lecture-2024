@@ -16,7 +16,9 @@ def parse_args():
     parser = argparse.ArgumentParser(description="線形回帰を行う")
     parser.add_argument("--filename", type=str, required=True, help="name of file")
     parser.add_argument("--degree", type=int, required=True, help="number of degree")
-    parser.add_argument("--normalization", type=int, default=0, help="normalization factor")
+    parser.add_argument(
+        "--normalization", type=int, default=0, help="normalization factor"
+    )
     return parser.parse_args()
 
 
@@ -30,9 +32,11 @@ def load_csv(filename):
         x_data : 独立変数
         y_data : 従属変数
     """
-    csvdata = np.loadtxt(filename, delimiter=",", skiprows=1)  # CSVファイルの中身をNDArrayに格納
+    csvdata = np.loadtxt(
+        filename, delimiter=",", skiprows=1
+    )  # CSVファイルの中身をNDArrayに格納
     x_size = len(csvdata[0]) - 1  # 独立変数の数
-    x_data = csvdata[:, : x_size]  # 独立変数のNDArray
+    x_data = csvdata[:, :x_size]  # 独立変数のNDArray
     y_data = csvdata[:, x_size]  # 従属変数のNDArray
     return x_data, y_data
 
@@ -50,9 +54,9 @@ def function(x1, x2, w, degree):
         h : 回帰式
     """
     # w0+w1*x1+w2*x1^2+...+wd*x1^d
-    f = np.poly1d(w[:degree+1][::-1])
+    f = np.poly1d(w[: degree + 1][::-1])
     # w(d+1)*x2+w(d+2)*x2^2+...
-    g = np.poly1d(np.insert(w[degree+1:], 0, 0)[::-1])
+    g = np.poly1d(np.insert(w[degree + 1 :], 0, 0)[::-1])
     h = f(x1) + g(x2)
     return h
 
@@ -81,7 +85,7 @@ def make_graph(x_data, y_data, w, degree):
         ax.legend(loc="upper left", fontsize=10)
         ax.set_xlabel("x")
         ax.set_ylabel("y")
-        ax.set_title("Linear Regression degree="+str(degree))
+        ax.set_title("Linear Regression degree=" + str(degree))
         plt.savefig("result.png")
         plt.show()
 
@@ -90,7 +94,14 @@ def make_graph(x_data, y_data, w, degree):
         fig = plt.figure(figsize=(6, 6))
         ax = fig.add_subplot(projection="3d")
         # 散布図プロット
-        ax.scatter(x_data[:, 0], x_data[:, 1], y_data, color="r", label="Actual Values", marker=".")
+        ax.scatter(
+            x_data[:, 0],
+            x_data[:, 1],
+            y_data,
+            color="r",
+            label="Actual Values",
+            marker=".",
+        )
         x1_axis = np.linspace(np.min(x_data[:, 0]), np.max(x_data[:, 0]), 1000)
         x2_axis = np.linspace(np.min(x_data[:, 1]), np.max(x_data[:, 1]), 1000)
         X1, X2 = np.meshgrid(x1_axis, x2_axis)
@@ -100,7 +111,7 @@ def make_graph(x_data, y_data, w, degree):
         ax.set_xlabel("x1")
         ax.set_ylabel("x2")
         ax.set_zlabel("y")
-        ax.set_title("Linear Regression degree="+str(degree))
+        ax.set_title("Linear Regression degree=" + str(degree))
         plt.savefig("result.png")
         plt.show()
 
@@ -117,28 +128,37 @@ def calc_weight(x_data, y_data, degree, normalization):
     Returns:
         w : 重み
     """
-    w = np.zeros(len(x_data[0]) * degree+1)
+    w = np.zeros(len(x_data[0]) * degree + 1)
     # 多項式回帰用に新たな行列を用意
-    new_x_data = np.zeros((len(x_data), len(x_data[0])*degree+1))
+    new_x_data = np.zeros((len(x_data), len(x_data[0]) * degree + 1))
     if len(x_data[0]) == 1:
-        for i in range(degree+1):
+        for i in range(degree + 1):
             for j in range(len(x_data)):
-                new_x_data[j][i] = x_data[j][0]**i
+                new_x_data[j][i] = x_data[j][0] ** i
                 j += 1
             i += 1
     if len(x_data[0]) == 2:
-        for i in range(degree+1):
+        for i in range(degree + 1):
             for j in range(len(x_data)):
-                new_x_data[j][i] = x_data[j][0]**i
+                new_x_data[j][i] = x_data[j][0] ** i
                 j += 1
             i += 1
         for i in range(degree):
             for j in range(len(x_data)):
-                new_x_data[j][i+degree+1] = x_data[j][1]**(i+1)
+                new_x_data[j][i+degree+1] = x_data[j][1] ** (i+1)
                 j += 1
             i += 1
     # 正規方程式で重みを計算(正規化するときは係数が適用される)
-    w = np.dot(np.dot(np.linalg.inv(np.dot(new_x_data.T, new_x_data) + normalization * np.identity(len(new_x_data[0]))), new_x_data.T), y_data)
+    w = np.dot(
+        np.dot(
+            np.linalg.inv(
+                np.dot(new_x_data.T, new_x_data)
+                + normalization * np.identity(len(new_x_data[0]))
+            ),
+            new_x_data.T,
+        ),
+        y_data,
+    )
     return w
 
 
@@ -146,7 +166,12 @@ def main():
     # 引数を受け取る
     args = parse_args()
     # 重みを計算
-    w = calc_weight(load_csv(args.filename)[0], load_csv(args.filename)[1], args.degree, args.normalization)
+    w = calc_weight(
+        load_csv(args.filename)[0],
+        load_csv(args.filename)[1],
+        args.degree,
+        args.normalization
+    )
     # グラフの表示
     make_graph(load_csv(args.filename)[0], load_csv(args.filename)[1], w, args.degree)
 
