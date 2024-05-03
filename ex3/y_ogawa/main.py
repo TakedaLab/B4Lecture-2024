@@ -163,9 +163,7 @@ def calc_weight(x_data, y_data, degree, normalization):
 
 
 def main():
-    """
-    読み込んだデータで線形回帰
-    """
+    """読み込んだデータで線形回帰."""
     # 引数を受け取る
     args = parse_args()
     # 重みを計算
