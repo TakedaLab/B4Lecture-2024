@@ -145,7 +145,7 @@ def calc_weight(x_data, y_data, degree, normalization):
             i += 1
         for i in range(degree):
             for j in range(len(x_data)):
-                new_x_data[j][i+degree+1] = x_data[j][1] ** (i+1)
+                new_x_data[j][i + degree + 1] = x_data[j][1] ** (i + 1)
                 j += 1
             i += 1
     # 正規方程式で重みを計算(正規化するときは係数が適用される)
@@ -170,7 +170,7 @@ def main():
         load_csv(args.filename)[0],
         load_csv(args.filename)[1],
         args.degree,
-        args.normalization
+        args.normalization,
     )
     # グラフの表示
     make_graph(load_csv(args.filename)[0], load_csv(args.filename)[1], w, args.degree)
