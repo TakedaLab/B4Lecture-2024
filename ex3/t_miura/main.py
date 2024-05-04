@@ -171,7 +171,7 @@ def calc_regression(
             data_d = np.concatenate(
                 [
                     np.repeat(data_d, N_PLOT, axis=0),
-                    np.tile(xi_data_d, (N_PLOT**x_idx, 1))
+                    np.tile(xi_data_d, (N_PLOT**x_idx, 1)),
                 ],
                 axis=1,
             )
