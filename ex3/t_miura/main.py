@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
 def get_args():
     """コマンドライン引数を取得.
 
@@ -42,11 +43,15 @@ def csv2ndarray(filename: str):
     # pd.DataFrameをnp.ndarrayに変換
     df_np = np.array(df_pd)
 
-    return df_np,tuple(df_pd.columns)
+    return df_np, tuple(df_pd.columns)
 
 
 def plot_dispersal_chart(
-    data: np.ndarray, filename: str, columns_name: tuple, linedata: np.ndarray = None, linename: str = None
+    data: np.ndarray,
+    filename: str,
+    columns_name: tuple,
+    linedata: np.ndarray = None,
+    linename: str = None,
 ):
     """散布図を描画.
 
@@ -58,9 +63,7 @@ def plot_dispersal_chart(
 
         # 回帰式を描画
         if linedata is not None:
-            plt.plot(
-                linedata[:, 0], linedata[:, 1], label=linename, color="orange"
-            )
+            plt.plot(linedata[:, 0], linedata[:, 1], label=linename, color="orange")
 
         # ラベルを設定
         plt.title(filename.replace(".csv", ""))
@@ -71,7 +74,7 @@ def plot_dispersal_chart(
     elif data.shape[1] == 3:
         # 3dプロットの準備
         fig = plt.figure()
-        ax = fig.add_subplot(1,1,1,projection = "3d")
+        ax = fig.add_subplot(1, 1, 1,projection = "3d")
 
         # データの散布図をプロット
         ax.scatter(data[:, 0], data[:, 1], data[:, 2], label="Observed data")
@@ -79,12 +82,17 @@ def plot_dispersal_chart(
         # 回帰式を描画
         if linedata is not None:
             n_plot = int(np.sqrt(len(linedata)))
-            x_new = linedata[:: n_plot, 0]
-            y_new = linedata[: n_plot, 1]
+            x_new = linedata[::n_plot, 0]
+            y_new = linedata[:n_plot, 1]
             x_new, y_new = np.meshgrid(x_new, y_new)
-            z_new = linedata[:,2].reshape((n_plot, n_plot)).T
+            z_new = linedata[:, 2].reshape((n_plot, n_plot)).T
             surf = ax.plot_surface(
-                x_new, y_new, z_new, label=linename, color="orange", alpha=0.3,
+                x_new,
+                y_new,
+                z_new,
+                label=linename,
+                color="orange",
+                alpha=0.3,
             )
             surf._facecolors2d = surf._facecolor3d  # ラベル関連の操作
             surf._edgecolors2d = surf._edgecolor3d  # ラベル関連の操作
@@ -101,7 +109,7 @@ def plot_dispersal_chart(
         temp = ".png"
     else:
         temp = "_regression.png"
-    plt.savefig(filename.replace(".csv", "")+temp)  # 画像の保存
+    plt.savefig(filename.replace(".csv", "") + temp)  # 画像の保存
     plt.show()  # 描画
 
 
@@ -116,30 +124,38 @@ def calc_regression(
     n_data, data_dim = data.shape
 
     # X,yを定義
-    y = data[:,-1]
+    y = data[:, -1]
     X = np.zeros((1 + n_dim * (data_dim - 1), n_data), dtype=np.float64)
     X[0] = 1
 
     for x_idx in range(data_dim - 1):
         xi = data[:, x_idx]
         for x_dim in range(1, n_dim + 1):
-            X[x_idx * n_dim + x_dim] = xi ** x_dim
+            X[x_idx * n_dim + x_dim] = xi**x_dim
 
     X = X.T
 
     # wを計算. np.linalg.invは逆行列を計算する関数
 
-    w = np.linalg.inv(X.T @ X + regularization_factor * np.identity(1 + n_dim * (data_dim - 1))) @ X.T @ y
+    w = (
+        np.linalg.inv(
+            X.T @ X + regularization_factor * np.identity(1 + n_dim * (data_dim - 1))
+        )
+        @ X.T
+        @ y
+    )
 
     # 回帰式の数式表現
     linename = columns_name[-1] + "=" + str(round(w[0], 2))
     for x_idx in range(data_dim - 1):
         x_str = columns_name[x_idx]
         for x_dim in range(1, n_dim + 1):
-            linename += "+{0}*{1}^{2}".format(round(w[x_idx * n_dim + x_dim], 2), x_str, x_dim)
+            linename += "+{0}*{1}^{2}".format(
+                round(w[x_idx * n_dim + x_dim], 2), x_str, x_dim
+            )
 
     # 回帰式のプロット用配列を作成
-    N_PLOT=100
+    N_PLOT = 100
     data_d = None
 
     # 各軸毎に100点をプロット
@@ -152,16 +168,24 @@ def calc_regression(
         if data_d is None:
             data_d = xi_data_d
         else:
-            data_d = np.concatenate([np.repeat(data_d, N_PLOT, axis=0), np.tile(xi_data_d, (N_PLOT ** x_idx, 1))], axis=1)
+            data_d = np.concatenate(
+                [
+                    np.repeat(data_d, N_PLOT, axis=0),
+                    np.tile(xi_data_d, (N_PLOT ** x_idx, 1))
+                ],
+                axis=1,
+            )
 
     # Xを計算
-    X_d = np.zeros((1 + n_dim * (data_dim - 1), N_PLOT ** (data_dim - 1)), dtype=np.float64)
+    X_d = np.zeros(
+        (1 + n_dim * (data_dim - 1), N_PLOT ** (data_dim - 1)), dtype=np.float64
+    )
     X_d[0] = 1
 
     for x_idx in range(data_dim - 1):
         xi = data_d[:, x_idx]
         for x_dim in range(1, n_dim + 1):
-            X_d[x_idx * n_dim + x_dim] = xi ** x_dim
+            X_d[x_idx * n_dim + x_dim] = xi**x_dim
 
     X_d = X_d.T
 
@@ -194,10 +218,14 @@ def main():
     plot_dispersal_chart(data, filename, columns_name)
 
     # 回帰式を求める
-    linedata, linename = calc_regression(data, n_dim, regularization_factor, columns_name)
+    linedata, linename = calc_regression(
+        data, n_dim, regularization_factor, columns_name
+    )
 
     # 回帰式を描画
-    plot_dispersal_chart(data, filename, columns_name, linedata=linedata, linename=linename)
+    plot_dispersal_chart(
+        data, filename, columns_name, linedata=linedata, linename=linename
+    )
 
     return
 
