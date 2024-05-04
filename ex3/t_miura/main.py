@@ -1,15 +1,15 @@
 """データに対して、最小二乗法を用いた回帰分析を行う.
 
 sys        : コマンドライン引数
-numpy      : 行列
 matplotlib : 散布図の描画
+numpy      : 行列
 pandas     : csvの読み取り
 """
 
 import sys
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 
@@ -74,7 +74,7 @@ def plot_dispersal_chart(
     elif data.shape[1] == 3:
         # 3dプロットの準備
         fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1,projection = "3d")
+        ax = fig.add_subplot(1, 1, 1, projection="3d")
 
         # データの散布図をプロット
         ax.scatter(data[:, 0], data[:, 1], data[:, 2], label="Observed data")
@@ -171,7 +171,7 @@ def calc_regression(
             data_d = np.concatenate(
                 [
                     np.repeat(data_d, N_PLOT, axis=0),
-                    np.tile(xi_data_d, (N_PLOT ** x_idx, 1))
+                    np.tile(xi_data_d, (N_PLOT**x_idx, 1))
                 ],
                 axis=1,
             )
