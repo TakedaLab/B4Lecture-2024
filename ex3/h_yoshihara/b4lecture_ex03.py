@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """最小二乗法を用いて回帰分析を行う."""
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
 
 
 def least_squire_method(data_size, dimension, csv_data, polynomial, switch, alpha):
