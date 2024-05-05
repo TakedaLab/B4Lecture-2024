@@ -66,7 +66,7 @@ def func(x, weight):
     """
     y = 0
     for i in range(len(weight)):
-        y += (x ** i) * weight[i]
+        y += (x**i) * weight[i]
     return y
 
 
@@ -82,7 +82,7 @@ def func_3d(x, y, weight):
     poly = (len(weight) - 1) // 2
     for i in range(len(weight)):
         if i <= poly:
-            z += (x ** i) * weight[i]
+            z += (x**i) * weight[i]
         else:
             z += (y ** (i - poly)) * weight[i]
     return z
@@ -137,11 +137,14 @@ if __name__ == "__main__":
     data_size = data_array.shape[0]  # csvデータのデータ数
     dimension = data_array.shape[1]  # csvデータの次元数
     polynomial = 15  # 説明変数の次数
-    switch = 0  # 正則化するかどうか
+    switch = 1  # 正則化するかどうか
     alpha = 10
 
     # 重みの計算
-    weight = least_squire_method(data_size, dimension, data_array, polynomial, switch, alpha)
+    weight = least_squire_method(
+        data_size, dimension, data_array, polynomial, switch, alpha
+    )
+    print(weight)
 
     # 正則化の比較のときにコメントアウトを外す
     # weight1 = least_squire_method(data_size, dimension, data_array, polynomial, 0, alpha)
@@ -158,10 +161,10 @@ if __name__ == "__main__":
         min_x = int(csv_data.min()["x1"] - 0.5)
         max_x = int(csv_data.max()["x1"] + 0.5)
         p = np.linspace(min_x, max_x, N)
-        ax1.plot(p, [func(p[k], weight1) for k in range(N)], label=label_make(weight1))
+        ax1.plot(p, [func(p[k], weight) for k in range(N)], label=label_make(weight))
         ax1.legend(loc="upper center", fontsize="xx-small")  # フォントサイズ
-        ax1.set_xlabel('x')
-        ax1.set_ylabel('y')
+        ax1.set_xlabel("x")
+        ax1.set_ylabel("y")
 
     # 3D描写
     if dimension == 3:
@@ -180,8 +183,8 @@ if __name__ == "__main__":
         Z = func_3d(X, Y, weight)
         ax1.plot_wireframe(X, Y, Z, label=label_make_3d(weight))
         ax1.legend(loc="upper center", fontsize="xx-small")  # フォントサイズ
-        ax1.set_xlabel('x')
-        ax1.set_ylabel('y')
-        ax1.set_zlabel('z')
+        ax1.set_xlabel("x")
+        ax1.set_ylabel("y")
+        ax1.set_zlabel("z")
 
-    fig1.savefig("overfitting.png")
+    # fig1.savefig("overfitting.png")
