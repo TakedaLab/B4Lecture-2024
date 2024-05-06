@@ -112,7 +112,7 @@ def make_polynomial_string(weight, dim):
         多項式の文字列(latex形式)
     """
     index = 0
-    poly = str(round(weight[index],2))
+    poly = str(round(weight[index], 2))
     index += 1
     for i in range(len(dim)):
         for j in range(dim[i]):
