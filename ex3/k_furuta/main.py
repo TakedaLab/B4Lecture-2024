@@ -97,7 +97,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def visalize(data, weight, dim):
+def visalize(data, weight, dim, points):
     """実データと回帰直線を表示する関数.
 
     4次元以上のデータ(特徴量が3つ以上のデータ)においてはプロットしないこととする
@@ -110,41 +110,61 @@ def visalize(data, weight, dim):
         回帰直線の係数
     dim : int
         各変数の次元数([1,2]ならば1,x^1,y^1,y^2)
+    points : int
+        回帰結果の表示点の数
     """
     # 特徴量と推定量に分割
     feature = data[:, :-1]
     target = data[:, -1]
 
     if len(dim) == 1:
-        x_0 = np.min(feature[:, 0]) + np.arange(0, 1000, 1) / 1000 * (
+        # プロット用の変数
+        x_0 = np.min(feature[:, 0]) + np.arange(0, points, 1) / points * (
             np.max(feature[:, 0]) - np.min(feature[:, 0])
         )
+        # 拡張して特徴量を用意
         variable = extend_data(x_0.reshape(-1, 1), dim)
+        # 重みから回帰結果の計算
         predict = variable @ weight
+
+        # 結果と散布図の作成
+        # 実データの散布図の表示
         plt.scatter(feature[:, 0], target)
-        plt.plot(x_0, predict)
-        plt.show()
+        # 回帰結果の表示
+        plt.plot(x_0, predict, color="orange")
+        # plt.show()
+
         # 画像化する際にはコメントアウトを外す
-        # plt.savefig("regression.png")
+        plt.savefig("regression.png")
 
     elif len(dim) == 2:
-        x_0 = np.min(feature[:, 0]) + np.arange(0, 100, 1) / 100 * (
+        # プロット用の変数
+        x_0 = np.min(feature[:, 0]) + np.arange(0, points, 1) / points * (
             np.max(feature[:, 0]) - np.min(feature[:, 0])
         )
-        x_1 = np.min(feature[:, 1]) + np.arange(0, 100, 1) / 100 * (
+        x_1 = np.min(feature[:, 1]) + np.arange(0, points, 1) / points * (
             np.max(feature[:, 1]) - np.min(feature[:, 1])
         )
+
+        # 直積を作成
         product = cartesian((x_0, x_1))
-        X_0, X_1 = np.meshgrid(x_0, x_1)
+        # 直積を拡張して特徴量を用意
         variable = extend_data(product, dim)
-        predict = (variable @ weight).reshape(100, 100).T
+        # 重みから回帰結果の計算
+        predict = (variable @ weight).reshape(points, points).T
+
+        # 結果と散布図の作成
         fig = plt.figure()
         ax = fig.add_subplot(projection="3d")
+        # 散布図の表示
         ax.scatter(feature[:, 0], feature[:, 1], target)
-        ax.plot_wireframe(X_0, X_1, predict)
-        plt.show()
+        # 回帰結果の表示
+        X_0, X_1 = np.meshgrid(x_0, x_1)
+        ax.plot_wireframe(X_0, X_1, predict, color="orange")
+        # plt.show()
+
         # 画像化する際にはコメントアウトを外す
-        # plt.savefig("regression.png")
+        plt.savefig("regression.png")
 
 
 if __name__ == "__main__":
@@ -170,4 +190,4 @@ if __name__ == "__main__":
     weight = calc_regression(data, dimension, coeff)
 
     # 重みから回帰される格子と実データの散布図を表示
-    visalize(data, weight, dimension)
+    visalize(data, weight, dimension, number_of_point)
