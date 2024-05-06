@@ -97,6 +97,30 @@ def parse_args():
     return parser.parse_args()
 
 
+def make_polynomial_string(weight, dim):
+    """指数の情報から多項式の文字列を作成.
+
+    Parameters
+    -------------
+    weight : ndarray, shape=(1 + sum(dim))
+        回帰直線の係数
+    dim : int
+        各変数の次元数([1,2]ならば1,x^1,y^1,y^2)
+    Return
+    ------------
+    poly : str
+        多項式の文字列(latex形式)
+    """
+    index = 0
+    poly = str(round(weight[index],2))
+    index += 1
+    for i in range(len(dim)):
+        for j in range(dim[i]):
+            poly += f"+{round(weight[index],2)}$x_{i+1}^{j+1}$"
+            index += 1
+    return poly
+
+
 def visalize(data, weight, dim, points):
     """実データと回帰直線を表示する関数.
 
@@ -128,10 +152,13 @@ def visalize(data, weight, dim, points):
         predict = variable @ weight
 
         # 結果と散布図の作成
+        fig, ax = plt.subplots()
         # 実データの散布図の表示
-        plt.scatter(feature[:, 0], target)
+        ax.scatter(feature[:, 0], target, label="sample")
         # 回帰結果の表示
-        plt.plot(x_0, predict, color="orange")
+        poly = make_polynomial_string(weight, dim)
+        ax.plot(x_0, predict, color="orange", label=poly)
+        ax.legend(ncol=2)
         # plt.show()
 
         # 画像化する際にはコメントアウトを外す
@@ -157,10 +184,12 @@ def visalize(data, weight, dim, points):
         fig = plt.figure()
         ax = fig.add_subplot(projection="3d")
         # 散布図の表示
-        ax.scatter(feature[:, 0], feature[:, 1], target)
+        ax.scatter(feature[:, 0], feature[:, 1], target, label="sample")
         # 回帰結果の表示
         X_0, X_1 = np.meshgrid(x_0, x_1)
-        ax.plot_wireframe(X_0, X_1, predict, color="orange")
+        poly = make_polynomial_string(weight, dim)
+        ax.plot_wireframe(X_0, X_1, predict, color="orange", label=poly)
+        ax.legend(ncol=2)
         # plt.show()
 
         # 画像化する際にはコメントアウトを外す
