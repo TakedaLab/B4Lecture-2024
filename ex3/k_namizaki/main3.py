@@ -1,5 +1,5 @@
 """
-最小二乗法を用いて回帰分析を行う．
+This code is to do regression analyzed using the least squares method.
 """
 import argparse
 
@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 def parse_args():
     """
-    引数を取得する
+    Get Arguments
 
     Returns
     -------
@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument(
         "-file",
         help="ファイルを入力",
-        default=r"C:\Users\kyskn\B4Lecture-2024\ex3\k_namizaki\data3.csv",
+        default=r"C:\Users\kyskn\B4Lecture-2024\ex3\k_namizaki\data2.csv",
         type = str
     )
     parser.add_argument("-n", help="次数", default=1, type=int)
@@ -29,7 +29,7 @@ def parse_args():
 
 def plot2d(x,y,w):
     """
-    2次元のプロットを行う
+    Plot in 2 dimensions.
 
     Parameters
     ----------
@@ -48,13 +48,13 @@ def plot2d(x,y,w):
     ax.set_xlabel("X axis")
     ax.set_ylabel("Y axis")
     ax.scatter(x, y, label = "Observed data")
-    ax.plot(x_ans, y_ans, label="ans")
+    ax.plot(x_ans, y_ans, label="ans", color="r")
     ax.legend()
     plt.show()
 
 def plot3d(x, y, z, w, degree):
     """
-    3次元のプロットを行う
+    Plot in 3 dimensions.
 
     Parameters
     ----------
@@ -80,7 +80,7 @@ def plot3d(x, y, z, w, degree):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
     ax.scatter(x, y, z, label="Observed data")
-    ax.plot_surface(X, Y, z_ans, label="ans",)
+    ax.plot_surface(X, Y, z_ans, label="ans",color="r", alpha=0.3)
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_zlabel("Z")
@@ -89,7 +89,7 @@ def plot3d(x, y, z, w, degree):
 
 def weight2d(x, y, degree, normal):
     """
-    2つのデータから重みを計算
+    Calculate weights from 2 sets of data
 
     Parameters
     ----------
@@ -118,7 +118,7 @@ def weight2d(x, y, degree, normal):
 
 def weight3d(x, y, z, degree, normal):
     """
-    3つのデータから重みを計算
+    Calculate weights from 3 sets of data
 
     Parameters
     ----------
@@ -155,7 +155,7 @@ def weight3d(x, y, z, degree, normal):
 
 def main():
     """
-    最小二乗法を用いて回帰分析を行う．
+    Do the regression analyzed using the least squares method.
     """
     args = parse_args()
     data = np.loadtxt(
