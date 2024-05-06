@@ -156,8 +156,8 @@ def weight3d(x, y, z, degree, normal):
         i += 1
     # w = (X.T @ X + λ @ I)^-1 @ X.T @ Y
     w = np.zeros(2 * degree + 1)
-    I = np.identity(len(X[0]))
-    w = np.linalg.inv(X.T @ X + normal * I) @ X.T @ Z
+    Im = np.identity(len(X[0]))
+    w = np.linalg.inv(X.T @ X + normal * Im) @ X.T @ Z
     return w
 
 
