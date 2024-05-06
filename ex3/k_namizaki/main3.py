@@ -30,6 +30,7 @@ def parse_args():
     parser.add_argument("-normal", help="正則化係数", default=0, type=int)
     return parser.parse_args()
 
+
 def plot2d(x, y, w):
     """
     Plot in 2 dimensions.
@@ -50,7 +51,7 @@ def plot2d(x, y, w):
     fig, ax = plt.subplots()
     ax.set_xlabel("X axis")
     ax.set_ylabel("Y axis")
-    ax.scatter(x, y, label ="Observed data")
+    ax.scatter(x, y, label="Observed data")
     ax.plot(x_ans, y_ans, label="ans", color="r")
     ax.legend()
     plt.show()
@@ -117,8 +118,8 @@ def weight2d(x, y, degree, normal):
         i += 1
     # w = (X.T @ X + λ @ I)^-1 @ X.T @ Y
     w = np.zeros(degree + 1)
-    I = np.identity(len(X[0]))
-    w = np.linalg.inv(X.T @ X + normal * I) @ X.T @ Y
+    Im = np.identity(len(X[0]))
+    w = np.linalg.inv(X.T @ X + normal * Im) @ X.T @ Y
     return w
 
 
