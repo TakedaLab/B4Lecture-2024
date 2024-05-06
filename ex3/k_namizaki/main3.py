@@ -7,8 +7,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def parse_args():
+    """
+    引数を取得する
+
+    Returns
+    -------
+    parser.parse_args() : 引数を返す
+    """
     parser = argparse.ArgumentParser(
-        description="hpfをつくり、wavfileのdataと畳み込みして、スペクトログラムを描画する"
+        description="最小二乗法を用いて回帰分析を行う。"
     )
     parser.add_argument(
         "-file",
@@ -16,13 +23,22 @@ def parse_args():
         default=r"C:\Users\kyskn\B4Lecture-2024\ex3\k_namizaki\data3.csv",
         type = str
     )
-    parser.add_argument("-normal", help="正則化係数", default=0, type=int)
     parser.add_argument("-n", help="次数", default=1, type=int)
+    parser.add_argument("-normal", help="正則化係数", default=0, type=int)
     return parser.parse_args()
 
 def plot2d(x,y,w):
+    """
+    2次元のプロットを行う
+
+    Parameters
+    ----------
+    x : xのデータ
+    y : yのデータ
+    w : 重み
+    """
     # 解答グラフ作成
-    x_ans = np.linspace(np.min(x), np.max(x), 1000)
+    x_ans = np.linspace(np.min(x), np.max(x), 100)
     # np.poly1d()は、最高次数の係数から始めないとダメ
     f = np.poly1d(w[::-1])
     y_ans = f(x_ans)
@@ -31,13 +47,23 @@ def plot2d(x,y,w):
     fig, ax = plt.subplots()
     ax.set_xlabel("X axis")
     ax.set_ylabel("Y axis")
-    ax.scatter(x, y, label = "real")
+    ax.scatter(x, y, label = "Observed data")
     ax.plot(x_ans, y_ans, label="ans")
     ax.legend()
     plt.show()
 
-
 def plot3d(x, y, z, w, degree):
+    """
+    3次元のプロットを行う
+
+    Parameters
+    ----------
+    x : xのデータ
+    y : yのデータ
+    z : zのデータ
+    w : 重み
+    degree : 次数
+    """
     # 解答グラフ作成
     x_ans = np.linspace(np.min(x), np.max(x), 100)
     y_ans = np.linspace(np.min(y), np.max(y), 100)
@@ -45,25 +71,37 @@ def plot3d(x, y, z, w, degree):
     X, Y = np.meshgrid(x_ans, y_ans)
     # np.poly1d()は、最高次数の係数から始めないとダメ
     f = np.poly1d(w[: degree + 1][::-1])
-    # 長さを同じにしつつ、1の係数部分を消すために0をinsert
+    # 長さを同じにしつつ、1の係数部分を消すために0をappend
     g = np.poly1d(np.append(w[degree + 1 :][::-1], 0))
-    # z00 = 1 + x0 + x0^2 ...+ 0 + y0 + y0^2...
+    # z00 = (...x0^2 + x0 + 1) + (... y0^2 + y0 + 0)
     z_ans = f(X) + g(Y)
 
     # グラフと実際の点を描画
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
-    ax.scatter(x, y, z, label="real")
-    ax.plot_surface(X, Y, z_ans, label="ans", cmap='viridis')
-    ax.set_title("title")
-    ax.set_xlabel("X-label")
-    ax.set_ylabel("Y-label")
-    ax.set_zlabel("Z-label")
+    ax.scatter(x, y, z, label="Observed data")
+    ax.plot_surface(X, Y, z_ans, label="ans",)
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
     ax.legend()
     plt.show()
 
-
 def weight2d(x, y, degree, normal):
+    """
+    2つのデータから重みを計算
+
+    Parameters
+    ----------
+    x : xのデータ
+    y : yのデータ
+    degree : 次数
+    normal : 正則化係数
+
+    Returns
+    -------
+    w : 重み
+    """
     # X = 1+x+x^2+...
     X = np.zeros((len(x), degree + 1))
     Y = y
@@ -79,6 +117,21 @@ def weight2d(x, y, degree, normal):
     return w
 
 def weight3d(x, y, z, degree, normal):
+    """
+    3つのデータから重みを計算
+
+    Parameters
+    ----------
+    x : xのデータ
+    y : yのデータ
+    z : zのデータ
+    degree : 次数
+    normal : 正則化係数
+
+    Returns
+    -------
+    w : 重み
+    """
     # X = 1+x+x^2+...+y+y^2+...
     X = np.zeros((len(x), 2*degree + 1))
     Z = z
@@ -101,6 +154,9 @@ def weight3d(x, y, z, degree, normal):
     return w
 
 def main():
+    """
+    最小二乗法を用いて回帰分析を行う．
+    """
     args = parse_args()
     data = np.loadtxt(
         args.file,
@@ -128,7 +184,6 @@ def main():
         w = weight3d(x, y, z, degree, normal)
         print(w)
         plot3d(x, y, z, w, degree)
-
 
 
 if __name__ == "__main__":
