@@ -23,7 +23,7 @@ def parse_args():
     parser.add_argument(
         "-file",
         help="ファイルを入力",
-        default=r"C:\Users\kyskn\B4Lecture-2024\ex3\k_namizaki\data2.csv",
+        default=r"C:\Users\kyskn\B4Lecture-2024\ex3\k_namizaki\data3.csv",
         type=str,
     )
     parser.add_argument("-n", help="次数", default=1, type=int)
@@ -31,15 +31,17 @@ def parse_args():
     return parser.parse_args()
 
 
-def plot2d(x, y, w):
+from numpy.typing import ArrayLike
+
+def plot2d(x: ArrayLike, y: ArrayLike, w: ArrayLike):
     """
     Plot in 2 dimensions.
 
     Parameters
     ----------
-    x : xのデータ
-    y : yのデータ
-    w : 重み
+    x (array-like): xのデータ
+    y (array-like): yのデータ
+    w (array-like): 重み
     """
     # 解答グラフ作成
     x_ans = np.linspace(np.min(x), np.max(x), 100)
@@ -63,10 +65,10 @@ def plot3d(x, y, z, w, degree):
 
     Parameters
     ----------
-    x : xのデータ
-    y : yのデータ
-    z : zのデータ
-    w : 重み
+    x (array-like): xのデータ
+    y (array-like): yのデータ
+    z (array-like): zのデータ
+    w (array-like): 重み
     degree : 次数
     """
     # 解答グラフ作成
@@ -99,23 +101,22 @@ def weight2d(x, y, degree, normal):
 
     Parameters
     ----------
-    x : xのデータ
-    y : yのデータ
+    x (array-like): xのデータ
+    y (array-like): yのデータ
     degree : 次数
     normal : 正則化係数
 
     Returns
     -------
-    w : 重み
+    w (array-like): 重み
     """
     # X = 1+x+x^2+...
     X = np.zeros((len(x), degree + 1))
     Y = y
-    for i in range(degree + 1):
-        for j in range(len(x)):
-            X[j][i] = x[j] ** i
-            j += 1
-        i += 1
+    # x[:, np.newaxis] はxを縦ベクトルにする
+    # np.arange(degree + 1) は、0 から degree までの整数の配列を生成
+    # 最後に[np.newaxis, :] を使って、この配列を行ベクトルに変形
+    X = x[:, np.newaxis] ** np.arange(degree + 1)[np.newaxis, :]
     # w = (X.T @ X + λ @ I)^-1 @ X.T @ Y
     w = np.zeros(degree + 1)
     Im = np.identity(len(X[0]))
@@ -129,31 +130,27 @@ def weight3d(x, y, z, degree, normal):
 
     Parameters
     ----------
-    x : xのデータ
-    y : yのデータ
-    z : zのデータ
+    x (array-like): xのデータ
+    y (array-like): yのデータ
+    z (array-like): zのデータ
     degree : 次数
     normal : 正則化係数
 
     Returns
     -------
-    w : 重み
+    w (array-like): 重み
     """
     # X = 1+x+x^2+...+y+y^2+...
     X = np.zeros((len(x), 2 * degree + 1))
     Z = z
-    # 0~次数まで回す
-    for i in range(degree + 1):
-        for j in range(len(x)):
-            X[j][i] = x[j] ** i
-            j += 1
-        i += 1
-    # 1~次数まで回す
-    for i in range(degree):
-        for j in range(len(y)):
-            X[j][i + degree + 1] = y[j] ** (i + 1)
-            j += 1
-        i += 1
+    # x[:, np.newaxis] はxを縦ベクトルにする
+    # np.arange(degree + 1) は、0 から degree までの整数の配列を生成
+    # [np.newaxis, :] を使って、整数の配列を行ベクトルに変形
+    X = x[:, np.newaxis] ** np.arange(degree + 1)[np.newaxis, :]
+    #　Yも同様に
+    Y = y[:, np.newaxis] ** np.arange(1, degree + 1)[np.newaxis, :]
+    # XとYの行列を水平に結合
+    X = np.hstack([X,Y])
     # w = (X.T @ X + λ @ I)^-1 @ X.T @ Y
     w = np.zeros(2 * degree + 1)
     Im = np.identity(len(X[0]))
