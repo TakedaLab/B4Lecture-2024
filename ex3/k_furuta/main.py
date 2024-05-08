@@ -219,4 +219,4 @@ if __name__ == "__main__":
     weight = calc_regression(data, dimension, coeff)
 
     # 重みから回帰される格子と実データの散布図を表示
-    visalize(data, weight, dimension, number_of_point)
+    visualize(data, weight, dimension, number_of_point)
