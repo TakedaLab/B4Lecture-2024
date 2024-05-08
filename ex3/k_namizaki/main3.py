@@ -9,6 +9,7 @@ import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numpy.typing import ArrayLike
 
 
 def parse_args():
@@ -30,8 +31,6 @@ def parse_args():
     parser.add_argument("-normal", help="正則化係数", default=0, type=int)
     return parser.parse_args()
 
-
-from numpy.typing import ArrayLike
 
 def plot2d(x: ArrayLike, y: ArrayLike, w: ArrayLike):
     """
@@ -59,7 +58,7 @@ def plot2d(x: ArrayLike, y: ArrayLike, w: ArrayLike):
     plt.show()
 
 
-def plot3d(x, y, z, w, degree):
+def plot3d(x: ArrayLike, y: ArrayLike, z: ArrayLike, w: ArrayLike, degree: int):
     """
     Plot in 3 dimensions.
 
@@ -69,7 +68,7 @@ def plot3d(x, y, z, w, degree):
     y (array-like): yのデータ
     z (array-like): zのデータ
     w (array-like): 重み
-    degree : 次数
+    degree (int): 次数
     """
     # 解答グラフ作成
     x_ans = np.linspace(np.min(x), np.max(x), 100)
@@ -95,7 +94,7 @@ def plot3d(x, y, z, w, degree):
     plt.show()
 
 
-def weight2d(x, y, degree, normal):
+def weight2d(x: ArrayLike, y: ArrayLike, degree: int, normal: int):
     """
     Calculate weights from 2 sets of data.
 
@@ -103,8 +102,8 @@ def weight2d(x, y, degree, normal):
     ----------
     x (array-like): xのデータ
     y (array-like): yのデータ
-    degree : 次数
-    normal : 正則化係数
+    degree (int): 次数
+    normal (int): 正則化係数
 
     Returns
     -------
@@ -124,7 +123,7 @@ def weight2d(x, y, degree, normal):
     return w
 
 
-def weight3d(x, y, z, degree, normal):
+def weight3d(x: ArrayLike, y: ArrayLike, z: ArrayLike, degree: int, normal: int):
     """
     Calculate weights from 3 sets of data.
 
@@ -133,8 +132,8 @@ def weight3d(x, y, z, degree, normal):
     x (array-like): xのデータ
     y (array-like): yのデータ
     z (array-like): zのデータ
-    degree : 次数
-    normal : 正則化係数
+    degree (int): 次数
+    normal (int): 正則化係数
 
     Returns
     -------
@@ -147,10 +146,10 @@ def weight3d(x, y, z, degree, normal):
     # np.arange(degree + 1) は、0 から degree までの整数の配列を生成
     # [np.newaxis, :] を使って、整数の配列を行ベクトルに変形
     X = x[:, np.newaxis] ** np.arange(degree + 1)[np.newaxis, :]
-    #　Yも同様に
+    # Yも同様に
     Y = y[:, np.newaxis] ** np.arange(1, degree + 1)[np.newaxis, :]
     # XとYの行列を水平に結合
-    X = np.hstack([X,Y])
+    X = np.hstack([X, Y])
     # w = (X.T @ X + λ @ I)^-1 @ X.T @ Y
     w = np.zeros(2 * degree + 1)
     Im = np.identity(len(X[0]))
