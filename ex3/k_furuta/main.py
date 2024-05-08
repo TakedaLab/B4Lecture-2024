@@ -121,7 +121,7 @@ def make_polynomial_string(weight, dim):
     return poly
 
 
-def visalize(data, weight, dim, points):
+def visualize(data, weight, dim, points):
     """実データと回帰直線を表示する関数.
 
     4次元以上のデータ(特徴量が3つ以上のデータ)においてはプロットしないこととする
