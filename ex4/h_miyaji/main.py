@@ -2,9 +2,11 @@
 
 import argparse
 
-import ex3
+
 import matplotlib.pyplot as plt
 import numpy as np
+
+import ex3
 
 
 def parse_args():
