@@ -25,7 +25,7 @@ def parse_args():
 
 
 def calc_eig(dataset: np.ndarray) -> np.ndarray:
-    """calculate eigenvalues and transformation matrix.
+    """Calculate eigenvalues and transformation matrix.
 
     Args:
         dataset (np.ndarray): csv data.
@@ -70,7 +70,7 @@ def calc_eig(dataset: np.ndarray) -> np.ndarray:
 
 
 def calc_contribution(eig_sorted: np.ndarray) -> np.ndarray:
-    """calculate contribution rates.
+    """Calculate contribution rates.
 
     Args:
         eig_sorted (np.ndarray): descending eigenvalue.
@@ -91,7 +91,7 @@ def calc_contribution(eig_sorted: np.ndarray) -> np.ndarray:
 
 
 def plot_bases(trans_matrix: np.ndarray, ax, cont: np.ndarray):
-    """plot the bases on a scatter plot.
+    """Plot the bases on a scatter plot.
 
     Args:
         trans_matrix (np.ndarray): transformation matrix.
@@ -135,7 +135,7 @@ def plot_bases(trans_matrix: np.ndarray, ax, cont: np.ndarray):
 
 
 def main():
-    """load csv file and perform a principal component analysis."""
+    """Load csv file and perform a principal component analysis."""
     # get argument
     args = parse_args()
     filename = args.input_file  # csv file name
