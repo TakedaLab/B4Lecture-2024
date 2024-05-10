@@ -24,45 +24,6 @@ def parse_args():
     return parser.parse_args()
 
 
-# calc_eigに統合（未使用）
-def standardization(dataset: np.ndarray) -> np.ndarray:
-    """standardize data.
-
-    Args:
-        dataset (np.ndarray): csv data.
-
-    Returns:
-        np.ndarray: standardized data.
-    """
-    num = len(dataset)  # number of data
-
-    # calculate mean
-    mean = np.zeros(dataset.shape)
-    mean[:, 0] += sum(dataset[:, 0]) / num
-    mean[:, 1] += sum(dataset[:, 1]) / num
-
-    # standardization
-    sd = (((dataset**2) / num) - (mean**2)) ** 0.5
-    sd_data = (dataset - mean) / sd
-    return sd_data
-
-
-# calc_eigに統合（未使用）
-def calc_covariance(sd_data: np.ndarray) -> np.ndarray:
-    dim = len(sd_data[0])  # dimension of data
-    num = len(sd_data)  # number of data
-
-    cov_matrix = np.zeros((dim, dim))
-    # upper triangular matrix
-    for i in range(dim):
-        for j in range(i + 1, dim):
-            cov_matrix[i, j] = sum((sd_data[:, i] * sd_data[:, j]))
-
-    # symmetric matrix, σ^2 = 1
-    cov_matrix = ((cov_matrix + cov_matrix.T) / num) + np.eye(dim, dtype=float)
-    return cov_matrix
-
-
 def calc_eig(dataset: np.ndarray) -> np.ndarray:
     """calculate eigenvalues and transformation matrix.
 
