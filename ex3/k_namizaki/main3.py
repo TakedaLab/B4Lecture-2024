@@ -43,7 +43,7 @@ def plot2d(x: ArrayLike, y: ArrayLike, w: ArrayLike):
     w (array-like): 重み
     """
     # 解答グラフ作成
-    x_ans = np.linspace(np.min(x), np.max(x), 100)
+    x_ans = np.linspace(np.min(x), np.max(x), 10000)
     # np.poly1d()は、最高次数の係数から始めないとダメ
     f = np.poly1d(w[::-1])
     y_ans = f(x_ans)
@@ -71,16 +71,27 @@ def plot3d(x: ArrayLike, y: ArrayLike, z: ArrayLike, w: ArrayLike, degree: int):
     degree (int): 次数
     """
     # 解答グラフ作成
-    x_ans = np.linspace(np.min(x), np.max(x), 100)
-    y_ans = np.linspace(np.min(y), np.max(y), 100)
+    x_ans = np.linspace(np.min(x), np.max(x), 1000)
+    y_ans = np.linspace(np.min(y), np.max(y), 1000)
     # meshgrid必須
     X, Y = np.meshgrid(x_ans, y_ans)
     # np.poly1d()は、最高次数の係数から始めないとダメ
     f = np.poly1d(w[: degree + 1][::-1])
     # 長さを同じにしつつ、1の係数部分を消すために0をappend
-    g = np.poly1d(np.append(w[degree + 1 :][::-1], 0))
-    # z00 = (...x0^2 + x0 + 1) + (... y0^2 + y0 + 0)
+    g = np.poly1d(np.append(w[degree + 1 : 2 * degree + 1][::-1], 0))
+
+    # z00 = (...x0^2 + x0 + 1) + (... y0^2 + y0 + 0) + (x0*y0+...)
     z_ans = f(X) + g(Y)
+    if degree > 1:
+        h = np.poly1d(np.append(w[2 * degree + 1 :][::-1], 0))
+        XY = np.zeros((1000, 1000))
+        # XYの各列に対して、対応するxとyの組み合わせの相互作用項を計算
+        col = 0
+        for i in range(1, degree + 1):
+            for j in range(1, i):
+                XY[:, col] = x_ans ** (i - j) * y_ans ** j
+                col += 1
+        z_ans = z_ans + h(XY)
 
     # グラフと実際の点を描画
     fig = plt.figure()
@@ -139,8 +150,8 @@ def weight3d(x: ArrayLike, y: ArrayLike, z: ArrayLike, degree: int, normal: int)
     -------
     w (array-like): 重み
     """
-    # X = 1+x+x^2+...+y+y^2+...
-    X = np.zeros((len(x), 2 * degree + 1))
+    # X = 1+x+x^2+...+y+y^2+...xy+...
+    X = np.zeros((len(x), 2 * degree + 1 + degree * (degree - 1) // 2))
     Z = z
     # x[:, np.newaxis] はxを縦ベクトルにする
     # np.arange(degree + 1) は、0 から degree までの整数の配列を生成
@@ -148,8 +159,21 @@ def weight3d(x: ArrayLike, y: ArrayLike, z: ArrayLike, degree: int, normal: int)
     X = x[:, np.newaxis] ** np.arange(degree + 1)[np.newaxis, :]
     # Yも同様に
     Y = y[:, np.newaxis] ** np.arange(1, degree + 1)[np.newaxis, :]
+    # XY = xy + x*y^2 + x^2*y+...
+    if degree > 1:
+        XY = np.zeros((len(x), degree * (degree - 1) // 2))
+        # XYの各列に対して、対応するxとyの組み合わせの相互作用項を計算
+        col = 0
+        for i in range(1, degree + 1):
+            for j in range(1, i):
+                XY[:, col] = x ** (i - j) * y ** j
+                col += 1
+
     # XとYの行列を水平に結合
     X = np.hstack([X, Y])
+    if degree > 1:
+        X = np.hstack([X, XY])
+
     # w = (X.T @ X + λ @ I)^-1 @ X.T @ Y
     w = np.zeros(2 * degree + 1)
     Im = np.identity(len(X[0]))
