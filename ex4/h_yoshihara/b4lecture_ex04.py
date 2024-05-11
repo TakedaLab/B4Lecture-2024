@@ -89,7 +89,9 @@ if __name__ == "__main__":
     if dimension == 3:
         ax1 = Axes3D(fig1)
         fig1.add_axes(ax1)
-        ax1.scatter(data_array[:, 0], data_array[:, 1], data_array[:, 2], color=colorlist)
+        ax1.scatter(
+            data_array[:, 0], data_array[:, 1], data_array[:, 2], color=colorlist
+        )
 
         x = np.linspace(np.min(data_array[:, 0]), np.max(data_array[:, 1]), 100)
         x_y = vector[1] / vector[0]
