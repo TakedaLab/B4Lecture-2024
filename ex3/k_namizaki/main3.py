@@ -89,7 +89,7 @@ def plot3d(x: ArrayLike, y: ArrayLike, z: ArrayLike, w: ArrayLike, degree: int):
         col = 0
         for i in range(1, degree + 1):
             for j in range(1, i):
-                XY[:, col] = x_ans ** (i - j) * y_ans ** j
+                XY[:, col] = x_ans ** (i - j) * y_ans**j
                 col += 1
         z_ans = z_ans + h(XY)
 
@@ -166,7 +166,7 @@ def weight3d(x: ArrayLike, y: ArrayLike, z: ArrayLike, degree: int, normal: int)
         col = 0
         for i in range(1, degree + 1):
             for j in range(1, i):
-                XY[:, col] = x ** (i - j) * y ** j
+                XY[:, col] = x ** (i - j) * y**j
                 col += 1
 
     # XとYの行列を水平に結合
