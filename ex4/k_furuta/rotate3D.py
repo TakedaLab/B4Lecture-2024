@@ -15,7 +15,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111, projection="3d")
 
 # csvファイルの読み込み
-data = np.genfromtxt("./data2.csv", delimiter=",", skip_header=1)
+data = np.genfromtxt("../data2.csv", delimiter=",", skip_header=1)
 # データを標準化
 data = scipy.stats.zscore(data)
 
