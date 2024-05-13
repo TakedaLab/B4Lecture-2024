@@ -26,9 +26,9 @@ def get_args():
     filename, comp_method = args.filename, args.comp_method
 
     if filename[-4:] != ".csv":
-        raise(ValueError("filename must be csv file"))
+        raise (ValueError("filename must be csv file"))
     if not comp_method in {"none", "2d", "90%"}:
-        raise(ValueError("comp_method muse be none or 2d or 90%"))
+        raise (ValueError("comp_method muse be none or 2d or 90%"))
 
     return filename, comp_method
 
@@ -63,8 +63,18 @@ def plot_dispersal_chart(
 
         # 回帰式を描画
         if base_vec is not None:
-            plt.axline((0, 0), (base_vec[0, 0], base_vec[1, 0]), label="1st component", color="orange")
-            plt.axline((0, 0), (base_vec[0, 1], base_vec[1, 1]), label="2nd component", color="green")
+            plt.axline(
+                (0, 0),
+                (base_vec[0, 0], base_vec[1, 0]),
+                label="1st component",
+                color="orange",
+            )
+            plt.axline(
+                (0, 0),
+                (base_vec[0, 1], base_vec[1, 1]),
+                label="2nd component",
+                color="green",
+            )
 
         # ラベルを設定
             plt.title(filename.replace(".csv", "_bace"))
@@ -102,13 +112,14 @@ def plot_dispersal_chart(
                 param2 = data_max / vec_i
                 param_higher = min([max(param1[j], param2[j]) for j in range(3)])
                 param_lower = max([min(param1[j], param2[j]) for j in range(3)])
-                ax.plot((vec_i[0] * param_lower, vec_i[0] * param_higher),
+                ax.plot(
+                    (vec_i[0] * param_lower, vec_i[0] * param_higher),
                     (vec_i[1] * param_lower, vec_i[1] * param_higher),
                     (vec_i[2] * param_lower, vec_i[2] * param_higher),
                     label=label[i] + " component",
                     color=color[i],
                 )
-        # ラベルを設定
+            # ラベルを設定
             ax.set_title(filename.replace(".csv", "_bace"))
         else:
             ax.set_title(filename.replace(".csv", ""))
@@ -148,7 +159,7 @@ def pca(data: np.ndarray, comp_method: str, filename: str):
 
     # 寄与率の計算
     contribution_rate = eigenvalue / np.sum(eigenvalue)
-    print("Conrtibution Rate =",contribution_rate.tolist())
+    print("Conrtibution Rate =", contribution_rate.tolist())
 
     # 次元削減
     if comp_method == "none":
@@ -164,7 +175,7 @@ def pca(data: np.ndarray, comp_method: str, filename: str):
 
     # 次元圧縮
     print(f"Compress to {n_dim} dimentions")
-    a = a[:,:n_dim]
+    a = a[:, :n_dim]
 
     # 主成分得点の計算
     y = a.T @ x
@@ -189,7 +200,9 @@ def main():
     pca_data = pca(data_np, comp_method, filename)
 
     # 主成分得点のプロット
-    plot_dispersal_chart(pca_data, "PCA_" + filename, ("1st component", "2nd component", "3rd component"))
+    plot_dispersal_chart(
+        pca_data, "PCA_" + filename, ("1st component", "2nd component", "3rd component")
+    )
 
 
 if __name__ == "__main__":
