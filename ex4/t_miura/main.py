@@ -9,6 +9,7 @@ pandas     : csvの読み込み
 
 import argparse
 import bisect
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -17,7 +18,8 @@ import pandas as pd
 def get_args():
     """コマンドライン引数の取得.
 
-    -> filename: str, comp_method: str"""
+    -> filename: str, comp_method: str
+    """
     # コマンドライン引数を取得
     parser = argparse.ArgumentParser()
     parser.add_argument("filename", help="csv filename")
@@ -27,7 +29,7 @@ def get_args():
 
     if filename[-4:] != ".csv":
         raise (ValueError("filename must be csv file"))
-    if not comp_method in {"none", "2d", "90%"}:
+    if comp_method not in {"none", "2d", "90%"}:
         raise (ValueError("comp_method muse be none or 2d or 90%"))
 
     return filename, comp_method
@@ -76,7 +78,7 @@ def plot_dispersal_chart(
                 color="green",
             )
 
-        # ラベルを設定
+            # ラベルを設定
             plt.title(filename.replace(".csv", "_bace"))
         else:
             plt.title(filename.replace(".csv", ""))
@@ -139,7 +141,8 @@ def plot_dispersal_chart(
 def pca(data: np.ndarray, comp_method: str, filename: str):
     """主成分分析と寄与率、圧縮次元数の表示.
 
-    -> 主成分得点: np.ndarray"""
+    -> 主成分得点: np.ndarray
+    """
     n = data.shape[0]  # サンプル数の取得
 
     # データの標準化
@@ -186,7 +189,8 @@ def pca(data: np.ndarray, comp_method: str, filename: str):
 def main():
     """main関数.
 
-    -> None"""
+    -> None
+    """
     # コマンドライン引数の取得
     filename, comp_method = get_args()
 
