@@ -87,10 +87,10 @@ def plot_PCA(data, eigen_vector, contribution_rate, file_name):
         ax.scatter(data[:, 0], data[:, 1])
         # 主成分の方向を描画
         ax.axline(
-            (0, 0), v[0], color="red", label=f"ratio:{round(contribution_rate[0],3)}"
+            (0, 0), v[:,0], color="red", label=f"ratio:{round(contribution_rate[0],3)}"
         )
         ax.axline(
-            (0, 0), v[1], color="green", label=f"ratio:{round(contribution_rate[1],3)}"
+            (0, 0), v[:,1], color="green", label=f"ratio:{round(contribution_rate[1],3)}"
         )
         ax.legend()
         # 画像として保存
