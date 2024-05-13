@@ -168,7 +168,7 @@ def plot_CCR(contribution_rate, file_name):
 def parse_args():
     """コマンドプロントから引数を受け取るための関数."""
     parser = argparse.ArgumentParser(
-        description="Generate spectrogram and inverse transform"
+        description="Plot PCA from data"
     )
     parser.add_argument(
         "--input-file", type=str, required=True, help="Name of input csv file"
