@@ -1,5 +1,10 @@
 """主成分分析して主成分を見つけ、次元圧縮を行う.
 
+argparse   : コマンドライン引数
+bisect     : 二分探索
+matplotlib : グラフの描画
+numpy      : 行列計算
+pandas     : csvの読み込み
 """
 
 import argparse
@@ -75,7 +80,6 @@ def plot_dispersal_chart(
             temp = "_bace.png"
         plt.savefig(filename.replace(".csv", temp))  # 画像の保存
         plt.show()  # 描画
-        plt.clf()  # 作成したグラフをリセット
     elif data.shape[1] == 3:
         # 3dプロットの準備
         fig = plt.figure()
@@ -124,7 +128,7 @@ def plot_dispersal_chart(
 def pca(data: np.ndarray, comp_method: str, filename: str):
     """主成分分析と寄与率、圧縮次元数の表示.
 
-    -> 主成分得点: np.ndarray, 主成分負荷量: np.ndarray"""
+    -> 主成分得点: np.ndarray"""
     n = data.shape[0]  # サンプル数の取得
 
     # データの標準化
@@ -169,6 +173,9 @@ def pca(data: np.ndarray, comp_method: str, filename: str):
 
 
 def main():
+    """main関数.
+
+    -> None"""
     # コマンドライン引数の取得
     filename, comp_method = get_args()
 
