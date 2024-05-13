@@ -88,6 +88,11 @@ def main():
     # args = parser.parse_args()
 
     path = "../data1.pickle"
+    a = os.path.basename(path)
+    print(a)
+    b = os.path.splitext(a)
+    print(b)
+    exit()
     filename = os.path.splitext(os.path.basename(path))[0]
 
     # load pickle file
