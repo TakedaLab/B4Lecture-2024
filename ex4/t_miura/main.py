@@ -166,6 +166,9 @@ def pca(data: np.ndarray, comp_method: str, filename: str):
 
     # 固有値,固有ベクトルを求める
     eigenvalue, a = np.linalg.eig(sigma)
+    sorted_idx = np.argsort(eigenvalue)[::-1]
+    eigenvalue = eigenvalue[sorted_idx]
+    a = a[:, sorted_idx]
 
     # 基底のプロット
     plot_dispersal_chart(data, filename, base_vec=a)
