@@ -8,6 +8,7 @@ import numpy as np
 
 def parse_args():
     """引数の取得を行う.
+
     filename : 読み込むファイル名
     """
     parser = argparse.ArgumentParser(description="主成分分析を行う")
@@ -17,6 +18,7 @@ def parse_args():
 
 def make_scatter(data: np.ndarray, dim: int, title: str):
     """散布図を表示.
+
     Args:
         data : データ
         dim : 次元
@@ -58,6 +60,7 @@ def make_scatter(data: np.ndarray, dim: int, title: str):
 
 def load_csv(filename: str) -> np.ndarray:
     """csvファイルを読み込み、データを独立変数と従属変数に分割する.
+
     Args:
         filename : 読み込むcsvファイル名
     Returns:
@@ -69,6 +72,7 @@ def load_csv(filename: str) -> np.ndarray:
 
 def standard_data(data: np.ndarray) -> np.ndarray:
     """データを標準化する.
+
     Args:
         data (np.ndarray): データ
     Returns:
@@ -82,6 +86,7 @@ def standard_data(data: np.ndarray) -> np.ndarray:
 
 def calc_contribution(eigen_vals: np.ndarray, dim: int):
     """寄与率、累積寄与率の計算.
+
     Args:
         eigen_vals (np.ndarray): 固有値
         dim (int): 次元
@@ -94,7 +99,7 @@ def calc_contribution(eigen_vals: np.ndarray, dim: int):
     sum_contribution = np.zeros(dim)
     n_components = 1
     for i in range(dim):
-        sum_contribution[i] = np.sum(contribution[:i+1])
+        sum_contribution[i] = np.sum(contribution[: i + 1])
         if sum_contribution[i] <= 0.9:
             n_components = i + 2
     return contribution, sum_contribution, n_components
@@ -104,6 +109,7 @@ def make_baseline(
     eigen_vec: np.ndarray, contribution: np.ndarray, dim: int, data: np.ndarray
 ):
     """基底を描画.
+
     Args:
         eigen_vec (np.ndarray): 基底ベクトル
         contribution (np.ndarray): 寄与率
