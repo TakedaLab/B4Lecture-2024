@@ -188,6 +188,15 @@ def pca(data: np.ndarray, comp_method: str, filename: str):
         # 累積寄与率が0.9を超える次元まで削減
         cumsum_cont = np.cumsum(contribution_rate)
         print("Cumsum Conrtibution Rate =", cumsum_cont.tolist())
+
+        # 累積寄与率のプロット
+        plt.plot(cumsum_cont, label="Cumsum Conrtibution Rate")
+        plt.title("Cumsum_Conrtibution_Rate_" + filename.replace(".csv", ""))
+        plt.xlabel("i")
+        plt.ylabel("Cumsum Conrtibution Rate")
+        plt.legend()  # 凡例の表示
+        plt.savefig("Cumsum_Conrtibution_Rate_" + filename.replace(".csv", ""))  # 画像の保存
+        plt.show()  # 描画
         n_dim = bisect.bisect(cumsum_cont, 0.9) + 1
 
     # 次元圧縮
