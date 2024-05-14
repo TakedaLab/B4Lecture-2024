@@ -28,11 +28,9 @@ def parse_args() -> Any:
     parser.add_argument(
         "-file",
         help="ファイルを入力",
-        default=r"C:\Users\kyskn\B4Lecture-2024\ex4\data1.csv",
+        default=r"C:\Users\kyskn\B4Lecture-2024\ex4\data3.csv",
         type=str,
     )
-    parser.add_argument("-n", help="次数", default=1, type=int)
-    parser.add_argument("-normal", help="正則化係数", default=0, type=int)
     return parser.parse_args()
 
 
