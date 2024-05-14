@@ -138,7 +138,11 @@ def plot_dispersal_chart(
         else:
             temp = "_bace.png"
         ax.set_box_aspect(
-            (data_max[0] - data_min[0], data_max[1] - data_min[1], data_max[2] - data_min[2])
+            (
+                data_max[0] - data_min[0],
+                data_max[1] - data_min[1],
+                data_max[2] - data_min[2],
+            )
         )
         plt.savefig(filename.replace(".csv", temp))  # 画像の保存
         plt.show()  # 描画
