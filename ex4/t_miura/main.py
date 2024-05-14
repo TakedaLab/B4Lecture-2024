@@ -195,7 +195,9 @@ def pca(data: np.ndarray, comp_method: str, filename: str):
         plt.xlabel("i")
         plt.ylabel("Cumsum Conrtibution Rate")
         plt.legend()  # 凡例の表示
-        plt.savefig("Cumsum_Conrtibution_Rate_" + filename.replace(".csv", ""))  # 画像の保存
+        plt.savefig(
+            "Cumsum_Conrtibution_Rate_" + filename.replace(".csv", "")
+        )  # 画像の保存
         plt.show()  # 描画
         n_dim = bisect.bisect(cumsum_cont, 0.9) + 1
 
