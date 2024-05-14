@@ -90,6 +90,7 @@ def plot_dispersal_chart(
             temp = ".png"
         else:
             temp = "_bace.png"
+        plt.gca().set_aspect("equal")  # アスペクト比の設定
         plt.savefig(filename.replace(".csv", temp))  # 画像の保存
         plt.show()  # 描画
     elif data.shape[1] == 3:
@@ -100,10 +101,12 @@ def plot_dispersal_chart(
         # データの散布図をプロット
         ax.scatter(data[:, 0], data[:, 1], data[:, 2], label="Observed data")
 
+        # データの最大最小値を計算
+        data_min = np.min(data, axis=0)
+        data_max = np.max(data, axis=0)
+
         # 基底を描画
         if base_vec is not None:
-            data_min = np.min(data, axis=0)
-            data_max = np.max(data, axis=0)
             label = ["1st", "2nd", "3rd"]
             color = ["orange", "green", "red"]
             for i in range(3):
@@ -134,6 +137,9 @@ def plot_dispersal_chart(
             temp = ".png"
         else:
             temp = "_bace.png"
+        ax.set_box_aspect(
+            (data_max[0] - data_min[0], data_max[1] - data_min[1], data_max[2] - data_min[2])
+        )
         plt.savefig(filename.replace(".csv", temp))  # 画像の保存
         plt.show()  # 描画
 
@@ -174,6 +180,7 @@ def pca(data: np.ndarray, comp_method: str, filename: str):
     elif comp_method == "90%":
         # 累積寄与率が0.9を超える次元まで削減
         cumsum_cont = np.cumsum(contribution_rate)
+        print("Cumsum Conrtibution Rate =", cumsum_cont.tolist())
         n_dim = bisect.bisect(cumsum_cont, 0.9) + 1
 
     # 次元圧縮
