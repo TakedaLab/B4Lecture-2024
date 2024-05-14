@@ -63,9 +63,7 @@ def load_csv(filename: str) -> np.ndarray:
     Returns:
         data : 読み込んだデータ
     """
-    data = np.loadtxt(
-        filename, delimiter=","
-    )  # CSVファイルの中身をNDArrayに格納
+    data = np.loadtxt(filename, delimiter=",")  # CSVファイルの中身をNDArrayに格納
     return data
 
 
@@ -83,7 +81,7 @@ def standard_data(data: np.ndarray) -> np.ndarray:
 
 
 def calc_contribution(eigen_vals: np.ndarray, dim: int):
-    """寄与率、累積寄与率の計算
+    """寄与率、累積寄与率の計算.
     Args:
         eigen_vals (np.ndarray): 固有値
         dim (int): 次元
@@ -102,15 +100,34 @@ def calc_contribution(eigen_vals: np.ndarray, dim: int):
     return contribution, sum_contribution, n_components
 
 
-def make_baseline(eigen_vec: np.ndarray, contribution: np.ndarray, dim: int, data: np.ndarray):
+def make_baseline(
+    eigen_vec: np.ndarray, contribution: np.ndarray, dim: int, data: np.ndarray
+):
+    """基底を描画.
+    Args:
+        eigen_vec (np.ndarray): 基底ベクトル
+        contribution (np.ndarray): 寄与率
+        dim (int): 次元
+        data (np.ndarray): データ
+    """
     # 次元が2の時の基底描画
     if dim == 2:
         fig = plt.figure(figsize=(6, 6))
         ax = fig.add_subplot()
         # 散布図プロット
         ax.scatter(data[:, 0], data[:, 1], color="r", label="Data", marker=".")
-        ax.axline((0, 0), (eigen_vec[0, 0], eigen_vec[1, 0]), color="y", label="contribution: " + str(contribution[0]))
-        ax.axline((0, 0), (eigen_vec[0, 1], eigen_vec[1, 1]), color="b", label="contribution: " + str(contribution[1]))
+        ax.axline(
+            (0, 0),
+            (eigen_vec[0, 0], eigen_vec[1, 0]),
+            color="y",
+            label="contribution: " + str(contribution[0]),
+        )
+        ax.axline(
+            (0, 0),
+            (eigen_vec[0, 1], eigen_vec[1, 1]),
+            color="b",
+            label="contribution: " + str(contribution[1]),
+        )
         ax.set_xlabel("x1")
         ax.set_ylabel("x2")
         ax.set_title("baseline_result")
@@ -180,7 +197,9 @@ def main():
     sort_eigen_vec = eigen_vec[index]
 
     # 寄与率、累積寄与率を求める
-    contribution, sum_contribution, n_components = calc_contribution(sort_eigen_vals, dim)
+    contribution, sum_contribution, n_components = calc_contribution(
+        sort_eigen_vals, dim
+    )
 
     # 基底を表示
     make_baseline(sort_eigen_vec, contribution, dim, data)
