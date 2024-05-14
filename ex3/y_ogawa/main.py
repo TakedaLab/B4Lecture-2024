@@ -135,19 +135,13 @@ def calc_weight(x_data, y_data, degree, normalization):
         for i in range(degree + 1):
             for j in range(len(x_data)):
                 new_x_data[j][i] = x_data[j][0] ** i
-                j += 1
-            i += 1
     if len(x_data[0]) == 2:
         for i in range(degree + 1):
             for j in range(len(x_data)):
                 new_x_data[j][i] = x_data[j][0] ** i
-                j += 1
-            i += 1
         for i in range(degree):
             for j in range(len(x_data)):
                 new_x_data[j][i + degree + 1] = x_data[j][1] ** (i + 1)
-                j += 1
-            i += 1
     # 正規方程式で重みを計算(正規化するときは係数が適用される)
     w = np.dot(
         np.dot(

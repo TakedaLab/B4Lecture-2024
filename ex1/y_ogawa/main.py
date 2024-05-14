@@ -20,7 +20,7 @@ def makeSpectrogram(waveSize, wave, sr, flameSize, overlap):
         waveSize: フレーム数
         wave: 波形の値
         sr: サンプリング周波数
-        frameSize: フレームの大きさ
+        flameSize: フレームの大きさ
         overlap: オーバーラップさせるサンプル数
 
     Returns:
@@ -51,7 +51,7 @@ def inverseWave(waveSize, spectrogram, sr, flameSize, overlap):
         waveSize: フレーム数
         Spectrogram: スペクトログラム
         sr: サンプリング周波数
-        frameSize: フレームの大きさ
+        flameSize: フレームの大きさ
         overlap: オーバーラップさせるサンプル数
 
     Returns:
