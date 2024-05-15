@@ -23,6 +23,24 @@ def make_scatter(data: np.ndarray, dim: int, title: str):
         data : データ
         dim : 次元
     """
+    # 次元が1の時の散布図描画
+    if dim == 1:
+        fig = plt.figure(figsize=(6, 6))
+        ax = fig.add_subplot()
+        y = np.zeros(len(data))
+        # 散布図プロット
+        ax.scatter(data, y, color="r", label="Data", marker=".")
+        ax.set_xlabel("x1")
+        ax.set_ylabel("x2")
+        ax.set_title(title)
+        ax.legend(loc="upper left", fontsize=10)
+        scale_min = min(data)
+        scale_max = max(data)
+        plt.xlim(scale_min, scale_max)
+        plt.ylim(scale_min, scale_max)
+        plt.savefig(title + "result.png")
+        plt.show()
+
     # 次元が2の時の散布図描画
     if dim == 2:
         fig = plt.figure(figsize=(6, 6))
@@ -33,6 +51,10 @@ def make_scatter(data: np.ndarray, dim: int, title: str):
         ax.set_ylabel("x2")
         ax.set_title(title)
         ax.legend(loc="upper left", fontsize=10)
+        scale_min = min(min(data[:, 0]), min(data[:, 1]))
+        scale_max = max(max(data[:, 0]), max(data[:, 1]))
+        plt.xlim(scale_min, scale_max)
+        plt.ylim(scale_min, scale_max)
         plt.savefig(title + "result.png")
         plt.show()
 
@@ -54,6 +76,10 @@ def make_scatter(data: np.ndarray, dim: int, title: str):
         ax.set_zlabel("x3")
         ax.set_title(title)
         ax.legend(loc="upper left", fontsize=10)
+        scale_min = min(min(data[:, 0]), min(data[:, 1]), min(data[:, 2]))
+        scale_max = max(max(data[:, 0]), max(data[:, 1]), max(data[:, 2]))
+        plt.xlim(scale_min, scale_max)
+        plt.ylim(scale_min, scale_max)
         plt.savefig(title + "result.png")
         plt.show()
 
@@ -126,13 +152,13 @@ def make_baseline(
             (0, 0),
             (eigen_vec[0, 0], eigen_vec[1, 0]),
             color="y",
-            label="contribution: " + str(contribution[0]),
+            label="PC1_contribution: " + str(round(contribution[0], 2)),
         )
         ax.axline(
             (0, 0),
             (eigen_vec[0, 1], eigen_vec[1, 1]),
             color="b",
-            label="contribution: " + str(contribution[1]),
+            label="PC2_contribution: " + str(round(contribution[1], 2)),
         )
         ax.set_xlabel("x1")
         ax.set_ylabel("x2")
@@ -165,9 +191,9 @@ def make_baseline(
         x3 = t * eigen_vec[0, 2]
         y3 = t * eigen_vec[1, 2]
         z3 = t * eigen_vec[2, 2]
-        ax.plot(x1, y1, z1, color="y", label="contribution: " + str(contribution[0]))
-        ax.plot(x2, y2, z2, color="b", label="contribution: " + str(contribution[1]))
-        ax.plot(x3, y3, z3, color="g", label="contribution: " + str(contribution[2]))
+        ax.plot(x1, y1, z1, color="y", label="PC1_contribution: " + str(round(contribution[0], 2)))
+        ax.plot(x2, y2, z2, color="b", label="PC2_contribution: " + str(round(contribution[1], 2)))
+        ax.plot(x3, y3, z3, color="g", label="PC3_contribution: " + str(round(contribution[2], 2)))
         ax.set_xlabel("x1")
         ax.set_ylabel("x2")
         ax.set_zlabel("x3")
