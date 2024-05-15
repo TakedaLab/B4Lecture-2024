@@ -191,9 +191,27 @@ def make_baseline(
         x3 = t * eigen_vec[0, 2]
         y3 = t * eigen_vec[1, 2]
         z3 = t * eigen_vec[2, 2]
-        ax.plot(x1, y1, z1, color="y", label="PC1_contribution: " + str(round(contribution[0], 2)))
-        ax.plot(x2, y2, z2, color="b", label="PC2_contribution: " + str(round(contribution[1], 2)))
-        ax.plot(x3, y3, z3, color="g", label="PC3_contribution: " + str(round(contribution[2], 2)))
+        ax.plot(
+            x1,
+            y1,
+            z1,
+            color="y",
+            label="PC1_contribution: " + str(round(contribution[0], 2)),
+        )
+        ax.plot(
+            x2,
+            y2,
+            z2,
+            color="b",
+            label="PC2_contribution: " + str(round(contribution[1], 2)),
+        )
+        ax.plot(
+            x3,
+            y3,
+            z3,
+            color="g",
+            label="PC3_contribution: " + str(round(contribution[2], 2)),
+        )
         ax.set_xlabel("x1")
         ax.set_ylabel("x2")
         ax.set_zlabel("x3")
