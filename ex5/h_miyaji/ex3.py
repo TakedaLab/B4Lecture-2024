@@ -69,11 +69,9 @@ def plot_scatter_diag(
         ax: グラフの描画領域を示すAxisオブジェクト.
     """
     # グラフの次元を取得
-    if isinstance(dataset[0], np.ndarray):
-        dim = len(dataset[0])
-    else:
-        dim = 1
-        dataset = np.vstack((dataset, np.zeros(len(dataset)))).T
+    dim = len(dataset[0])
+    if dim == 1:
+        dataset = np.hstack((dataset, np.zeros(len(dataset))[:, np.newaxis]))
 
     # グラフ描画の設定
     fig = plt.figure()

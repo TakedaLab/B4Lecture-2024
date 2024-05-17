@@ -29,12 +29,12 @@ def parse_args():
 
 # θ初期化する関数(-> means, cov_matrix, weights)が欲しいかも
 def initialize_gmm(
-    dataset: np.ndarray, cluster_num: int
+    dim: int, cluster_num: int
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Initialize the means, covariance matrix and weights.
 
     Args:
-        dataset (np.ndarray): csv data (n, dim).
+        dim (int): the dimension of csv data.
         cluster_num (int): number of clusters.
 
     Returns:
@@ -42,12 +42,6 @@ def initialize_gmm(
         cov_matrix (np.ndarray): covariance matrix for each cluster (k, dim, dim).
         weights (np.ndarray): weight of each Gaussian (k, ).
     """
-    # dimension of the data
-    if isinstance(dataset[0], np.ndarray):
-        dim = len(dataset[0])
-    else:
-        dim = 1
-
     means = np.random.randn(cluster_num, dim)  # (k, dim)
     cov_matrix = np.array([np.eye(dim) for k in range(cluster_num)])  # (k, dim, dim)
     weights = np.array([1 / cluster_num for k in range(cluster_num)])  # (k, )
@@ -135,11 +129,7 @@ def em_algo(
     """
     cluster_num = len(weights)  # number of Gaussian
     data_num = len(dataset)  # number of data (csv plot)
-    if isinstance(dataset[0], np.ndarray):
-        dim = len(dataset[0])  # dimension of the data
-    else:
-        dim = 1
-        dataset = dataset[:, np.newaxis]
+    dim = len(dataset[0])  # dimension of the data
 
     # E step : calculate burden ratio
     mix_gauss = calc_mix_gauss(dataset, means, cov_matrix, weights)
@@ -242,10 +232,49 @@ def plot_one_line(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
-    # plt.savefig("h_miyaji\\figs\\ll_1.png")
+    # plt.savefig("h_miyaji\\figs\\ll_1-1.png")
     plt.show()
 
     return None
+
+
+def plot_gmm(mix_gauss: np.ndarray, means: np.ndarray, x_value: np.ndarray, ax):
+    """Plot gmm on a scatter plot.
+
+    Args:
+        mix_gauss (np.ndarray): the data of GMM (n, )
+        means (np.ndarray): mean for each cluster (k, dim).
+        x_value (np.ndarray): the data of x1 (and x2) axis (plot_num, dim).
+        ax (Axis): Axis object of the scatter plot.
+
+    Returns:
+        ax: Axis object of the graph.
+    """
+    # dimension of the data
+    if isinstance(means[0], np.ndarray):
+        dim = len(means[0])
+    else:
+        dim = 1
+    colors = ("b", "g", "r")  # color of line (blue, green, red)
+
+    if dim == 1:  # x-y
+        print("-----------start plot 2D-------------")  # TODO: print
+        ax.plot(x_value, mix_gauss, label="GMM", color=colors[0])
+
+    elif dim == 2:  # x-y-z
+        print("-----------start plot 3D-------------")  # TODO: print
+        ax.plot(
+            x_value[:, 0],
+            x_value[:, 1],
+            mix_gauss,
+            label="GMM",
+            color=colors[0],
+        )
+
+    ax.legend()
+    # plt.savefig("h_miyaji\\figs\\result1-2.png")
+    plt.show()
+    return ax
 
 
 # ----以下ex4----
@@ -294,50 +323,6 @@ def calc_cov_matrix(dataset: np.ndarray, means: np.ndarray) -> np.ndarray:
     return cov_matrix
 
 
-def plot_bases(trans_matrix: np.ndarray, ax, cont: np.ndarray):
-    """Plot the bases on a scatter plot.
-
-    Args:
-        trans_matrix (np.ndarray): transformation matrix.
-        ax (Axis): Axis object of the scatter plot.
-        cont (np.ndarray): contribution rates.
-
-    Returns:
-        ax: Axis object of the graph.
-    """
-    dim = len(trans_matrix[0])  # dimension of the data after transformation
-    colors = ("b", "g", "r")  # color of line (blue, green, red)
-
-    if dim == 2:  # x-y
-        for i in range(dim):
-            eig_vec = trans_matrix[:, i]
-            cr = cont[i]  # contribution rate
-            ax.axline(
-                [0, 0], eig_vec, label=f"Contribution rate: {cr:3.3f}", color=colors[i]
-            )
-
-    elif dim == 3:  # x-y-z
-        for i in range(dim):
-            eig_vec = trans_matrix[:, i]
-            cr = cont[i]  # contribution rate
-
-            t = np.array([-2.5, 2.5])  # range of line
-            line_points = t[:, np.newaxis] * eig_vec
-
-            ax.plot(
-                line_points[:, 0],
-                line_points[:, 1],
-                line_points[:, 2],
-                label=f"Contribution rate: {cr:3.3f}",
-                color=colors[i],
-            )
-
-    ax.legend()
-    # plt.savefig("h_miyaji\\figs\\result2-1.png")
-    plt.show()
-    return ax
-
-
 def main():
     """Load csv file and a fitting of the data using the EM algorithm."""
     # get argument
@@ -354,14 +339,14 @@ def main():
         dim = len(data[0])
     else:
         dim = 1
+        data = data[:, np.newaxis]
 
     # plot csv data (2d or 3d)
     if dim <= 3:
         ax = ex3.plot_scatter_diag(data, title=filename[2:-4])
-        plt.show()
 
     # initialize gmm parameters
-    old_means, old_cov_matrix, old_weights = initialize_gmm(data, cluster_num)
+    old_means, old_cov_matrix, old_weights = initialize_gmm(dim, cluster_num)
 
     print("----------- old log likelihood -----------")
 
@@ -398,9 +383,24 @@ def main():
     new_weights = new_params[2]
     print(f"{new_ll=}\n{new_means=}\n{new_cov_matrix=}\n{new_weights=}")
     print(f"{ll_data=}\n{ll_data.shape=}")
-    print(f"{times=} : {np.abs(new_ll - old_ll)=}")
+    print(f"{times=} : {np.abs(new_ll - old_ll)=}")  # kokomade
 
+    # plot log-likelihood
     plot_one_line(ll_data, f"{filename[2:7]}, k={cluster_num}")
+
+    # plot GMM and means
+    mix_gauss = np.sum(
+        calc_mix_gauss(data, new_params[0], new_params[1], new_params[2]), axis=0
+    )
+
+    if dim == 1:
+        x_value = np.linspace(np.min(data), np.max(data), len(data))[:, np.newaxis]
+    elif dim == 2:
+        x1_value = np.linspace(np.min(data[:, 0]), np.max(data[:, 0]), len(data))
+        x2_value = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), len(data))
+        x_value = np.vstack((x1_value, x2_value)).T
+
+    # plot_gmm(mix_gauss, new_params[0], x_value, ax)
 
     # ----以下ex4----
 
