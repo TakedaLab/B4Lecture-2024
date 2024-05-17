@@ -19,6 +19,11 @@ def parse_args():
     # number of clusters for Gaussian distribution
     parser.add_argument("--cluster-num", type=int, default=1, help="number of clusters")
 
+    # convergence condition for EM algorithm
+    parser.add_argument(
+        "--error", type=float, default=0.001, help="convergence condition"
+    )
+
     return parser.parse_args()
 
 
@@ -47,49 +52,6 @@ def initialize_gmm(
     cov_matrix = np.array([np.eye(dim) for k in range(cluster_num)])  # (k, dim, dim)
     weights = np.array([1 / cluster_num for k in range(cluster_num)])  # (k, )
     return means, cov_matrix, weights
-
-
-# TODO:　一旦目をつぶる（後でやる）　分散共分散行列を計算するやつ　初期化を単位行列にするなら要らんかも
-def calc_cov_matrix(dataset: np.ndarray, means: np.ndarray) -> np.ndarray:
-    """Calculate covariance matrix.
-
-    Args:
-        dataset (np.ndarray): csv data.
-        means (np.ndarray): mean vector (dim(dataset),)
-
-    Returns:
-        np.ndarray: _description_
-    """
-    # dimension of the data
-    if isinstance(dataset[0], np.ndarray):
-        dim = len(dataset[0])
-    else:
-        dim = 1
-
-    num = len(dataset)  # number of the data
-
-    # calculate mean of x and x^2
-    mean = np.zeros(dataset.shape)
-    mean_xx = np.zeros(dataset.shape)
-    for i in range(dim):
-        mean[:, i] += sum(dataset[:, i]) / num
-        mean_xx[:, i] += sum(dataset[:, i] ** 2) / num
-
-    # standardization = sqrt(mean(x^2) - mean(x)^2)
-    sd = (mean_xx - (mean**2)) ** 0.5
-    sd_data = (dataset - mean) / sd
-
-    # calculate covariance matrix
-    cov_matrix = np.zeros((dim, dim))
-    var_matrix = np.zeros((dim, dim))
-
-    for i in range(dim):  # variance (σ^2)
-        var_matrix[i, i] = sum((dataset[:, i] - means[:, i]) ** 2)
-        for j in range(i + 1, dim):  # upper triangular matrix
-            cov_matrix[i, j] = sum((dataset[:, i] * dataset[:, j]))
-    # symmetric matrix
-    cov_matrix = (cov_matrix + cov_matrix.T + var_matrix) / num
-    return cov_matrix
 
 
 # 多変量ガウス関数を計算するやつ　入力するxは１個のデータ点とする -> float
@@ -235,7 +197,101 @@ def get_log_likelihood(
     return log_likelihood
 
 
+def plot_one_line(
+    dataset: np.ndarray,
+    title: str,
+    xlabel: str = "x1",
+    ylabel: str = "x2",
+    zlabel: str = "x3",
+) -> None:
+    """_summary_
+
+    Args:
+        dataset (np.ndarray): data of x, y (and z) (n, dim).
+        title (str): the graph title.
+        xlabel (str, optional): label name on x-axis. Defaults to "x1".
+        ylabel (str, optional): label name on y-axis. Defaults to "x2".
+        zlabel (str, optional): label name on z-axis. Defaults to "x3".
+
+    Returns:
+        None:
+    """
+    # dimension of the data
+    if isinstance(dataset[0], np.ndarray):
+        dim = len(dataset[0])
+    else:
+        dim = 1
+
+    fig = plt.figure()
+
+    x1 = dataset[:, 0]
+    x2 = dataset[:, 1]
+
+    if dim == 1 or dim == 2:  # x-y
+        for i in range(dim):
+            ax = fig.add_subplot(111)
+            ax.plot(x1, x2, color="b")
+
+    elif dim == 3:  # x-y-z
+        x3 = dataset[:, 2]
+        ax = fig.add_subplot(111, projection="3d")
+        ax.plot(x1, x2, x3, color="b")
+        ax.set_zlabel(zlabel)
+
+    ax.set_title(title)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.grid()
+    # plt.savefig("h_miyaji\\figs\\ll_1.png")
+    plt.show()
+
+    return None
+
+
 # ----以下ex4----
+
+
+# 一旦目をつぶる（後でやる）　分散共分散行列を計算するやつ　初期化を単位行列にするなら要らんかも
+def calc_cov_matrix(dataset: np.ndarray, means: np.ndarray) -> np.ndarray:
+    """Calculate covariance matrix.
+
+    Args:
+        dataset (np.ndarray): csv data.
+        means (np.ndarray): mean vector (dim(dataset),)
+
+    Returns:
+        np.ndarray: _description_
+    """
+    # dimension of the data
+    if isinstance(dataset[0], np.ndarray):
+        dim = len(dataset[0])
+    else:
+        dim = 1
+
+    num = len(dataset)  # number of the data
+
+    # calculate mean of x and x^2
+    mean = np.zeros(dataset.shape)
+    mean_xx = np.zeros(dataset.shape)
+    for i in range(dim):
+        mean[:, i] += sum(dataset[:, i]) / num
+        mean_xx[:, i] += sum(dataset[:, i] ** 2) / num
+
+    # standardization = sqrt(mean(x^2) - mean(x)^2)
+    sd = (mean_xx - (mean**2)) ** 0.5
+    sd_data = (dataset - mean) / sd
+
+    # calculate covariance matrix
+    cov_matrix = np.zeros((dim, dim))
+    var_matrix = np.zeros((dim, dim))
+
+    for i in range(dim):  # variance (σ^2)
+        var_matrix[i, i] = sum((dataset[:, i] - means[:, i]) ** 2)
+        for j in range(i + 1, dim):  # upper triangular matrix
+            cov_matrix[i, j] = sum((dataset[:, i] * dataset[:, j]))
+    # symmetric matrix
+    cov_matrix = (cov_matrix + cov_matrix.T + var_matrix) / num
+    return cov_matrix
 
 
 def plot_bases(trans_matrix: np.ndarray, ax, cont: np.ndarray):
@@ -288,6 +344,7 @@ def main():
     args = parse_args()
     filename = args.input_file  # csv file name
     cluster_num = args.cluster_num  # number of clusters for Gaussian distribution
+    error = args.error  # convergence condition for EM algorithm
 
     # load csv file
     data = ex3.load_data(filename)
@@ -304,21 +361,46 @@ def main():
         plt.show()
 
     # initialize gmm parameters
-    means, cov_matrix, weights = initialize_gmm(data, cluster_num)
+    old_means, old_cov_matrix, old_weights = initialize_gmm(data, cluster_num)
 
     print("----------- old log likelihood -----------")
 
     # calculate log-likelihood
-    ll_old = get_log_likelihood(data, means, cov_matrix, weights)
-    print(f"{ll_old=}\n{means=}\n{cov_matrix=}\n{weights=}")  # TODO: print
+    old_ll = get_log_likelihood(data, old_means, old_cov_matrix, old_weights)
+    print(f"{old_ll=}\n{old_means=}\n{old_cov_matrix=}\n{old_weights=}")  # TODO: print
 
     print("----------- em algo -----------")
-    # EM algorithm
-    new_means, new_cov_matrix, new_weights = em_algo(data, means, cov_matrix, weights)
 
-    print("----------- new log likelihood -----------")
-    ll_new = get_log_likelihood(data, new_means, new_cov_matrix, new_weights)
-    print(f"{ll_new=}\n{new_means=}\n{new_cov_matrix=}\n{new_weights=}")  # TODO: print
+    times = 0
+    ll_data = np.array([0, old_ll])
+
+    while True:
+        times += 1
+        new_params = em_algo(data, old_means, old_cov_matrix, old_weights)
+        new_ll = get_log_likelihood(data, new_params[0], new_params[1], new_params[2])
+
+        ll_data = np.vstack((ll_data, [times, new_ll]))
+
+        if new_ll - old_ll < 0:  # 単調増加確認
+            print(f"new_ll is smaller than old_ll\n{new_ll=}, {old_ll=}")
+
+        if np.abs(new_ll - old_ll) < error:  # 収束確認
+            break
+
+        old_ll = new_ll
+        old_means = new_params[0]
+        old_cov_matrix = new_params[1]
+        old_weights = new_params[2]
+
+    print("----------- end of while -----------")  # TODO: print
+    new_means = new_params[0]
+    new_cov_matrix = new_params[1]
+    new_weights = new_params[2]
+    print(f"{new_ll=}\n{new_means=}\n{new_cov_matrix=}\n{new_weights=}")
+    print(f"{ll_data=}\n{ll_data.shape=}")
+    print(f"{times=} : {np.abs(new_ll - old_ll)=}")
+
+    plot_one_line(ll_data, f"{filename[2:7]}, k={cluster_num}")
 
     # ----以下ex4----
 
