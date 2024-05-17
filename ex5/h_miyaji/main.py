@@ -232,7 +232,7 @@ def plot_one_line(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
-    # plt.savefig("h_miyaji\\figs\\ll_1-2.png")
+    plt.savefig("h_miyaji\\figs\\result_3-2.png")
     plt.show()
 
     return None
@@ -271,17 +271,23 @@ def plot_gmm(mix_gauss: np.ndarray, means: np.ndarray, x_value: np.ndarray, ax):
 
     elif dim == 2:  # x-y-z
         print("-----------start plot 3D-------------")  # TODO: print
-        ax.plot(
-            x_value[:, 0],
-            x_value[:, 1],
-            mix_gauss,
-            label="GMM",
-            color=colors[0],
+
+        contour = ax.contour(
+            x_value[0], x_value[1], mix_gauss, label="GMM", cmap="magma"
+        )
+        plt.colorbar(contour, ax=ax)
+
+        ax.scatter(
+            means[:, 0],
+            means[:, 1],
+            label="Centroids",
+            color=colors[1],
+            marker="x",
+            s=200,
         )
 
     ax.legend()
-    # plt.savefig("h_miyaji\\figs\\result1-1.png")
-    plt.show()
+    plt.savefig("h_miyaji\\figs\\result3-1.png")
     return ax
 
 
@@ -397,19 +403,25 @@ def main():
 
     # plot GMM and means
 
+    plot_num = len(data)
     if dim == 1:
         x_value = np.linspace(np.min(data), np.max(data), len(data))[:, np.newaxis]
         mix_gauss = np.sum(
             calc_mix_gauss(x_value, new_params[0], new_params[1], new_params[2]), axis=0
         )
     elif dim == 2:
-        x1_value = np.linspace(np.min(data[:, 0]), np.max(data[:, 0]), len(data))
-        x2_value = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), len(data))
-        x_value = np.vstack((x1_value, x2_value)).T
-        mix_gauss = np.sum(
-            calc_mix_gauss(x_value, new_params[0], new_params[1], new_params[2]), axis=0
-        )
-        print(f"{mix_gauss=}")
+        x1_value = np.linspace(np.min(data[:, 0]), np.max(data[:, 0]), plot_num)
+        x2_value = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), plot_num)
+        xx, yy = np.meshgrid(x1_value, x2_value)  # .shape = (plot_num, plot, num)
+        mix_gauss = np.zeros((plot_num, plot_num))
+
+        for n in range(plot_num):
+            tmp = np.vstack((xx[n], yy[n])).T  # .shape = (plot_num, dim)
+            mix_gauss[n, :] = np.sum(
+                calc_mix_gauss(tmp, new_params[0], new_params[1], new_params[2]),
+                axis=0,
+            )
+        x_value = (xx, yy)
 
     plot_gmm(mix_gauss, new_params[0], x_value, ax)
 
