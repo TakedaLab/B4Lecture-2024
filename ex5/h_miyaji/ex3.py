@@ -81,12 +81,12 @@ def plot_scatter_diag(
 
     if dim == 2 or dim == 1:  # x-yグラフ
         ax = fig.add_subplot(111)
-        ax.scatter(x1, x2, label=label, edgecolors="m", facecolor="None")
+        ax.scatter(x1, x2, label=label, edgecolors="c", facecolor="None")
 
     elif dim == 3:  # x-y-zグラフ
         x3 = dataset[:, 2]
         ax = fig.add_subplot(111, projection="3d")
-        ax.scatter(x1, x2, x3, label=label, color="m", marker=".")
+        ax.scatter(x1, x2, x3, label=label, color="c", marker=".")
 
         ax.set_zlabel(zlabel)
 

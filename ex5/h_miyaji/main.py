@@ -232,7 +232,7 @@ def plot_one_line(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
-    # plt.savefig("h_miyaji\\figs\\ll_1-1.png")
+    # plt.savefig("h_miyaji\\figs\\ll_1-2.png")
     plt.show()
 
     return None
@@ -255,11 +255,19 @@ def plot_gmm(mix_gauss: np.ndarray, means: np.ndarray, x_value: np.ndarray, ax):
         dim = len(means[0])
     else:
         dim = 1
-    colors = ("b", "g", "r")  # color of line (blue, green, red)
+    colors = ("b", "r", "g")  # color of line (blue, red, green)
 
     if dim == 1:  # x-y
         print("-----------start plot 2D-------------")  # TODO: print
         ax.plot(x_value, mix_gauss, label="GMM", color=colors[0])
+        ax.scatter(
+            means,
+            np.zeros((len(means))),
+            label="Centroids",
+            color=colors[1],
+            marker="x",
+            s=200,
+        )
 
     elif dim == 2:  # x-y-z
         print("-----------start plot 3D-------------")  # TODO: print
@@ -272,7 +280,7 @@ def plot_gmm(mix_gauss: np.ndarray, means: np.ndarray, x_value: np.ndarray, ax):
         )
 
     ax.legend()
-    # plt.savefig("h_miyaji\\figs\\result1-2.png")
+    # plt.savefig("h_miyaji\\figs\\result1-1.png")
     plt.show()
     return ax
 
@@ -343,7 +351,9 @@ def main():
 
     # plot csv data (2d or 3d)
     if dim <= 3:
-        ax = ex3.plot_scatter_diag(data, title=filename[2:-4])
+        ax = ex3.plot_scatter_diag(
+            data, title=f"GMM: {filename[2:-4]}, k={cluster_num}"
+        )
 
     # initialize gmm parameters
     old_means, old_cov_matrix, old_weights = initialize_gmm(dim, cluster_num)
@@ -385,22 +395,26 @@ def main():
     print(f"{ll_data=}\n{ll_data.shape=}")
     print(f"{times=} : {np.abs(new_ll - old_ll)=}")  # kokomade
 
-    # plot log-likelihood
-    plot_one_line(ll_data, f"{filename[2:7]}, k={cluster_num}")
-
     # plot GMM and means
-    mix_gauss = np.sum(
-        calc_mix_gauss(data, new_params[0], new_params[1], new_params[2]), axis=0
-    )
 
     if dim == 1:
         x_value = np.linspace(np.min(data), np.max(data), len(data))[:, np.newaxis]
+        mix_gauss = np.sum(
+            calc_mix_gauss(x_value, new_params[0], new_params[1], new_params[2]), axis=0
+        )
     elif dim == 2:
         x1_value = np.linspace(np.min(data[:, 0]), np.max(data[:, 0]), len(data))
         x2_value = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), len(data))
         x_value = np.vstack((x1_value, x2_value)).T
+        mix_gauss = np.sum(
+            calc_mix_gauss(x_value, new_params[0], new_params[1], new_params[2]), axis=0
+        )
+        print(f"{mix_gauss=}")
 
-    # plot_gmm(mix_gauss, new_params[0], x_value, ax)
+    plot_gmm(mix_gauss, new_params[0], x_value, ax)
+
+    # plot log-likelihood
+    plot_one_line(ll_data, f"Log likelihood: {filename[2:-4]}, k={cluster_num}")
 
     # ----以下ex4----
 
