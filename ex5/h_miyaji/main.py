@@ -232,19 +232,26 @@ def plot_one_line(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
-    plt.savefig("h_miyaji\\figs\\result1-2.png")
+    # plt.savefig("h_miyaji\\figs\\result1-2.png")
     plt.show()
 
     return None
 
 
-def plot_gmm(mix_gauss: np.ndarray, means: np.ndarray, x_value: np.ndarray, ax):
+def plot_gmm(
+    mix_gauss: np.ndarray,
+    means: np.ndarray,
+    x_value: np.ndarray,
+    axis_range: list,
+    ax,
+):
     """Plot gmm on a scatter plot.
 
     Args:
         mix_gauss (np.ndarray): the data of GMM (n, )
         means (np.ndarray): mean for each cluster (k, dim).
         x_value (np.ndarray): the data of x1 (and x2) axis (plot_num, dim).
+        axis_range (list): the range of graph axis ([xmin, xmax, ymin, ymax]).
         ax (Axes): Axes object of the scatter plot.
 
     Returns:
@@ -285,7 +292,8 @@ def plot_gmm(mix_gauss: np.ndarray, means: np.ndarray, x_value: np.ndarray, ax):
         )
 
     ax.legend()
-    plt.savefig("h_miyaji\\figs\\result1-1.png")
+    ax.axis(axis_range)
+    # plt.savefig("h_miyaji\\figs\\result1-1.png")
     return ax
 
 
@@ -357,16 +365,20 @@ def main():
     print(f"{times=} : {np.abs(new_ll - old_ll)=}")  # kokomade
 
     # plot GMM and means
-
     plot_num = len(data)
     if dim == 1:
         x_value = np.linspace(np.min(data), np.max(data), len(data))[:, np.newaxis]
         mix_gauss = np.sum(
             calc_mix_gauss(x_value, new_params[0], new_params[1], new_params[2]), axis=0
         )
+
     elif dim == 2:
-        x1_value = np.linspace(np.min(data[:, 0]), np.max(data[:, 0]), plot_num)
-        x2_value = np.linspace(np.min(data[:, 1]), np.max(data[:, 1]), plot_num)
+        xmin = np.min(data[:, 0])
+        xmax = np.max(data[:, 0])
+        ymin = np.min(data[:, 1])
+        ymax = np.max(data[:, 1])
+        x1_value = np.linspace(xmin, xmax, plot_num)
+        x2_value = np.linspace(ymin, ymax, plot_num)
         xx, yy = np.meshgrid(x1_value, x2_value)  # .shape = (plot_num, plot, num)
         mix_gauss = np.zeros((plot_num, plot_num))
 
@@ -377,8 +389,9 @@ def main():
                 axis=0,
             )
         x_value = (xx, yy)
+        axis_range = [int(xmin - 1), int(xmax + 1), int(ymin - 1), int(ymax + 1)]
 
-    plot_gmm(mix_gauss, new_params[0], x_value, ax)
+    plot_gmm(mix_gauss, new_params[0], x_value, axis_range, ax)
 
     # plot log-likelihood
     plot_one_line(
