@@ -66,7 +66,7 @@ def plot_scatter_diag(
         zlabel (str, optional): Z軸のラベル名. Defaults to "x3".
 
     Returns:
-        ax: グラフの描画領域を示すAxisオブジェクト.
+        ax: グラフの描画領域を示すAxesオブジェクト.
     """
     # グラフの次元を取得
     dim = len(dataset[0])
@@ -110,12 +110,12 @@ def plot_reg_model(
 
     Args:
         dataset (np.ndarray): 回帰モデルのデータ
-        ax (Axis): プロットを追加したい場所を示すAxisオブジェクト.
+        ax (Axes): プロットを追加したい場所を示すAxesオブジェクト.
         label (str): 凡例.
         dim (int, optional): 2Dグラフ or 3Dグラフ. Defaults to 2.
 
     Returns:
-        ax: Axisオブジェクト
+        ax: Axesオブジェクト
     """
     if dim == 2:  # x-yグラフ
         ax.scatter(

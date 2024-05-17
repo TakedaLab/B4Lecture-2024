@@ -232,7 +232,7 @@ def plot_one_line(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
-    plt.savefig("h_miyaji\\figs\\result_3-2.png")
+    plt.savefig("h_miyaji\\figs\\result1-2.png")
     plt.show()
 
     return None
@@ -245,10 +245,10 @@ def plot_gmm(mix_gauss: np.ndarray, means: np.ndarray, x_value: np.ndarray, ax):
         mix_gauss (np.ndarray): the data of GMM (n, )
         means (np.ndarray): mean for each cluster (k, dim).
         x_value (np.ndarray): the data of x1 (and x2) axis (plot_num, dim).
-        ax (Axis): Axis object of the scatter plot.
+        ax (Axes): Axes object of the scatter plot.
 
     Returns:
-        ax: Axis object of the graph.
+        ax: Axes object of the graph.
     """
     # dimension of the data
     if isinstance(means[0], np.ndarray):
@@ -257,7 +257,7 @@ def plot_gmm(mix_gauss: np.ndarray, means: np.ndarray, x_value: np.ndarray, ax):
         dim = 1
     colors = ("b", "r", "g")  # color of line (blue, red, green)
 
-    if dim == 1:  # x-y
+    if dim == 1:  # x
         print("-----------start plot 2D-------------")  # TODO: print
         ax.plot(x_value, mix_gauss, label="GMM", color=colors[0])
         ax.scatter(
@@ -269,12 +269,10 @@ def plot_gmm(mix_gauss: np.ndarray, means: np.ndarray, x_value: np.ndarray, ax):
             s=200,
         )
 
-    elif dim == 2:  # x-y-z
+    elif dim == 2:  # x-y
         print("-----------start plot 3D-------------")  # TODO: print
 
-        contour = ax.contour(
-            x_value[0], x_value[1], mix_gauss, label="GMM", cmap="magma"
-        )
+        contour = ax.contour(x_value[0], x_value[1], mix_gauss, cmap="magma")
         plt.colorbar(contour, ax=ax)
 
         ax.scatter(
@@ -287,54 +285,8 @@ def plot_gmm(mix_gauss: np.ndarray, means: np.ndarray, x_value: np.ndarray, ax):
         )
 
     ax.legend()
-    plt.savefig("h_miyaji\\figs\\result3-1.png")
+    plt.savefig("h_miyaji\\figs\\result1-1.png")
     return ax
-
-
-# ----以下ex4----
-
-
-# 一旦目をつぶる（後でやる）　分散共分散行列を計算するやつ　初期化を単位行列にするなら要らんかも
-def calc_cov_matrix(dataset: np.ndarray, means: np.ndarray) -> np.ndarray:
-    """Calculate covariance matrix.
-
-    Args:
-        dataset (np.ndarray): csv data.
-        means (np.ndarray): mean vector (dim(dataset),)
-
-    Returns:
-        np.ndarray: _description_
-    """
-    # dimension of the data
-    if isinstance(dataset[0], np.ndarray):
-        dim = len(dataset[0])
-    else:
-        dim = 1
-
-    num = len(dataset)  # number of the data
-
-    # calculate mean of x and x^2
-    mean = np.zeros(dataset.shape)
-    mean_xx = np.zeros(dataset.shape)
-    for i in range(dim):
-        mean[:, i] += sum(dataset[:, i]) / num
-        mean_xx[:, i] += sum(dataset[:, i] ** 2) / num
-
-    # standardization = sqrt(mean(x^2) - mean(x)^2)
-    sd = (mean_xx - (mean**2)) ** 0.5
-    sd_data = (dataset - mean) / sd
-
-    # calculate covariance matrix
-    cov_matrix = np.zeros((dim, dim))
-    var_matrix = np.zeros((dim, dim))
-
-    for i in range(dim):  # variance (σ^2)
-        var_matrix[i, i] = sum((dataset[:, i] - means[:, i]) ** 2)
-        for j in range(i + 1, dim):  # upper triangular matrix
-            cov_matrix[i, j] = sum((dataset[:, i] * dataset[:, j]))
-    # symmetric matrix
-    cov_matrix = (cov_matrix + cov_matrix.T + var_matrix) / num
-    return cov_matrix
 
 
 def main():
@@ -358,7 +310,10 @@ def main():
     # plot csv data (2d or 3d)
     if dim <= 3:
         ax = ex3.plot_scatter_diag(
-            data, title=f"GMM: {filename[2:-4]}, k={cluster_num}"
+            data,
+            title=f"GMM: {filename[2:-4]}, k={cluster_num}",
+            xlabel="$x$",
+            ylabel="Probability density",
         )
 
     # initialize gmm parameters
@@ -426,7 +381,12 @@ def main():
     plot_gmm(mix_gauss, new_params[0], x_value, ax)
 
     # plot log-likelihood
-    plot_one_line(ll_data, f"Log likelihood: {filename[2:-4]}, k={cluster_num}")
+    plot_one_line(
+        ll_data,
+        title=f"Log likelihood: {filename[2:-4]}, k={cluster_num}",
+        xlabel="Iteration",
+        ylabel="Log likelihood",
+    )
 
     # ----以下ex4----
 
