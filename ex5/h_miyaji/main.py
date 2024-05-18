@@ -8,7 +8,6 @@ import numpy as np
 import ex3
 
 
-# TODO:　後で変える
 def parse_args():
     """Retrieve variables from the command prompt."""
     parser = argparse.ArgumentParser(description="performs a fitting of tha data.")
@@ -27,7 +26,6 @@ def parse_args():
     return parser.parse_args()
 
 
-# θ初期化する関数(-> means, cov_matrix, weights)が欲しいかも
 def initialize_gmm(
     dim: int, cluster_num: int
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -48,7 +46,6 @@ def initialize_gmm(
     return means, cov_matrix, weights
 
 
-# 多変量ガウス関数を計算するやつ　入力するxは１個のデータ点とする -> float
 def get_gauss(data: np.ndarray, mean: np.ndarray, cov_matrix: np.ndarray) -> float:
     """Get the value of the Gaussian distribution.
 
@@ -61,22 +58,20 @@ def get_gauss(data: np.ndarray, mean: np.ndarray, cov_matrix: np.ndarray) -> flo
         gauss (float): the value of the Gaussian distribution.
     """
     # dimension of the data
-    if type(data) is np.ndarray:
+    if isinstance(data, np.ndarray):
         dim = len(data)
     else:
         dim = 1
 
     gauss_denominator = (np.sqrt(2 * np.pi) ** dim) * np.sqrt(np.linalg.det(cov_matrix))
-
-    # TODO: dataとmeanを縦ベクトルにしないといけない可能性がある　実行してみて次元エラーが出たら.Tの位置を逆にしてみる
     gauss_numerator = np.exp(
         ((data - mean) @ np.linalg.inv(cov_matrix) @ (data - mean)[:, np.newaxis]) / -2
     )
+
     gauss = gauss_numerator / gauss_denominator
     return gauss
 
 
-# 混合ガウス分布の値を計算する　Xはcsvデータ全体、返す値も全体にする（各ガウス分布の値を残しておく） ->(k, n)
 def calc_mix_gauss(
     dataset: np.ndarray,
     means: np.ndarray,
@@ -95,19 +90,19 @@ def calc_mix_gauss(
         mix_gauss (np.ndarray): values of mix Gaussian distribution (k, n).
     """
     cluster_num = len(weights)  # number of Gaussian
-    data_num = len(dataset)  # number of data (csv plot)
+    data_num = len(dataset)  # number of csv data
 
-    mix_gauss = np.zeros((cluster_num, data_num))
-    # TODO: お前を消す方法
+    mix_gauss = np.zeros((cluster_num, data_num))  # (k, n)
+
     for k in range(cluster_num):
         for n in range(data_num):
             mix_gauss[k, n] = weights[k] * get_gauss(
                 dataset[n], means[k], cov_matrix[k]
             )
+
     return mix_gauss
 
 
-# EMアルゴリズムで新しいθ = {μ, Σ, π}を求める
 def em_algo(
     dataset: np.ndarray,
     means: np.ndarray,
@@ -124,36 +119,34 @@ def em_algo(
 
     Returns:
         new_means (np.ndarray): updated means (k, dim).
-        new_cov_matrix(np.ndarray): updated cov_matrix (k, dim, dim).
+        new_cov_matrix (np.ndarray): updated cov_matrix (k, dim, dim).
         new_weights (np.ndarray): updated weights (k, ).
     """
     cluster_num = len(weights)  # number of Gaussian
-    data_num = len(dataset)  # number of data (csv plot)
+    data_num = len(dataset)  # number of csv data
     dim = len(dataset[0])  # dimension of the data
 
-    # E step : calculate burden ratio
+    # E step : calculate burden ratio (gamma)
     mix_gauss = calc_mix_gauss(dataset, means, cov_matrix, weights)
-    burden_ratio = (
-        mix_gauss.T / np.sum(mix_gauss, axis=0)[:, np.newaxis]
-    )  # gamma (n, k)
+    burden_ratio = mix_gauss.T / np.sum(mix_gauss, axis=0)[:, np.newaxis]  # (n, k)
 
-    # M step : update θ = {π, μ, Σ}
+    # M step : update θ = {μ, Σ, π}
     N_k = np.sum(burden_ratio, axis=0)  # (k, )
     N = np.sum(N_k)  # N = data_num (float)
     new_weights = N_k / N
 
     new_means = np.zeros((cluster_num, dim))
     for k in range(cluster_num):
-        # sum( (1, dim)*(n, dim), axis=0 ) = sum( (n, dim), axis=0 ) = (dim, )
+        # (dim, ) = np.sum( (1, dim)*(n, dim), axis=0 ) = np.sum( (n, dim), axis=0 )
         new_means[k, :] = (
             np.sum(burden_ratio[:, k][:, np.newaxis] * dataset, axis=0) / N_k[k]
         )
 
     new_cov_matrix = np.zeros((cluster_num, dim, dim))
-    deviation = (
-        dataset[np.newaxis, :, :] - new_means[:, np.newaxis, :]
-    )  # x(1, n, dim) - μ(k, 1, dim) = (k, n, dim)
-    # TODO: 二重forに敗北した
+
+    # (k, n, dim) = x(1, n, dim) - μ(k, 1, dim)
+    deviation = dataset[np.newaxis, :, :] - new_means[:, np.newaxis, :]
+
     for k in range(cluster_num):
         for n in range(data_num):
             tmp = deviation[k, n, :][:, np.newaxis] @ deviation[k, n, :][np.newaxis, :]
@@ -163,14 +156,13 @@ def em_algo(
     return new_means, new_cov_matrix, new_weights
 
 
-# 対数尤度関数の値(float)を返す
 def get_log_likelihood(
     dataset: np.ndarray,
     means: np.ndarray,
     cov_matrix: np.ndarray,
     weights: np.ndarray,
 ) -> float:
-    """get the value of log-likelihood.
+    """Get the value of log-likelihood.
 
     Args:
         dataset (np.ndarray): csv data (n, dim).
@@ -194,7 +186,7 @@ def plot_one_line(
     ylabel: str = "x2",
     zlabel: str = "x3",
 ) -> None:
-    """_summary_
+    """Plot only one graph.
 
     Args:
         dataset (np.ndarray): data of x, y (and z) (n, dim).
@@ -206,11 +198,7 @@ def plot_one_line(
     Returns:
         None:
     """
-    # dimension of the data
-    if isinstance(dataset[0], np.ndarray):
-        dim = len(dataset[0])
-    else:
-        dim = 1
+    dim = len(dataset[0])  # dimension of the data
 
     fig = plt.figure()
 
@@ -218,9 +206,8 @@ def plot_one_line(
     x2 = dataset[:, 1]
 
     if dim == 1 or dim == 2:  # x-y
-        for i in range(dim):
-            ax = fig.add_subplot(111)
-            ax.plot(x1, x2, color="b")
+        ax = fig.add_subplot(111)
+        ax.plot(x1, x2, color="b")
 
     elif dim == 3:  # x-y-z
         x3 = dataset[:, 2]
@@ -232,7 +219,7 @@ def plot_one_line(
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.grid()
-    # plt.savefig("h_miyaji\\figs\\result1-2.png")
+    # plt.savefig("h_miyaji\\figs\\result3-2.png")
     plt.show()
 
     return None
@@ -245,7 +232,7 @@ def plot_gmm(
     axis_range: list,
     ax,
 ):
-    """Plot gmm on a scatter plot.
+    """Plot GMM on a scatter plot.
 
     Args:
         mix_gauss (np.ndarray): the data of GMM (n, )
@@ -262,10 +249,9 @@ def plot_gmm(
         dim = len(means[0])
     else:
         dim = 1
-    colors = ("b", "r", "g")  # color of line (blue, red, green)
+    colors = ("b", "r")  # color of plot (blue, red)
 
     if dim == 1:  # x
-        print("-----------start plot 2D-------------")  # TODO: print
         ax.plot(x_value, mix_gauss, label="GMM", color=colors[0])
         ax.scatter(
             means,
@@ -277,11 +263,8 @@ def plot_gmm(
         )
 
     elif dim == 2:  # x-y
-        print("-----------start plot 3D-------------")  # TODO: print
-
         contour = ax.contour(x_value[0], x_value[1], mix_gauss, cmap="magma")
-        plt.colorbar(contour, ax=ax)
-
+        plt.colorbar(contour, ax=ax, label="Probability density")
         ax.scatter(
             means[:, 0],
             means[:, 1],
@@ -293,12 +276,12 @@ def plot_gmm(
 
     ax.legend()
     ax.axis(axis_range)
-    # plt.savefig("h_miyaji\\figs\\result1-1.png")
+    # plt.savefig("h_miyaji\\figs\\result3-1.png")
     return ax
 
 
 def main():
-    """Load csv file and a fitting of the data using the EM algorithm."""
+    """Load csv file and perform a fitting of the data using the EM algorithm."""
     # get argument
     args = parse_args()
     filename = args.input_file  # csv file name
@@ -313,77 +296,82 @@ def main():
         dim = len(data[0])
     else:
         dim = 1
-        data = data[:, np.newaxis]
+        data = data[:, np.newaxis]  # (n, ) -> (n, 1)
 
-    # plot csv data (2d or 3d)
-    if dim <= 3:
+    # plot csv data
+    if dim == 1:
         ax = ex3.plot_scatter_diag(
             data,
             title=f"GMM: {filename[2:-4]}, k={cluster_num}",
             xlabel="$x$",
             ylabel="Probability density",
         )
+    elif dim <= 3:
+        ax = ex3.plot_scatter_diag(
+            data,
+            title=f"GMM: {filename[2:-4]}, k={cluster_num}",
+            xlabel="$x1$",
+            ylabel="$x2$",
+        )
 
     # initialize gmm parameters
     old_means, old_cov_matrix, old_weights = initialize_gmm(dim, cluster_num)
 
-    print("----------- old log likelihood -----------")
-
     # calculate log-likelihood
     old_ll = get_log_likelihood(data, old_means, old_cov_matrix, old_weights)
-    print(f"{old_ll=}\n{old_means=}\n{old_cov_matrix=}\n{old_weights=}")  # TODO: print
+    # print(f"{old_ll=}\n{old_means=}\n{old_cov_matrix=}\n{old_weights=}")  # value check
 
-    print("----------- em algo -----------")
+    times = 0  # iteration
+    ll_data = np.array([0, old_ll])  # transition data of log likelihood
 
-    times = 0
-    ll_data = np.array([0, old_ll])
-
-    while True:
+    while True:  # EM algorithm
         times += 1
         new_params = em_algo(data, old_means, old_cov_matrix, old_weights)
         new_ll = get_log_likelihood(data, new_params[0], new_params[1], new_params[2])
 
         ll_data = np.vstack((ll_data, [times, new_ll]))
 
-        if new_ll - old_ll < 0:  # 単調増加確認
-            print(f"new_ll is smaller than old_ll\n{new_ll=}, {old_ll=}")
+        if new_ll - old_ll < 0:  # check for monotonically increase
+            print(f"ERROR: new_ll is smaller than old_ll\n{new_ll=}, {old_ll=}")
 
-        if np.abs(new_ll - old_ll) < error:  # 収束確認
+        if np.abs(new_ll - old_ll) < error:  # convergence check
             break
 
+        # update parameters
         old_ll = new_ll
         old_means = new_params[0]
         old_cov_matrix = new_params[1]
         old_weights = new_params[2]
 
-    print("----------- end of while -----------")  # TODO: print
-    new_means = new_params[0]
-    new_cov_matrix = new_params[1]
-    new_weights = new_params[2]
-    print(f"{new_ll=}\n{new_means=}\n{new_cov_matrix=}\n{new_weights=}")
-    print(f"{ll_data=}\n{ll_data.shape=}")
-    print(f"{times=} : {np.abs(new_ll - old_ll)=}")  # kokomade
+    # # value check
+    # print(
+    #     f"{new_ll=}\nnew_means={new_params[0]}\nnew_cov_matrix={new_params[1]}\nnew_weights={new_params[2]}"
+    # )
+    # print(f"{times=} : {np.abs(new_ll - old_ll)=}")
 
-    # plot GMM and means
+    # prepare plot data
     plot_num = len(data)
-    if dim == 1:
+    if dim == 1:  # x
         x_value = np.linspace(np.min(data), np.max(data), len(data))[:, np.newaxis]
         mix_gauss = np.sum(
             calc_mix_gauss(x_value, new_params[0], new_params[1], new_params[2]), axis=0
         )
+        axis_range = None
 
-    elif dim == 2:
+    elif dim == 2:  # x-y
         xmin = np.min(data[:, 0])
         xmax = np.max(data[:, 0])
         ymin = np.min(data[:, 1])
         ymax = np.max(data[:, 1])
+
         x1_value = np.linspace(xmin, xmax, plot_num)
         x2_value = np.linspace(ymin, ymax, plot_num)
-        xx, yy = np.meshgrid(x1_value, x2_value)  # .shape = (plot_num, plot, num)
+        xx, yy = np.meshgrid(x1_value, x2_value)  # (plot_num, plot_num)
+
         mix_gauss = np.zeros((plot_num, plot_num))
 
         for n in range(plot_num):
-            tmp = np.vstack((xx[n], yy[n])).T  # .shape = (plot_num, dim)
+            tmp = np.vstack((xx[n], yy[n])).T  # (plot_num, dim)
             mix_gauss[n, :] = np.sum(
                 calc_mix_gauss(tmp, new_params[0], new_params[1], new_params[2]),
                 axis=0,
@@ -391,6 +379,7 @@ def main():
         x_value = (xx, yy)
         axis_range = [int(xmin - 1), int(xmax + 1), int(ymin - 1), int(ymax + 1)]
 
+    # plot GMM and means
     plot_gmm(mix_gauss, new_params[0], x_value, axis_range, ax)
 
     # plot log-likelihood
@@ -400,22 +389,6 @@ def main():
         xlabel="Iteration",
         ylabel="Log likelihood",
     )
-
-    # ----以下ex4----
-
-    # # plot base lines (2d or 3d)
-    # if dim <= 3:
-    #     plot_bases(trans_matrix, ax, cont)
-
-    # # dimensionality reduction (3d -> 2d)
-    # if dim == 3:
-    #     trans_data = (trans_matrix.T @ data.T).T  # y_i = A.T @ x_i
-    #     data_2d = trans_data[:, :-1]  # 3d -> 2d
-    #     ex3.plot_scatter_diag(
-    #         data_2d, "After Dimensionality Reduction", xlabel="PC1", ylabel="PC2"
-    #     )
-    #     # plt.savefig("h_miyaji\\figs\\result2-2.png")
-    #     plt.show()
 
 
 if __name__ == "__main__":
