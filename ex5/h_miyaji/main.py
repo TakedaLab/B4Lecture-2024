@@ -6,6 +6,7 @@ import matplotlib.colors
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import multivariate_normal
+from sklearn.cluster import KMeans
 
 import ex3
 
@@ -29,11 +30,12 @@ def parse_args():
 
 
 def initialize_gmm(
-    dim: int, cluster_num: int
+    dataset: np.ndarray, dim: int, cluster_num: int
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Initialize the means, covariance matrix and weights.
 
     Args:
+        dataset (np.ndarray): csv data (n, dim).
         dim (int): the dimension of csv data.
         cluster_num (int): number of clusters.
 
@@ -42,7 +44,13 @@ def initialize_gmm(
         cov_matrix (np.ndarray): covariance matrix for each cluster (k, dim, dim).
         weights (np.ndarray): weight of each Gaussian (k, ).
     """
-    means = np.random.randn(cluster_num, dim)  # (k, dim)
+    # means = np.random.randn(cluster_num, dim)  # (k, dim)
+
+    # initialize by kmeans
+    kmeans = KMeans(n_clusters=cluster_num)
+    kmeans.fit(dataset)
+    means = kmeans.cluster_centers_
+
     cov_matrix = np.array([np.eye(dim) for k in range(cluster_num)])  # (k, dim, dim)
     weights = np.array([1 / cluster_num for k in range(cluster_num)])  # (k, )
     return means, cov_matrix, weights
@@ -330,7 +338,7 @@ def main():
         )
 
     # initialize gmm parameters
-    old_means, old_cov_matrix, old_weights = initialize_gmm(dim, cluster_num)
+    old_means, old_cov_matrix, old_weights = initialize_gmm(data, dim, cluster_num)
 
     # calculate log-likelihood
     old_ll = get_log_likelihood(data, old_means, old_cov_matrix, old_weights)
