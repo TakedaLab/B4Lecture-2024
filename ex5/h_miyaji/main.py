@@ -2,6 +2,7 @@
 
 import argparse
 
+import matplotlib.colors
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -264,7 +265,6 @@ def plot_gmm(
 
     elif dim == 2:  # x-y
         contour = ax.contour(x_value[0], x_value[1], mix_gauss, cmap="magma")
-        plt.colorbar(contour, ax=ax, label="Probability density")
         ax.scatter(
             means[:, 0],
             means[:, 1],
@@ -273,6 +273,12 @@ def plot_gmm(
             marker="x",
             s=200,
         )
+
+        # create continuous colorbar
+        norm = matplotlib.colors.Normalize(contour.cvalues.min(), contour.cvalues.max())
+        sm = plt.cm.ScalarMappable(norm=norm, cmap=contour.cmap)
+        sm.set_array([])
+        plt.colorbar(sm, ticks=contour.levels, ax=ax, label="Probability density")
 
     ax.legend()
     ax.axis(axis_range)
