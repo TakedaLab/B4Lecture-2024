@@ -68,7 +68,7 @@ def get_gauss(data: np.ndarray, mean: np.ndarray, cov_matrix: np.ndarray) -> flo
         ((data - mean) @ np.linalg.inv(cov_matrix) @ (data - mean)[:, np.newaxis]) / -2
     )
 
-    gauss = gauss_numerator / gauss_denominator
+    gauss = gauss_numerator.item() / gauss_denominator.item()
     return gauss
 
 
@@ -96,7 +96,7 @@ def calc_mix_gauss(
 
     for k in range(cluster_num):
         for n in range(data_num):
-            mix_gauss[k, n] = weights[k] * get_gauss(
+            mix_gauss[k, n] = weights.item(k) * get_gauss(
                 dataset[n], means[k], cov_matrix[k]
             )
 
