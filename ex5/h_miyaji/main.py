@@ -5,6 +5,7 @@ import argparse
 import matplotlib.colors
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import multivariate_normal
 
 import ex3
 
@@ -95,11 +96,19 @@ def calc_mix_gauss(
 
     mix_gauss = np.zeros((cluster_num, data_num))  # (k, n)
 
-    for k in range(cluster_num):
-        for n in range(data_num):
-            mix_gauss[k, n] = weights.item(k) * get_gauss(
-                dataset[n], means[k], cov_matrix[k]
-            )
+    # for k in range(cluster_num):
+    #     for n in range(data_num):
+    #         mix_gauss[k, n] = weights.item(k) * get_gauss(
+    #             dataset[n], means[k], cov_matrix[k]
+    #         )
+
+    # remove double for loop
+    gaussian_pdfs = list(
+        map(lambda mean, cov: multivariate_normal(mean, cov), means, cov_matrix)
+    )
+    mix_gauss = np.array(
+        list(map(lambda pdf, weight: pdf.pdf(dataset) * weight, gaussian_pdfs, weights))
+    )
 
     return mix_gauss
 
