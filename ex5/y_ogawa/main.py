@@ -55,9 +55,9 @@ def random_initialize_para(data: np.ndarray, n_components: int) -> np.ndarray:
 
 
 def estep(
-        data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray
+    data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray
 ) -> np.ndarray:
-    """Eステップの実行
+    """Eステップの実行.
 
     Args:
         data (np.ndarray): データ
@@ -85,7 +85,7 @@ def estep(
 
 
 def mstep(data: np.ndarray, responsibilities: np.ndarray) -> np.ndarray:
-    """Mステップの実行
+    """Mステップの実行.
 
     Args:
         data (np.ndarray): データ
@@ -127,9 +127,9 @@ def mstep(data: np.ndarray, responsibilities: np.ndarray) -> np.ndarray:
 
 
 def EMstep(
-        data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray
+    data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray
 ):
-    """EMアルゴリズムの実行
+    """EMアルゴリズムの実行.
 
     Args:
         data (np.ndarray): データ
@@ -192,7 +192,7 @@ def make_likelihoodgraph(log_likelihood_list: list):
 
 
 def plot_gmm(
-        data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray
+    data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray
 ):
     """混合ガウス分布をプロットする.
 
