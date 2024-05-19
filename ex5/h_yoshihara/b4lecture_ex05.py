@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """GMMを用いてデータのフィッティングを行う."""
 
-import math
-
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.linalg as LA
@@ -58,7 +56,7 @@ def log_likelihood(data_array, mu, sigma, pi):
         pi : 各ガウス分布の重み
     """
     likelihood = np.sum(mix_gaussian(data_array, mu, sigma, pi), axis=0)
-    loglikelihood= np.sum(np.log(likelihood))
+    loglikelihood = np.sum(np.log(likelihood))
     return loglikelihood
 
 
@@ -125,11 +123,7 @@ if __name__ == "__main__":
     # 対数尤度関数の推移を描写
     fig1 = plt.figure()
     ax1 = fig1.add_subplot(111)
-    ax1.plot(
-        np.arange(0, len(loglikelihood), 1),
-        loglikelihood,
-        label="log_likelihood"
-    )
+    ax1.plot(np.arange(0, len(loglikelihood), 1), loglikelihood, label="log_likelihood")
     plt.legend(loc="upper left", fontsize=9)
     ax1.set_xlabel("repetition")
     ax1.set_ylabel("log-likelihood")
@@ -139,12 +133,8 @@ if __name__ == "__main__":
     if dimension == 1:
         fig2 = plt.figure()
         ax2 = fig2.add_subplot(111)
-        ax2.scatter(
-            data_array, np.zeros(data_size), color='blue', label="data"
-        )
-        ax2.scatter(
-            mu, np.zeros(mu.shape[0]), color='red', label="centroid"
-        )
+        ax2.scatter(data_array, np.zeros(data_size), color='blue', label="data")
+        ax2.scatter(mu, np.zeros(mu.shape[0]), color='red', label="centroid")
         x_min = np.min(data_array[:, 0] - 0.5)
         x_max = np.max(data_array[:, 0] + 0.5)
         p = np.linspace(x_min, x_max, N)[:, np.newaxis]
@@ -153,7 +143,9 @@ if __name__ == "__main__":
         plt.legend(loc="upper left", fontsize=9)
         ax2.set_xlabel("x")
         ax2.set_ylabel("probability density")
-        ax2.set_ylim(0,)
+        ax2.set_ylim(
+            0,
+        )
         fig2.savefig("data1_gaussian.png")
 
     # 3D描写
@@ -173,14 +165,20 @@ if __name__ == "__main__":
         ax2 = Axes3D(fig2)
         fig2.add_axes(ax2)
         ax2.scatter(
-            data_array[:, 0], data_array[:, 1], np.zeros(data_size), color=colorlist, label="data"
+            data_array[:, 0],
+            data_array[:, 1],
+            np.zeros(data_size),
+            color=colorlist,
+            label="data"
         )
-        ax2.plot_surface(X, Y, pdf, rstride=1, cstride=1, cmap='viridis')
+        ax2.plot_surface(X, Y, pdf, rstride=1, cstride=1, cmap="viridis")
         plt.legend(loc="upper left", fontsize=9)
         ax2.set_xlabel("x")
         ax2.set_ylabel("y")
         ax2.set_zlabel("probability density")
-        ax2.set_zlim(0,)
+        ax2.set_zlim(
+            0,
+        )
         fig2.savefig("data3_gaussian.png")
         ax2.view_init(azim=0, elev=0)
         fig2.savefig("data3_gaussian_0_0.png")
@@ -191,12 +189,8 @@ if __name__ == "__main__":
 
         fig3 = plt.figure()
         ax3 = fig3.add_subplot(111)
-        ax3.scatter(
-            data_array[:, 0], data_array[:, 1], label="data", color='blue'
-        )
-        ax3.scatter(
-            mu[:, 0], mu[:, 1], label="Centroid", color="red"
-        )
+        ax3.scatter(data_array[:, 0], data_array[:, 1], label="data", color="blue")
+        ax3.scatter(mu[:, 0], mu[:, 1], label="Centroid", color="red")
         cset = ax3.contour(X, Y, pdf, cmap=cm.jet)
         plt.legend(loc="upper left", fontsize=9)
         fig3.savefig("data3_contour.png")
