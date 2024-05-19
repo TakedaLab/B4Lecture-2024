@@ -1,6 +1,10 @@
 """GMMを用いたデータのフィッティングを行う.
 
-
+argparse   : コマンドライン引数
+matplotlib : グラフのプロット
+numpy      : 行列計算
+pandas     : csvファイルの読み込み
+scipy      : ガウス分布の計算
 """
 
 import argparse
@@ -46,6 +50,7 @@ def plot_log_likelihood(filename: str, log_likelihood_list: list):
 
 
 class GMM:
+    """混合ガウスモデルによるデータのフィッティングを行う."""
     def __init__(self, filename: str, n_class: int):
         """コンストラクタ.
 
@@ -138,7 +143,7 @@ class GMM:
                             temp,
                             mean=self.param[0][i],
                             cov=self.param[1][i],
-                            allow_singular=True
+                            allow_singular=True,
                         )
                         * self.param[2][i]
                     )
@@ -153,7 +158,7 @@ class GMM:
                     self.param[0][:, 1],
                     label="Centroid",
                     color="red",
-                    marker="x"
+                    marker="x",
                 )
 
                 # 混合分布を計算
@@ -178,7 +183,7 @@ class GMM:
                             temp,
                             mean=self.param[0][i],
                             cov=self.param[1][i],
-                            allow_singular=True
+                            allow_singular=True,
                         )
                         * self.param[2][i]
                     )
@@ -262,16 +267,17 @@ class GMM:
                     mean=self.param[0][i],
                     cov=self.param[1][i],
                     allow_singular=True,
-                    )
-                    * self.param[2][i]
                 )
+                * self.param[2][i]
+            )
 
         return
 
     def calc_log_likelihood(self):
         """対数尤度の計算.
 
-        -> 対数尤度: float"""
+        -> 対数尤度: float
+        """
         # pi_nを計算
         if self.pi_n is None:
             self.calc_pi_n()
