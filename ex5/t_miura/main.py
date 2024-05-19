@@ -51,6 +51,7 @@ def plot_log_likelihood(filename: str, log_likelihood_list: list):
 
 class GMM:
     """混合ガウスモデルによるデータのフィッティングを行う."""
+
     def __init__(self, filename: str, n_class: int):
         """コンストラクタ.
 
