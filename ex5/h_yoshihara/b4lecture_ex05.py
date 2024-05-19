@@ -133,8 +133,8 @@ if __name__ == "__main__":
     if dimension == 1:
         fig2 = plt.figure()
         ax2 = fig2.add_subplot(111)
-        ax2.scatter(data_array, np.zeros(data_size), color='blue', label="data")
-        ax2.scatter(mu, np.zeros(mu.shape[0]), color='red', label="centroid")
+        ax2.scatter(data_array, np.zeros(data_size), color="blue", label="data")
+        ax2.scatter(mu, np.zeros(mu.shape[0]), color="red", label="centroid")
         x_min = np.min(data_array[:, 0] - 0.5)
         x_max = np.max(data_array[:, 0] + 0.5)
         p = np.linspace(x_min, x_max, N)[:, np.newaxis]
@@ -169,7 +169,7 @@ if __name__ == "__main__":
             data_array[:, 1],
             np.zeros(data_size),
             color=colorlist,
-            label="data"
+            label="data",
         )
         ax2.plot_surface(X, Y, pdf, rstride=1, cstride=1, cmap="viridis")
         plt.legend(loc="upper left", fontsize=9)
