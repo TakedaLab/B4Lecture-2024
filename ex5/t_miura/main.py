@@ -35,7 +35,7 @@ def plot_log_likelihood(filename: str, log_likelihood_list: list):
     -> None
     """
     plt.plot(log_likelihood_list)
-    plt_name=filename.replace(".csv", "_log-likelihood")
+    plt_name = filename.replace(".csv", "_log-likelihood")
     plt.title(plt_name)
     plt.xlabel("steps")
     plt.ylabel("log-likelihood")
@@ -63,7 +63,6 @@ class GMM:
         self.gamma = None
         return
 
-
     def get_csvdata(self):
         """csvファイルを読み取り、ndarrayに変換.
 
@@ -84,7 +83,6 @@ class GMM:
 
         return
 
-
     def plot_dispersal_chart(self, distribution_flag: bool):
         """散布図と混合分布を描画.
 
@@ -99,43 +97,91 @@ class GMM:
 
         # 散布図を描画
         if self.n_dim == 1:
-            plt.scatter(self.data[:, 0], np.zeros(self.n_sample), label="Observed data", alpha=0.5)
+            plt.scatter(
+                self.data[:, 0],
+                np.zeros(self.n_sample),
+                label="Observed data",
+                alpha=0.5,
+            )
         else:
             plt.scatter(self.data[:, 0], self.data[:, 1], label="Observed data")
 
         # 混合分布を描画
         if distribution_flag:
             if self.param is None:
-                raise(ValueError("param is not set"))
+                raise (ValueError("param is not set"))
 
             PLOT_COUNT = 1000
 
             if self.n_dim == 1:
                 # 平均をプロット
-                plt.scatter(self.param[0][:, 0], np.zeros(self.n_class), label="Centroid", color="red", marker="x")
+                plt.scatter(
+                    self.param[0][:, 0],
+                    np.zeros(self.n_class),
+                    label="Centroid",
+                    color="red",
+                    marker="x",
+                )
 
                 # 混合分布を計算
-                mixed_dist_x = np.arange(PLOT_COUNT) * (self.data_max[0] - self.data_min[0]) / (PLOT_COUNT - 1) + self.data_min[0]
+                mixed_dist_x = (
+                    np.arange(PLOT_COUNT)
+                    * (self.data_max[0] - self.data_min[0])
+                    / (PLOT_COUNT - 1)
+                    + self.data_min[0]
+                )
                 mixed_dist_y = np.zeros(PLOT_COUNT)
                 temp = mixed_dist_x.reshape((PLOT_COUNT, 1))
                 for i in range(self.n_class):
-                    mixed_dist_y += stats.multivariate_normal.pdf(temp, mean=self.param[0][i], cov=self.param[1][i], allow_singular=True) * self.param[2][i]
+                    mixed_dist_y += (
+                        stats.multivariate_normal.pdf(
+                            temp,
+                            mean=self.param[0][i],
+                            cov=self.param[1][i],
+                            allow_singular=True
+                        )
+                        * self.param[2][i]
+                    )
 
                 # 混合分布をプロット
                 plt.plot(mixed_dist_x, mixed_dist_y, label="GMM", color="orange")
 
             else:
                 # 平均をプロット
-                plt.scatter(self.param[0][:, 0], self.param[0][:, 1], label="Centroid", color="red", marker="x")
+                plt.scatter(
+                    self.param[0][:, 0],
+                    self.param[0][:, 1],
+                    label="Centroid",
+                    color="red",
+                    marker="x"
+                )
 
                 # 混合分布を計算
-                x = np.arange(PLOT_COUNT) * (self.data_max[0] - self.data_min[0]) / (PLOT_COUNT - 1) + self.data_min[0]
-                y = np.arange(PLOT_COUNT) * (self.data_max[1] - self.data_min[1]) / (PLOT_COUNT - 1) + self.data_min[1]
+                x = (
+                    np.arange(PLOT_COUNT)
+                    * (self.data_max[0] - self.data_min[0])
+                    / (PLOT_COUNT - 1)
+                    + self.data_min[0]
+                )
+                y = (
+                    np.arange(PLOT_COUNT)
+                    * (self.data_max[1] - self.data_min[1])
+                    / (PLOT_COUNT - 1)
+                    + self.data_min[1]
+                )
                 X, Y = np.meshgrid(x, y)
                 temp = np.stack([X.ravel(), Y.ravel()]).T
-                z = np.zeros(PLOT_COUNT ** 2)
+                z = np.zeros(PLOT_COUNT**2)
                 for i in range(self.n_class):
-                    z += stats.multivariate_normal.pdf(temp, mean=self.param[0][i], cov=self.param[1][i], allow_singular=True) * self.param[2][i]
+                    z += (
+                        stats.multivariate_normal.pdf(
+                            temp,
+                            mean=self.param[0][i],
+                            cov=self.param[1][i],
+                            allow_singular=True
+                        )
+                        * self.param[2][i]
+                    )
                 Z = z.reshape((PLOT_COUNT, PLOT_COUNT))
 
                 # 混合分布をプロット
@@ -157,11 +203,10 @@ class GMM:
         plt.legend()
 
         # プロットの保存と表示
-        plt.savefig(plt_name+".png")
+        plt.savefig(plt_name + ".png")
         plt.show()
 
         return
-
 
     def decede_initial_param(self, seed: int = 0):
         """パラメータの初期値を決定.
@@ -173,7 +218,9 @@ class GMM:
         # 平均ベクトルをランダムで決定
         mu = np.random.rand(self.n_class, self.n_dim)
         for i in range(self.n_dim):
-            mu[:, i] = mu[:, i] * (self.data_max[i] - self.data_min[i]) + self.data_min[i]
+            mu[:, i] = (
+                mu[:, i] * (self.data_max[i] - self.data_min[i]) + self.data_min[i]
+            )
 
         # 分散共分散行列をすべて基本行列で決定
         sigma = np.stack([np.eye(self.n_dim)] * self.n_class)
@@ -190,7 +237,6 @@ class GMM:
 
         return
 
-
     def reset_param(self):
         """paramが更新されたときpi_nとgammaを削除.
 
@@ -201,7 +247,6 @@ class GMM:
 
         return
 
-
     def calc_pi_n(self):
         """pi_nを計算.
 
@@ -211,10 +256,17 @@ class GMM:
         self.pi_n = np.zeros((self.n_sample, self.n_class))
 
         for i in range(self.n_class):
-            self.pi_n[:, i] = stats.multivariate_normal.pdf(self.data, mean=self.param[0][i], cov=self.param[1][i], allow_singular=True) * self.param[2][i]
+            self.pi_n[:, i] = (
+                stats.multivariate_normal.pdf(
+                    self.data,
+                    mean=self.param[0][i],
+                    cov=self.param[1][i],
+                    allow_singular=True,
+                    )
+                    * self.param[2][i]
+                )
 
         return
-
 
     def calc_log_likelihood(self):
         """対数尤度の計算.
@@ -229,7 +281,6 @@ class GMM:
         log_likelihood = np.sum(np.log(temp))
 
         return log_likelihood
-
 
     def E_step(self):
         """Eステップの実行.
@@ -246,7 +297,6 @@ class GMM:
 
         return
 
-
     def M_step(self):
         """Mステップの実行.
 
@@ -254,7 +304,7 @@ class GMM:
         """
         # Eステップが実行されたか確認
         if self.gamma is None:
-            raise(ValueError("E-step was not complited"))
+            raise (ValueError("E-step was not complited"))
 
         # N_kを計算
         n = np.sum(self.gamma, axis=0)
@@ -263,13 +313,13 @@ class GMM:
         mu = np.zeros((self.n_class, self.n_dim))
 
         for k in range(self.n_class):
-            mu[k] = np.sum(self.gamma[:, k: k + 1] * self.data, axis=0) / n[k]
+            mu[k] = np.sum(self.gamma[:, k : k + 1] * self.data, axis=0) / n[k]
 
         # 分散共分散行列を再計算
         sigma = np.zeros((self.n_class, self.n_dim, self.n_dim))
         for k in range(self.n_class):
             x_sub_mu = self.data - self.param[0][k]
-            sigma[k] = x_sub_mu.T @ (self.gamma[:, k: k + 1] * x_sub_mu) / n[k]
+            sigma[k] = x_sub_mu.T @ (self.gamma[:, k : k + 1] * x_sub_mu) / n[k]
 
         # 各ガウス分布の重みを再計算
         pi = n / self.n_sample
@@ -279,7 +329,6 @@ class GMM:
         self.reset_param()
 
         return
-
 
     def EM_algorithm(self, E: float = 1e-4):
         """EMアルゴリズムの実行.
