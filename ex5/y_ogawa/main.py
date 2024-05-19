@@ -3,8 +3,8 @@
 import argparse
 
 import matplotlib.pyplot as plt
-import numpy as np
 import matplotlib.ticker as ticker
+import numpy as np
 from scipy.stats import multivariate_normal
 
 import ex4
@@ -18,7 +18,9 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(description="GMMを用いたマッピングを行う")
     parser.add_argument("--filename", type=str, required=True, help="name of file")
-    parser.add_argument("--n_components", type=int, required=True, help="number of component")
+    parser.add_argument(
+        "--n_components", type=int, required=True, help="number of component"
+    )
     return parser.parse_args()
 
 
@@ -41,7 +43,9 @@ def random_initialize_para(data: np.ndarray, n_components: int) -> np.ndarray:
     weights /= weights.sum()
 
     # 平均値をランダムに初期化
-    means = np.random.rand(n_components, n_features) * (data.max(axis=0) - data.min(axis=0)) + data.min(axis=0)
+    means = np.random.rand(n_components, n_features) * (
+        data.max(axis=0) - data.min(axis=0)
+    ) + data.min(axis=0)
 
     # 共分散行列のランダム初期化（数値安定性のため小さな値を加える）
     covariances = np.zeros((n_components, n_features, n_features))
@@ -50,7 +54,9 @@ def random_initialize_para(data: np.ndarray, n_components: int) -> np.ndarray:
     return weights, means, covariances
 
 
-def estep(data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray) -> np.ndarray:
+def estep(
+        data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray
+) -> np.ndarray:
     """Eステップの実行
 
     Args:
@@ -69,7 +75,9 @@ def estep(data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances:
     # 負担率を計算する
     responsibilities = np.zeros((n_samples, n_components))
     for k in range(n_components):
-        responsibilities[:, k] = weights[k] * multivariate_normal.pdf(data, mean=means[k], cov=covariances[k])
+        responsibilities[:, k] = weights[k] * multivariate_normal.pdf(
+            data, mean=means[k], cov=covariances[k]
+        )
     responsibilities_sum = responsibilities.sum(axis=1, keepdims=True)
     responsibilities /= responsibilities_sum
 
@@ -118,7 +126,9 @@ def mstep(data: np.ndarray, responsibilities: np.ndarray) -> np.ndarray:
     return weights, means, covariances
 
 
-def EMstep(data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray):
+def EMstep(
+        data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray
+):
     """EMアルゴリズムの実行
 
     Args:
@@ -143,7 +153,9 @@ def EMstep(data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances
 
     for j in range(max_try):
         # Eステップを実行する
-        responsibilities, responsibilities_sum = estep(data, weights, means, covariances)
+        responsibilities, responsibilities_sum = estep(
+            data, weights, means, covariances
+        )
 
         # Mステップを実行する
         weights, means, covariances = mstep(data, responsibilities)
@@ -169,9 +181,9 @@ def make_likelihoodgraph(log_likelihood_list: list):
     """
     # 対数尤度のプロット
     plt.plot(np.arange(len(log_likelihood_list)), log_likelihood_list)
-    plt.xlabel('Iterations')
-    plt.ylabel('Log Likelihood')
-    plt.title('Log Likelihood by Iterations')
+    plt.xlabel("Iterations")
+    plt.ylabel("Log Likelihood")
+    plt.title("Log Likelihood by Iterations")
 
     # 横軸を整数にする
     plt.gca().get_xaxis().set_major_locator(ticker.MaxNLocator(integer=True))
@@ -179,7 +191,9 @@ def make_likelihoodgraph(log_likelihood_list: list):
     plt.show()
 
 
-def plot_gmm(data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray):
+def plot_gmm(
+        data: np.ndarray, weights: np.ndarray, means: np.ndarray, covariances: np.ndarray
+):
     """混合ガウス分布をプロットする.
 
     Args:
@@ -197,7 +211,9 @@ def plot_gmm(data: np.ndarray, weights: np.ndarray, means: np.ndarray, covarianc
 
         # 混合ガウス分布の確率密度関数を計算
         for k in range(n_components):
-            y += weights[k] * multivariate_normal.pdf(x, mean=means[k], cov=covariances[k])
+            y += weights[k] * multivariate_normal.pdf(
+                x, mean=means[k], cov=covariances[k]
+            )
         zeros = np.zeros(len(data))
 
         # 確率密度関数をプロット
@@ -239,7 +255,9 @@ def plot_gmm(data: np.ndarray, weights: np.ndarray, means: np.ndarray, covarianc
 
         # 混合ガウス分布の確率密度関数を計算
         for k in range(n_components):
-            Z += weights[k] * multivariate_normal.pdf(pos, mean=means[k], cov=covariances[k])
+            Z += weights[k] * multivariate_normal.pdf(
+                pos, mean=means[k], cov=covariances[k]
+            )
 
         # 確率密度関数をプロット
         CS = plt.contour(X, Y, Z)
@@ -251,7 +269,13 @@ def plot_gmm(data: np.ndarray, weights: np.ndarray, means: np.ndarray, covarianc
         plt.scatter(data[:, 0], data[:, 1], color="r", label="Data", marker=".")
 
         # ガウス分布の平均を表示
-        plt.scatter(means[:, 0], means[:, 1], color="g", marker="x", label="Mean of Gaussian Distribution")
+        plt.scatter(
+            means[:, 0],
+            means[:, 1],
+            color="g",
+            marker="x",
+            label="Mean of Gaussian Distribution",
+        )
 
         # 軸ラベルを表示
         plt.xlabel("x1")
@@ -266,10 +290,10 @@ def plot_gmm(data: np.ndarray, weights: np.ndarray, means: np.ndarray, covarianc
         plt.show()
 
         # ヒートマップを作成
-        fig, ax = plt.subplots(subplot_kw={'projection': '3d'})
+        fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 
         # 3Dグラフ
-        SF = ax.plot_surface(X, Y, Z, cmap='viridis')
+        SF = ax.plot_surface(X, Y, Z, cmap="viridis")
 
         # 軸ラベルを表示
         ax.set_xlabel("x1")
@@ -281,7 +305,7 @@ def plot_gmm(data: np.ndarray, weights: np.ndarray, means: np.ndarray, covarianc
 
         # カラーバーの設定
         cbar = fig.colorbar(SF, aspect=8)
-        cbar.ax.set_ylabel('probability density')
+        cbar.ax.set_ylabel("probability density")
 
         plt.savefig("GMM_heatmap.png")
         plt.show()
@@ -309,7 +333,9 @@ def main():
     weights, means, covariances = random_initialize_para(data, args.n_components)
 
     # EMアルゴリズムを実行する
-    log_likelihood_list, weights, means, covariances = EMstep(data, weights, means, covariances)
+    log_likelihood_list, weights, means, covariances = EMstep(
+        data, weights, means, covariances
+    )
 
     # 対数尤度をグラフにする
     make_likelihoodgraph(log_likelihood_list)
