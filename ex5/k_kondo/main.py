@@ -57,7 +57,7 @@ def plot_scatter(data, title):
 
 
 def initialize(data, num_components):
-    """初期値をランダムに設定
+    """初期値をランダムに設定.
 
     Args:
         data (np.ndarray): 入力データ
@@ -134,6 +134,18 @@ def E_step(data, num_components, mean, cov, weight):
 
 
 def M_step(data, num_components, responsibility):
+    """負担率を用いて、平均、分散共分散行列、重みを更新.
+
+    Args:
+        data (np.ndarray): データ
+        num_components (int): クラスター数
+        responsibility (np.ndarray): 負担率
+
+    Returns:
+        mean (np.ndarray): 平均ベクトル
+        cov (np.ndarray): 分散共分散行列
+        weight (np.ndarray): クラスターの重みS
+    """
     Nk = np.sum(responsibility, axis=0)
     mean = np.zeros((num_components, data.shape[1]))
     for k in range(num_components):
