@@ -1,12 +1,12 @@
 """This code is Fitting of data using GMM."""
 
 import argparse
+from typing import Any
+
 import matplotlib.pyplot as plt
 import numpy as np
-from typing import Any
-from numpy.typing import ArrayLike
 import scipy.stats as stats
-
+from numpy.typing import ArrayLike
 
 
 def parse_args() -> Any:
