@@ -149,7 +149,7 @@ def EMstep(
         means (np.ndarray): 再計算後の平均
         covariances (np.ndarray): 再計算後の共分散行列
     """
-    n_samples = data.shape[0]
+    # n_samples = data.shape[0]
 
     # EMアルゴリズムの試行回数
     max_try = 100
