@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
 from scipy.stats import multivariate_normal
+from sklearn.cluster import KMeans
 
 import ex4
 
@@ -43,14 +44,19 @@ def random_initialize_para(data: np.ndarray, n_components: int) -> np.ndarray:
     weights /= weights.sum()
 
     # 平均値をランダムに初期化
-    means = np.random.rand(n_components, n_features) * (
-        data.max(axis=0) - data.min(axis=0)
-    ) + data.min(axis=0)
+    # means = np.random.rand(n_components, n_features) * (
+    #     data.max(axis=0) - data.min(axis=0)
+    # ) + data.min(axis=0)
+
+    # KMeansで初期化
+    kmeans = KMeans(n_clusters=n_components, random_state=0).fit(data)
+    means = kmeans.cluster_centers_
 
     # 共分散行列のランダム初期化（数値安定性のため小さな値を加える）
-    covariances = np.zeros((n_components, n_features, n_features))
-    for i in range(n_components):
-        covariances[i] = np.eye(n_features) * (np.random.rand() + 1e-6)
+    # covariances = np.zeros((n_components, n_features, n_features))
+    # for i in range(n_components):
+    #     covariances[i] = np.eye(n_features) * (np.random.rand() + 1e-6)
+    covariances = np.eye(n_features) * (np.random.rand(n_components, 1, 1) + 1e-6)
     return weights, means, covariances
 
 
@@ -160,11 +166,14 @@ def EMstep(
         # Mステップを実行する
         weights, means, covariances = mstep(data, responsibilities)
 
-        log_likelihood = 0
-        for i in range(n_samples):
-            log_likelihood += np.log(responsibilities_sum[i])
+        # log_likelihood = 0
+        # for i in range(n_samples):
+        #     log_likelihood += np.log(responsibilities_sum[i])
 
-        log_likelihood_list.append(log_likelihood[0])
+        # log_likelihood_list.append(log_likelihood[0])
+
+        log_likelihood = np.sum(np.log(responsibilities_sum))
+        log_likelihood_list.append(log_likelihood)
 
         # 収束判定
         if j > 0 and np.abs(log_likelihood_list[-1] - log_likelihood_list[-2]) < 1e-4:
@@ -217,7 +226,7 @@ def plot_gmm(
         zeros = np.zeros(len(data))
 
         # 確率密度関数をプロット
-        plt.plot(x, y)
+        plt.plot(x, y, color="b", label="GMM")
 
         # 散布図をプロット
         plt.scatter(data, zeros, color="r", label="Data", marker=".")
