@@ -17,7 +17,9 @@ def parse_args() -> Any:
     -------
     parser.parse_args() : 引数を返す
     """
-    parser = argparse.ArgumentParser(description="GMMを用いてデータのフィッティングを行う")
+    parser = argparse.ArgumentParser(
+        description="GMMを用いてデータのフィッティングを行う"
+    )
     parser.add_argument(
         "-file",
         help="ファイルを入力",
@@ -27,9 +29,10 @@ def parse_args() -> Any:
     parser.add_argument("-k", help="クラスター数", default=3, type=int)
     return parser.parse_args()
 
+
 def plot_data(data: ArrayLike, D: int):
     """
-    plot data.
+    Plot data.
 
     Parameters
     ----------
@@ -52,9 +55,12 @@ def plot_data(data: ArrayLike, D: int):
         ax.set_ylabel("x2")
         plt.show()
 
-def visualize(data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: int, D: int):
+
+def visualize(
+    data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: int, D: int
+):
     """
-    visualize contour (line).
+    Visualize contour (line).
 
     Parameters
     ----------
@@ -112,6 +118,7 @@ def visualize(data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K
         ax.set_ylabel("x2")
     plt.show()
 
+
 def initialization(K: int, D: int):
     """
     initialize.
@@ -140,6 +147,7 @@ def initialization(K: int, D: int):
     pi = np.ones(K) / K
     return pi, mu, sigma
 
+
 def cul_gmm(data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: int):
     """
     Calculate gmm.
@@ -162,8 +170,14 @@ def cul_gmm(data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: 
     gmm : ArrayLike
         gmm
     """
-    gmm = np.array([pi[k] * stats.multivariate_normal.pdf(data, mean=mu[k], cov=sigma[k]) for k in range(K)]).T
+    gmm = np.array(
+        [
+            pi[k] * stats.multivariate_normal.pdf(data, mean=mu[k], cov=sigma[k])
+            for k in range(K)
+        ]
+    ).T
     return gmm
+
 
 def e_step(data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: int):
     """
@@ -200,6 +214,7 @@ def e_step(data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: i
     # 更新
     return r
 
+
 def m_step(data: ArrayLike, r: ArrayLike, K: int, N: int, D: int):
     """
     Do m_step.
@@ -234,7 +249,9 @@ def m_step(data: ArrayLike, r: ArrayLike, K: int, N: int, D: int):
         # 最適なmuを計算して更新する
         mu = (r.T @ data) / (N_k)  # (K, )
         # 最適なsigmaを計算して更新する
-        res_error = np.tile(data[:, None], (1, K)).T - np.tile(mu[:, None], (1, N))  # (K, N)
+        res_error = np.tile(data[:, None], (1, K)).T - np.tile(
+            mu[:, None], (1, N)
+        )  # (K, N)
         sigma = ((r.T * res_error) @ res_error.T) / (N_k[:, None])  # (K, K)
         sigma = sigma[:, 0]  # 最初の列を取り出す (K, )
     elif D == 2:
@@ -245,15 +262,14 @@ def m_step(data: ArrayLike, r: ArrayLike, K: int, N: int, D: int):
         res_error = np.tile(data[:, :, None], (1, 1, K)).transpose(2, 1, 0) - np.tile(
             mu[:, :, None], (1, 1, N)
         )  # (K, D, N)
-        sigma = (
-            (r_tile * res_error) @ res_error.transpose(0, 2, 1)
-        ) / (N_k[:, None, None] + np.spacing(1))  # (K, D, D)
+        sigma = ((r_tile * res_error) @ res_error.transpose(0, 2, 1)) / (
+            N_k[:, None, None] + np.spacing(1)
+        )  # (K, D, D)
     return pi, mu, sigma
 
 
 def main() -> None:
     """Fitting of data using GMM."""
-
     args = parse_args()
     data = np.loadtxt(args.file, delimiter=",", dtype="float")
     K = args.k
@@ -272,7 +288,9 @@ def main() -> None:
     # 各イテレーションの対数尤度を記録するためのリスト
     log_likelihood_list = []
     # 対数尤度の初期値を計算
-    log_likelihood_list.append(np.mean(np.log(np.sum(cul_gmm(data, pi, mu, sigma, K), 1) + eps)))
+    log_likelihood_list.append(
+        np.mean(np.log(np.sum(cul_gmm(data, pi, mu, sigma, K), 1) + eps))
+    )
     for i in range(rota_max):
         # Eステップの実行
         r = e_step(data, pi, mu, sigma, K)
@@ -282,9 +300,14 @@ def main() -> None:
         gmm = cul_gmm(data, pi, mu, sigma, K)
         log_likelihood_list.append(np.mean(np.log(np.sum(gmm, 1) + eps)))
         # 前回の対数尤度からの増加幅を出力する
-        print("Log-likelihood gap: " + str(round(np.abs(log_likelihood_list[i] - log_likelihood_list[i + 1]), 4)))
+        print(
+            "Log-likelihood gap: "
+            + str(round(np.abs(log_likelihood_list[i] - log_likelihood_list[i + 1]), 4))
+        )
         # もし収束条件を満たした場合，もしくは最大更新回数に到達した場合は更新停止して可視化を行う
-        if (np.abs(log_likelihood_list[i] - log_likelihood_list[i + 1]) < thr) or (i == rota_max - 1):
+        if (np.abs(log_likelihood_list[i] - log_likelihood_list[i + 1]) < thr) or (
+            i == rota_max - 1
+        ):
             print(f"EM algorithm has stopped after {i + 1} iteraions.")
             visualize(data, pi, mu, sigma, K, D)
             fig, ax = plt.subplots()
