@@ -70,10 +70,10 @@ class GMM:
             if abs(new_log_likelihood - log_likelihood) < self.tol:
                 break
             log_likelihood = new_log_likelihood
-        
+
         # 対数尤度の推移をプロット
         plt.figure()
-        plt.plot(np.array(self.log_likelihood_)/n_samples)
+        plt.plot(np.array(self.log_likelihood_) / n_samples)
         # 軸の名前と凡例を付けて保存
         plt.title("")
         plt.xlabel("Iteration")
