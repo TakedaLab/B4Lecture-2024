@@ -27,7 +27,7 @@ class GMM:
         self.max_iter = max_iter
         self.tol = tol
 
-    def fit(self, X):
+    def fit(self, X, file_name):
         """ガウス分布のパラメータを収束するまで更新する関数.
 
         Parameter
@@ -40,6 +40,8 @@ class GMM:
             <self>の対数尤度の収束条件
         X : np.ndarray, shape=(number of sample, dimension of data)
             対象となるデータ(ベクトルはエラーが起きる)
+        file_name : str
+            イテレーションごとの対数尤度(保存する画像の名前はhistory_ファイル名.png)
         """
         n_samples, n_features = X.shape
 
@@ -51,6 +53,8 @@ class GMM:
 
         # 対数尤度は初めは0としておく
         log_likelihood = 0
+        self.log_likelihood_ = []
+
         for _ in range(self.max_iter):
             # Eステップ
             responsibilities = self._estimate_responsibilities(X)
@@ -60,10 +64,21 @@ class GMM:
 
             # 対数尤度の計算
             new_log_likelihood = self._compute_log_likelihood(X)
+            self.log_likelihood_.append(new_log_likelihood)
+
             # 更新後の差がtol以下なら収束
             if abs(new_log_likelihood - log_likelihood) < self.tol:
                 break
             log_likelihood = new_log_likelihood
+        
+        # 対数尤度の推移をプロット
+        plt.figure()
+        plt.plot(np.array(self.log_likelihood_)/n_samples)
+        # 軸の名前と凡例を付けて保存
+        plt.title("")
+        plt.xlabel("Iteration")
+        plt.ylabel("Log likelihood")
+        plt.savefig(f"history_{file_name}.png")
 
     def _estimate_responsibilities(self, X):
         """ガウス分布の負担率を計算する関数.
@@ -175,6 +190,7 @@ class GMM:
         file_name : str
             読み込んだデータのファイル名(保存する画像の名前はresult_ファイル名.png)
         """
+        plt.figure()
         # 出力範囲内で適当な間隔でxを計算しておく
         x = np.linspace(np.min(X), np.max(X), 1000)
         y = np.zeros_like(x)
@@ -206,6 +222,7 @@ class GMM:
         file_name : str
             読み込んだデータのファイル名(保存する画像の名前はresult_ファイル名.png)
         """
+        plt.figure()
         # データの散布図をプロット
         plt.scatter(X[:, 0], X[:, 1], s=4, label="Data")
 
@@ -269,6 +286,6 @@ if __name__ == "__main__":
     # 初期化
     gmm = GMM(n_components=n_components, max_iter=max_iter, tol=tol)
     # パラメータの学習
-    gmm.fit(data)
+    gmm.fit(data, file_name)
     # 結果の表示
     gmm.visualize(data, file_name)
