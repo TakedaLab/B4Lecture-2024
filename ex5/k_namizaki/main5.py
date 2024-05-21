@@ -56,7 +56,7 @@ def plot_data(data: ArrayLike, D: int):
         plt.show()
 
 
-def visualize(
+def visualize_contour(
     data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: int, D: int
 ):
     """
@@ -83,7 +83,7 @@ def visualize(
         min_value = min(data)
         max_value = max(data)
         x = np.arange(min_value - 1, max_value + 1, 0.01)
-        Z = cul_gmm(x, pi, mu, sigma, K)
+        Z = calculate_gmm(x, pi, mu, sigma, K)
         Z = np.sum(Z, axis=1)
         ax.plot(x, Z, color="r")
         zeros = np.zeros(len(data))
@@ -103,7 +103,7 @@ def visualize(
         X, Y = np.meshgrid(x, y)
 
         z = np.c_[X.ravel(), Y.ravel()]
-        Z = cul_gmm(z, pi, mu, sigma, K)
+        Z = calculate_gmm(z, pi, mu, sigma, K)
         # 分割で保持されているから一列にまとめないといけない
         Z = np.sum(Z, axis=1)
         shape = X.shape
@@ -119,7 +119,7 @@ def visualize(
     plt.show()
 
 
-def initialization(K: int, D: int):
+def initialize(K: int, D: int):
     """
     initialize.
 
@@ -148,7 +148,7 @@ def initialization(K: int, D: int):
     return pi, mu, sigma
 
 
-def cul_gmm(data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: int):
+def calculate_gmm(data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: int):
     """
     Calculate gmm.
 
@@ -202,7 +202,7 @@ def e_step(data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: i
         負担率
     """
     # GMMの確率密度関数を計算
-    gmm = cul_gmm(data, pi, mu, sigma, K)
+    gmm = calculate_gmm(data, pi, mu, sigma, K)
     # 対数領域で負担率を計算
     eps = np.finfo(float).eps
     # axis=1 は行方向に合計を計算し、keepdims=True は次元を保持することを意味します。これにより、各行の合計が列ベクトルとして保持されます
@@ -284,12 +284,12 @@ def main() -> None:
 
     eps = np.finfo(float).eps
     # 初期化
-    pi, mu, sigma = initialization(K, D)
+    pi, mu, sigma = initialize(K, D)
     # 各イテレーションの対数尤度を記録するためのリスト
     log_likelihood_list = []
     # 対数尤度の初期値を計算
     log_likelihood_list.append(
-        np.mean(np.log(np.sum(cul_gmm(data, pi, mu, sigma, K), 1) + eps))
+        np.mean(np.log(np.sum(calculate_gmm(data, pi, mu, sigma, K), 1) + eps))
     )
     for i in range(rota_max):
         # Eステップの実行
@@ -297,7 +297,7 @@ def main() -> None:
         # Mステップの実行
         pi, mu, sigma = m_step(data, r, K, N, D)
         # 今回のイテレーションの対数尤度を記録する
-        gmm = cul_gmm(data, pi, mu, sigma, K)
+        gmm = calculate_gmm(data, pi, mu, sigma, K)
         log_likelihood_list.append(np.mean(np.log(np.sum(gmm, 1) + eps)))
         # 前回の対数尤度からの増加幅を出力する
         print(
@@ -309,7 +309,7 @@ def main() -> None:
             i == rota_max - 1
         ):
             print(f"EM algorithm has stopped after {i + 1} iteraions.")
-            visualize(data, pi, mu, sigma, K, D)
+            visualize_contour(data, pi, mu, sigma, K, D)
             fig, ax = plt.subplots()
             ax.plot(log_likelihood_list)
             ax.set_xlabel("Iteration")
