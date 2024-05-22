@@ -139,8 +139,23 @@ def initialize(K: int, D: int):
     sigma : ArrayLike (K,D,D)
         分散共分散行列
     """
-    # 平均は標準ガウス分布から生成
-    mu = np.random.randn(K, D)
+    # 平均を目視から生成
+    # 行数と列数を表示
+    print("行数はクラスター数", K, "です")
+    print("列数は次元数", D, "です")
+    # 入力された行数と列数で行列を初期化
+    matrix = []
+    print("行列の要素を入力してください:")
+    # 行列の要素を入力
+    for i in range(K):
+        row = []
+        for j in range(D):
+            element = float(input(f"行{i+1}、列{j+1}: "))
+            row.append(element)
+        matrix.append(row)
+    # NumPy配列に変換
+    mu = np.array(matrix)
+
     # 分散共分散行列はD*D単位行列をK個
     sigma = np.tile(np.eye(D), (K, 1, 1))
     # 重みは一様分布から生成
@@ -148,7 +163,9 @@ def initialize(K: int, D: int):
     return pi, mu, sigma
 
 
-def calculate_gmm(data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: int):
+def calculate_gmm(
+    data: ArrayLike, pi: ArrayLike, mu: ArrayLike, sigma: ArrayLike, K: int
+):
     """
     Calculate gmm.
 
@@ -310,6 +327,7 @@ def main() -> None:
         ):
             print(f"EM algorithm has stopped after {i + 1} iteraions.")
             visualize_contour(data, pi, mu, sigma, K, D)
+            print(mu)
             fig, ax = plt.subplots()
             ax.plot(log_likelihood_list)
             ax.set_xlabel("Iteration")
