@@ -26,7 +26,6 @@ def parse_args() -> Any:
         default=r"C:\Users\kyskn\B4Lecture-2024\ex5\data2.csv",
         type=str,
     )
-    parser.add_argument("-k", help="クラスター数", default=3, type=int)
     return parser.parse_args()
 
 
@@ -289,7 +288,8 @@ def main() -> None:
     """Fitting of data using GMM."""
     args = parse_args()
     data = np.loadtxt(args.file, delimiter=",", dtype="float")
-    K = args.k
+    # クラスター数を入力
+    K = int(input(f"クラスター数を入力: "))
     rota_max = 1000
     thr = 0.0001
     # 次元数Nはshapeでは、一列の時に困る
