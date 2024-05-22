@@ -299,7 +299,7 @@ def main() -> None:
     eps = np.finfo(float).eps
 
     # クラスター数を入力
-    K = int(input(f"クラスター数を入力: "))
+    K = int(input("クラスター数を入力: "))
     # 初期化
     pi, mu, sigma = initialize(K, D)
     # 各イテレーションの対数尤度を記録するためのリスト
