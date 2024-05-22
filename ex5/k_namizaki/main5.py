@@ -288,8 +288,6 @@ def main() -> None:
     """Fitting of data using GMM."""
     args = parse_args()
     data = np.loadtxt(args.file, delimiter=",", dtype="float")
-    # クラスター数を入力
-    K = int(input(f"クラスター数を入力: "))
     rota_max = 1000
     thr = 0.0001
     # 次元数Nはshapeでは、一列の時に困る
@@ -298,8 +296,10 @@ def main() -> None:
     N = len(data)
     # 散布図をプロットして概形を確認
     plot_data(data, D)
-
     eps = np.finfo(float).eps
+
+    # クラスター数を入力
+    K = int(input(f"クラスター数を入力: "))
     # 初期化
     pi, mu, sigma = initialize(K, D)
     # 各イテレーションの対数尤度を記録するためのリスト
