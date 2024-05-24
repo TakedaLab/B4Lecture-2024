@@ -126,8 +126,8 @@ if __name__ == "__main__":
     print(f"Forward_algorithm 正解率 : {accuracy_forward * 100:.2f}%")
     print(f"Viterbi_algorithm 正解率 : {accuracy_viterbi * 100:.2f}%")
 
-    print(f"Forward_algorithm 処理時間 : {{:.2f}}".format(end_forward - start_forward))
-    print(f"Viterbi_algorithm 処理時間 : {{:.2f}}".format(end_viterbi - start_viterbi))
+    print(f"Forward_algorithm 処理時間 : {end_forward - start_forward:.2f}")
+    print(f"Viterbi_algorithm 処理時間 : {end_viterbi - start_viterbi:.2f}")
 
     fig1 = plt.figure(figsize=(20, 8))
 
