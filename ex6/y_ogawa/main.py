@@ -35,7 +35,6 @@ def load_pickle(filename: str) -> np.ndarray:
     A (np.ndarray): 遷移確率
     B (np.ndarray): 出力確率
     """
-
     # pickleファイルの読み込み
     data = pickle.load(open(filename, "rb"))
     answer_models = np.array(data["answer_models"])
@@ -150,9 +149,7 @@ def plot_confusion_matirx(
 
 
 def main():
-    """
-    pickleのファイルを読み込みHMMの予測を行う.
-    """
+    """pickleのファイルを読み込みHMMの予測を行う."""
     # 引数を受け取る
     args = parse_args()
 
