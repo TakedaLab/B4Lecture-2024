@@ -78,7 +78,8 @@ def forward(
                 # alphaの更新
                 alpha[t, :] = (
                     # 前の状態の確率と遷移確率の積
-                    np.dot(alpha[t - 1, :], A[k, :, :]) * B[k, :, output[p, t]]
+                    np.dot(alpha[t - 1, :], A[k, :, :])
+                    * B[k, :, output[p, t]]
                 )
 
             # 確率の計算
