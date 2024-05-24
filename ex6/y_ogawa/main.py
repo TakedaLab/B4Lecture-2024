@@ -157,11 +157,10 @@ def main():
     answer_models, output, PI, A, B = load_pickle(args.filename)
 
     # Forwardアルゴリズム
-    for i in range(100):
-        forward_start = time.time()
-        prob_forward = forward(output, PI, A, B)
-        forward_end = time.time()
-        forward_time = round(forward_end - forward_start, 3)
+    forward_start = time.time()
+    prob_forward = forward(output, PI, A, B)
+    forward_end = time.time()
+    forward_time = round(forward_end - forward_start, 3)
 
     # Viterbiアルゴリズム
     viterbi_start = time.time()
