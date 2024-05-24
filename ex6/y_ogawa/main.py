@@ -1,18 +1,19 @@
 """pickleのファイルを読み込みHMMの予測を行う."""
 
 import argparse
+import pickle
+import time
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pickle
 import pandas as pd
 import seaborn as sns
-import time
 from sklearn.metrics import confusion_matrix
 
 
 def parse_args():
     """引数の取得を行う.
+
     filename : 読み込むファイル名
     n_cluster : クラスター数
     """
@@ -22,7 +23,9 @@ def parse_args():
 
 
 def load_pickle(filename: str) -> np.ndarray:
-    """pickleファイルの読み込みを行う.
+    """
+    pickleファイルの読み込みを行う.
+
     filename : 読み込むファイル名
 
     return
@@ -45,8 +48,12 @@ def load_pickle(filename: str) -> np.ndarray:
 
 
 # Forwardアルゴリズム
-def forward(output: np.ndarray, PI: np.ndarray, A: np.ndarray, B: np.ndarray) -> np.ndarray:
-    """Forwardアルゴリズムを実行する.
+def forward(
+    output: np.ndarray, PI: np.ndarray, A: np.ndarray, B: np.ndarray
+) -> np.ndarray:
+    """
+    Forwardアルゴリズムを実行する.
+
     output (np.ndarray): 出力ラベル
     PI (np.ndarray): 初期確率
     A (np.ndarray): 遷移確率
@@ -67,7 +74,9 @@ def forward(output: np.ndarray, PI: np.ndarray, A: np.ndarray, B: np.ndarray) ->
             alpha[0, :] = PI[k].T[0] * B[k, :, output[p, 0]]
 
             for t in range(1, time):
-                alpha[t, :] = np.dot(alpha[t - 1, :], A[k, :, :]) * B[k, :, output[p, t]]
+                alpha[t, :] = (
+                    np.dot(alpha[t - 1, :], A[k, :, :]) * B[k, :, output[p, t]]
+                )
 
             prob[k, p] = np.sum(alpha[-1, :])
 
@@ -75,8 +84,12 @@ def forward(output: np.ndarray, PI: np.ndarray, A: np.ndarray, B: np.ndarray) ->
 
 
 # Viterbiアルゴリズム
-def viterbi(output: np.ndarray, PI: np.ndarray, A: np.ndarray, B: np.ndarray) -> np.ndarray:
-    """Viterbiアルゴリズムを実行する.
+def viterbi(
+    output: np.ndarray, PI: np.ndarray, A: np.ndarray, B: np.ndarray
+) -> np.ndarray:
+    """
+    Viterbiアルゴリズムを実行する.
+
     output (np.ndarray): 出力ラベル
     PI (np.ndarray): 初期確率
     A (np.ndarray): 遷移確率
@@ -96,15 +109,22 @@ def viterbi(output: np.ndarray, PI: np.ndarray, A: np.ndarray, B: np.ndarray) ->
             delta[0, :] = PI[k].T[0] * B[k, :, output[p, 0]]
 
             for t in range(1, time):
-                delta[t, :] = np.max(delta[t - 1, :, np.newaxis] * A[k, :, :], axis=0) * B[k, :, output[p, t]]
+                delta[t, :] = (
+                    np.max(delta[t - 1, :, np.newaxis] * A[k, :, :], axis=0)
+                    * B[k, :, output[p, t]]
+                )
 
             prob[k, p] = np.max(delta[-1, :])
 
     return prob
 
 
-def plot_confusion_matirx(answer: np.ndarray, pred: np.ndarray, algorithm: str, time: float):
-    """混同行列のプロットを行う.
+def plot_confusion_matirx(
+    answer: np.ndarray, pred: np.ndarray, algorithm: str, time: float
+):
+    """
+    混同行列のプロットを行う.
+
     answer (np.ndarray): 正解ラベル
     pred (np.ndarray): 予測ラベル
     algorithm (str): アルゴリズム名
@@ -116,7 +136,9 @@ def plot_confusion_matirx(answer: np.ndarray, pred: np.ndarray, algorithm: str, 
     # 正解率の計算
     acc = np.sum(pred - answer == 0) / len(answer) * 100
     # 混合行列のプロット
-    ax = sns.heatmap(cm_df, annot=True, cbar=True, cmap="Blues", fmt='d', vmin=0, vmax=20)
+    ax = sns.heatmap(
+        cm_df, annot=True, cbar=True, cmap="Blues", fmt="d", vmin=0, vmax=20
+    )
 
     # カラーバーの取得と整数ティックの設定
     colorbar = ax.collections[0].colorbar
@@ -128,7 +150,9 @@ def plot_confusion_matirx(answer: np.ndarray, pred: np.ndarray, algorithm: str, 
 
 
 def main():
-    """pickleのファイルを読み込みHMMの予測を行う."""
+    """
+    pickleのファイルを読み込みHMMの予測を行う.
+    """
     # 引数を受け取る
     args = parse_args()
 
@@ -151,12 +175,16 @@ def main():
     # 混同行列のプロット
     plt.figure(figsize=(11, 6))
     plt.subplot(121)
-    plot_confusion_matirx(answer_models, np.argmax(prob_forward, axis=0), "Forward", forward_time)
+    plot_confusion_matirx(
+        answer_models, np.argmax(prob_forward, axis=0), "Forward", forward_time
+    )
     plt.subplot(122)
-    plot_confusion_matirx(answer_models, np.argmax(prob_viterbi, axis=0), "Viterbi", viterbi_time)
+    plot_confusion_matirx(
+        answer_models, np.argmax(prob_viterbi, axis=0), "Viterbi", viterbi_time
+    )
     plt.tight_layout()
     title = args.filename.replace("../", "").replace(".pickle", "")
-    plt.savefig(title+".png")
+    plt.savefig(title + ".png")
     plt.show()
 
 
