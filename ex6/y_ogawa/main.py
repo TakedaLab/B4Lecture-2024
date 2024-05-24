@@ -66,17 +66,22 @@ def forward(
 
     prob = np.zeros((n_model, n_samples))
 
-    # 初期化
+    # Forwardアルゴリズム
     for k in range(n_model):
         for p in range(n_samples):
+            # alphaの初期化
             alpha = np.zeros((time, n_state))
             alpha[0, :] = PI[k].T[0] * B[k, :, output[p, 0]]
 
+            # alphaの計算
             for t in range(1, time):
+                # alphaの更新
                 alpha[t, :] = (
+                    # 前の状態の確率と遷移確率の積
                     np.dot(alpha[t - 1, :], A[k, :, :]) * B[k, :, output[p, t]]
                 )
 
+            # 確率の計算
             prob[k, p] = np.sum(alpha[-1, :])
 
     return prob
@@ -102,17 +107,23 @@ def viterbi(
 
     prob = np.zeros((n_model, n_samples))
 
+    # Viterbiアルゴリズム
     for k in range(n_model):
         for p in range(n_samples):
+            # deltaの初期化
             delta = np.zeros((time, n_state))
             delta[0, :] = PI[k].T[0] * B[k, :, output[p, 0]]
 
+            # deltaの計算
             for t in range(1, time):
+                # deltaの更新
                 delta[t, :] = (
+                    # 前の状態の確率と遷移確率の積
                     np.max(delta[t - 1, :, np.newaxis] * A[k, :, :], axis=0)
                     * B[k, :, output[p, t]]
                 )
 
+            # 確率の計算
             prob[k, p] = np.max(delta[-1, :])
 
     return prob
