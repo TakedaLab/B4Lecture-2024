@@ -147,7 +147,7 @@ if __name__ == "__main__":
     file_name = os.path.splitext(os.path.basename(file_path))[0]
 
     # モデルをロード
-    with open("../data1.pickle", mode="rb") as file:
+    with open(file_path, mode="rb") as file:
         data_dict = pickle.load(file)
         # モデルとデータを代入しておく
         output_data = data_dict["output"]
