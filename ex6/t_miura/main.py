@@ -96,7 +96,7 @@ class HMM:
         # 漸化式
         for s in range(1, self.last_time):
             alpha = (AT @ alpha) * self.B[
-                :, :, self.output[p, s]: self.output[p, s] + 1
+                :, :, self.output[p, s] : self.output[p, s] + 1
             ]
 
         # 各モデルのP(0|M)を算出
