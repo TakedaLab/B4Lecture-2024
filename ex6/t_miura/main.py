@@ -91,11 +91,13 @@ class HMM:
         AT = self.A.transpose(0, 2, 1)
 
         # 初期条件
-        alpha = self.PI * self.B[:, :, self.output[p, 0]: self.output[p, 0] + 1]
+        alpha = self.PI * self.B[:, :, self.output[p, 0] : self.output[p, 0] + 1]
 
         # 漸化式
         for s in range(1, self.last_time):
-            alpha = (AT @ alpha) * self.B[:, :, self.output[p, s]: self.output[p, s] + 1]
+            alpha = (AT @ alpha) * self.B[
+                :, :, self.output[p, s]: self.output[p, s] + 1
+            ]
 
         # 各モデルのP(0|M)を算出
         p_0_m = np.sum(alpha, axis=1).flatten()
@@ -112,13 +114,13 @@ class HMM:
             self.load_picklefile()
 
         # 初期条件
-        delta = self.PI * self.B[:, :, self.output[p, 0]: self.output[p, 0] + 1]
+        delta = self.PI * self.B[:, :, self.output[p, 0] : self.output[p, 0] + 1]
 
         # 漸化式
-        for s in range(1,self.last_time):
+        for s in range(1, self.last_time):
             delta = (
                 np.max(delta * self.A, axis=1).reshape((self.n_models, self.n_state, 1))
-                * self.B[:, :, self.output[p, s]: self.output[p, s] + 1]
+                * self.B[:, :, self.output[p, s] : self.output[p, s] + 1]
             )
 
         # 各モデルのP(M|0)を算出
@@ -156,7 +158,6 @@ class HMM:
 
         return time_forward, time_viterbi
 
-
     def plot_prediction(self):
         """２つのモデルの予想の混同行列と正解率をプロット.
 
@@ -186,16 +187,16 @@ class HMM:
                         y,
                         x,
                         int(confusion_matrix_forward[x, y]),
-                        horizontalalignment='center',
-                        verticalalignment='center',
+                        horizontalalignment="center",
+                        verticalalignment="center",
                     )
                 else:
                     plt.text(
                         y,
                         x,
                         int(confusion_matrix_forward[x, y]),
-                        horizontalalignment='center',
-                        verticalalignment='center',
+                        horizontalalignment="center",
+                        verticalalignment="center",
                         color="w",
                     )
 
@@ -214,17 +215,17 @@ class HMM:
                         y,
                         x,
                         int(confusion_matrix_viterbi[x, y]),
-                        horizontalalignment='center',
-                        verticalalignment='center',
+                        horizontalalignment="center",
+                        verticalalignment="center",
                     )
                 else:
                     plt.text(
                         y,
                         x,
                         int(confusion_matrix_viterbi[x, y]),
-                        horizontalalignment='center',
-                        verticalalignment='center',
-                        color="w"
+                        horizontalalignment="center",
+                        verticalalignment="center",
+                        color="w",
                     )
 
         plt.title(f"Viterbi Algorithm\nAccurancy={accuracy_viterbi}")
@@ -243,7 +244,6 @@ def main():
 
     -> None
     """
-
     # コマンドライン引数の取得
     filename = get_args()
 
