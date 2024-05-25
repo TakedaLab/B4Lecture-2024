@@ -70,7 +70,7 @@ def forward(output, trans_prob, out_prob, init_prob):
     for i in range(p):
         # alphaの初期化[k,l] = [k,l] * [k,l]
         alpha = init_prob[:, :, 0] * out_prob[:, :, output[i, 0]]
-        for j in range(t):
+        for j in range(1,t):
             # alphaを最後のt回目まで回す{sum([k,l,newでl] * [k,l,l]) = [k,l]} * [k,l]
             alpha = (
                 np.sum(alpha[:, :, np.newaxis] * trans_prob, axis=1)
@@ -115,13 +115,13 @@ def viterbi(output, trans_prob, out_prob, init_prob):
     for i in range(p):
         # alphaの初期化[k,l] = [k,l] * [k,l]
         alpha = init_prob[:, :, 0] * out_prob[:, :, output[i, 0]]
-        for j in range(t):
-            # alphaを最後のt回目まで回す{sum([k,l,newでl] * [k,l,l]) = [k,l]} * [k,l]
+        for j in range(1, t):
+            # alphaを最後のt回目まで回す{max([k,l,newでl] * [k,l,l]) = [k,l]} * [k,l]
             alpha = (
-                np.sum(alpha[:, :, np.newaxis] * trans_prob, axis=1)
+                np.max(alpha[:, :, np.newaxis] * trans_prob, axis=1)
                 * out_prob[:, :, output[i, j]]
             )
-        # P[k]（それぞれのモデルである確率）
+        # P[k]
         P = np.max(alpha, axis=1)
         # outputのi番目が何のモデルの確率が一番高いか（argmaxでどの配列の要素が最大か取得）
         viterbi_prob[i] = np.argmax(P)
@@ -161,7 +161,7 @@ def plot_confusion(true, forward_prob, viterbi_prob):
     )
     axs[0].set_xlabel("Predicted model", fontsize=16)
     axs[0].set_ylabel("Actual model", fontsize=16)
-    axs[0].set_title(f"Forward algorithm\n(Acc.{forward_accurancy:.2f}%)", fontsize=16)
+    axs[0].set_title(f"Forward algorithm\n(Acc.{forward_accurancy:.0f}%)", fontsize=16)
 
     # viterbi
     viterbi_accurancy = 100 * accuracy_score(true, viterbi_prob)
@@ -176,7 +176,7 @@ def plot_confusion(true, forward_prob, viterbi_prob):
     )
     axs[1].set_xlabel("Predicted model", fontsize=16)
     axs[1].set_ylabel("Actual model", fontsize=16)
-    axs[1].set_title(f"Viterbi algorithm\n(Acc.{viterbi_accurancy:.2f}%)", fontsize=16)
+    axs[1].set_title(f"Viterbi algorithm\n(Acc.{viterbi_accurancy:.0f}%)", fontsize=16)
 
     plt.tight_layout()
     plt.show()
