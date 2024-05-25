@@ -1,5 +1,5 @@
 """
-pickleデータの読み込み
+pickleデータの読み込み.
 
 ForwardアルゴリズムとViterbiアルゴリズムを実装
 出力系列ごとにどのモデルから生成されたか推定
@@ -41,7 +41,7 @@ def parse_args():
 
 def forward(output, trans_prob, out_prob, init_prob):
     """
-    フォワードアルゴリズムをする
+    フォワードアルゴリズムをする.
 
     Parameters
     ----------
@@ -86,7 +86,7 @@ def forward(output, trans_prob, out_prob, init_prob):
 
 def viterbi(output, trans_prob, out_prob, init_prob):
     """
-    viterbiアルゴリズムをする
+    viterbiアルゴリズムをする.
 
     Parameters
     ----------
@@ -131,7 +131,7 @@ def viterbi(output, trans_prob, out_prob, init_prob):
 
 def plot_confusion(true, forward_prob, viterbi_prob):
     """
-    混同行列を作成
+    混同行列を作成.
 
     Parameters
     ----------
@@ -183,6 +183,7 @@ def plot_confusion(true, forward_prob, viterbi_prob):
 
 
 def main():
+    """モデルを予測."""
     args = parse_args()
     # pickleからデータを取り出す
     data = pickle.load(open(args.file, "rb"))
