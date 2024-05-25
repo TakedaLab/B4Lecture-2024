@@ -52,19 +52,21 @@ class HMM:
         predicted_model = np.zeros(self.OUT_NUM, dtype=int)  # (p, )
 
         for p in range(self.OUT_NUM):
-            # (k, l, 0) = (k, l, 0) * (k, l, o_0)
+            # (k, l) = (k, l) * (k, l)
             alpha[:, :, 0] = self.PI[:, :, 0] * self.B[:, :, self.output[p, 0]]
 
-            for t in range(self.OUT_LEN - 1):  # t -> 1 ~ t
-                # (k, l1, T+1) = np.sum( (k, l0, ax, T)*(k, l0, l1), axis=l0) * (k, l1, out[t+1]) -> (k, l1)
+            for t in range(self.OUT_LEN - 1):  # t : 1 -> t-1
+                # (k, l1) = np.sum( (k, l0, newaxis)*(k, l0, l1), axis=l0) * (k, l1)
                 alpha[:, :, t + 1] = np.sum(
                     alpha[:, :, t][:, :, np.newaxis] * self.A,
                     axis=1,
                 )
                 alpha[:, :, t + 1] *= self.B[:, :, self.output[p, t + 1]]
-            # (P, k) = np.sum(k, l, T-1, axis=l) -> (k, )
+
+            # (k, ) = np.sum( (k, l), axis=l)
             probability[p, :] = np.sum(alpha[:, :, self.OUT_LEN - 1], axis=1)
             predicted_model[p] = np.argmax(probability[p, :])
+
         return predicted_model
 
     def viterbi_algorithm(self) -> np.ndarray:
@@ -78,19 +80,21 @@ class HMM:
         predicted_model = np.zeros(self.OUT_NUM, dtype=int)  # (p, )
 
         for p in range(self.OUT_NUM):
-            # (k, l, 0) = (k, l, 0) * (k, l, o_0)
+            # (k, l) = (k, l) * (k, l)
             delta[:, :, 0] = self.PI[:, :, 0] * self.B[:, :, self.output[p, 0]]
 
-            for t in range(self.OUT_LEN - 1):  # t -> 1 ~ t
-                # (k, l1, T+1) = np.max( (k, l0, ax, T)*(k, l0, l1), axis=l0) * (k, l1, out[t+1]) -> (k, l1)
+            for t in range(self.OUT_LEN - 1):  # t : 1 -> t-1
+                # (k, l1) = np.sum( (k, l0, newaxis)*(k, l0, l1), axis=l0) * (k, l1)
                 delta[:, :, t + 1] = np.max(
                     delta[:, :, t][:, :, np.newaxis] * self.A,
                     axis=1,
                 )
                 delta[:, :, t + 1] *= self.B[:, :, self.output[p, t + 1]]
-            # (P, k) = np.max(k, l, T-1, axis=l) -> (k, )
+
+            # (k, ) = np.sum( (k, l), axis=l)
             probability[p, :] = np.max(delta[:, :, self.OUT_LEN - 1], axis=1)
             predicted_model[p] = np.argmax(probability[p, :])
+
         return predicted_model
 
     def display_result(
@@ -107,14 +111,18 @@ class HMM:
         Returns:
             None
         """
-        cm = confusion_matrix(self.answer_models, predicted_model)
+        # calculate accuracy[%]
         accuracy = accuracy_score(self.answer_models, predicted_model) * 100
+
+        # display confusion matrix
+        cm = confusion_matrix(self.answer_models, predicted_model)
         sns.heatmap(cm, ax=ax, annot=True, cmap="gray_r", cbar=False, square=True)
         ax.set_xlabel("Predicted model")
         ax.set_ylabel("Actual model")
         ax.set_title(
             f"{algorithm_name} algorithm\n(ACC. {accuracy:2.0f}%, time. {run_time:.3f}s)"
         )
+
         return None
 
 
