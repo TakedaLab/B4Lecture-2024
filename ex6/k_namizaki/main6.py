@@ -70,7 +70,7 @@ def forward(output, trans_prob, out_prob, init_prob):
     for i in range(p):
         # alphaの初期化[k,l] = [k,l] * [k,l]
         alpha = init_prob[:, :, 0] * out_prob[:, :, output[i, 0]]
-        for j in range(1,t):
+        for j in range(1, t):
             # alphaを最後のt回目まで回す{sum([k,l,newでl] * [k,l,l]) = [k,l]} * [k,l]
             alpha = (
                 np.sum(alpha[:, :, np.newaxis] * trans_prob, axis=1)
