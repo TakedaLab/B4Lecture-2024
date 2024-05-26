@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
+from openpyxl import load_workbook
 
 
 def parse_args():
@@ -64,7 +65,7 @@ def forward(
     # n_model: モデルの数(k), n_state: 状態数(l), n_output: 出力の状態数(n)
     n_model, n_state, n_output = B.shape
 
-    prob = np.zeros((n_model, n_samples))
+    probability = np.zeros((n_model, n_samples))
 
     # Forwardアルゴリズム
     for k in range(n_model):
@@ -83,9 +84,9 @@ def forward(
                 )
 
             # 確率の計算
-            prob[k, p] = np.sum(alpha[-1, :])
+            probability[k, p] = np.sum(alpha[-1, :])
 
-    return prob
+    return probability
 
 
 # Viterbiアルゴリズム
@@ -106,7 +107,7 @@ def viterbi(
     # n_model: モデルの数(k), n_state: 状態数(l), n_output: 出力の状態数(n)
     n_model, n_state, n_output = B.shape
 
-    prob = np.zeros((n_model, n_samples))
+    probability = np.zeros((n_model, n_samples))
 
     # Viterbiアルゴリズム
     for k in range(n_model):
@@ -125,9 +126,9 @@ def viterbi(
                 )
 
             # 確率の計算
-            prob[k, p] = np.max(delta[-1, :])
+            probability[k, p] = np.max(delta[-1, :])
 
-    return prob
+    return probability
 
 
 def plot_confusion_matirx(
@@ -170,13 +171,13 @@ def main():
 
     # Forwardアルゴリズム
     forward_start = time.time()
-    prob_forward = forward(output, PI, A, B)
+    probability_forward = forward(output, PI, A, B)
     forward_end = time.time()
     forward_time = round(forward_end - forward_start, 3)
 
     # Viterbiアルゴリズム
     viterbi_start = time.time()
-    prob_viterbi = viterbi(output, PI, A, B)
+    probability_viterbi = viterbi(output, PI, A, B)
     viterbi_end = time.time()
     viterbi_time = round(viterbi_end - viterbi_start, 3)
 
@@ -184,11 +185,11 @@ def main():
     plt.figure(figsize=(11, 6))
     plt.subplot(121)
     plot_confusion_matirx(
-        answer_models, np.argmax(prob_forward, axis=0), "Forward", forward_time
+        answer_models, np.argmax(probability_forward, axis=0), "Forward", forward_time
     )
     plt.subplot(122)
     plot_confusion_matirx(
-        answer_models, np.argmax(prob_viterbi, axis=0), "Viterbi", viterbi_time
+        answer_models, np.argmax(probability_viterbi, axis=0), "Viterbi", viterbi_time
     )
     plt.tight_layout()
     title = args.filename.replace("../", "").replace(".pickle", "")
