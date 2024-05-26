@@ -1,12 +1,12 @@
 """forwardとviterbiアルゴリズムを実行し、処理時間を計測する."""
 
-import pickle
 import argparse
+import pickle
 import time
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
 
@@ -39,7 +39,6 @@ def forward(output, init_prob, trans_prob, output_prob):
     Returns:
         np.ndarray: 予測結果 [p]
     """
-
     # 出力系列の数(p)、状態数(l)、出力記号数(n)、モデル数(k)を取得
     p, t = output.shape
     k, l, n = output_prob.shape
@@ -72,11 +71,9 @@ def viterbi(output, init_prob, trans_prob, output_prob):
     Returns:
         np.ndarray: 予測結果 [p]
     """
-
     # 出力系列の数(p)、状態数(l)、出力記号数(n)、モデル数(k)を取得
     p, t = output.shape
     k, l, n = output_prob.shape
-
     # viterbiアルゴリズムの実行
     viterbi_result = np.zeros(p)
     for i in range(p):
@@ -102,7 +99,6 @@ def plot(predict, answer, algorithm, time):
         algorithm (str): アルゴリズム名
         time (float): 処理時間
     """
-
     # 混合行列の作成
     cm = confusion_matrix(answer, predict)
     cm_df = pd.DataFrame(cm, columns=np.unique(answer), index=np.unique(answer))
@@ -123,9 +119,7 @@ def plot(predict, answer, algorithm, time):
 
 
 def main():
-    """
-    forwardとviterbiを実行し、処理時間を計測
-    """
+    """forwardとviterbiを実行し、処理時間を計測."""
     # データの読み込み
     filename, data = load_data()
     answer_models = np.array(data["answer_models"])
