@@ -36,7 +36,6 @@ def parse_args() -> Any:
 
 class PrincipalComponentAnalysis:
     """PrincipalComponentAnalysis."""
-
     def __init__(self, file_path: str) -> None:
         """Make self."""
         self.file_path = file_path
@@ -177,9 +176,7 @@ class PrincipalComponentAnalysis:
         """
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
-        ax.scatter(
-            self.data[:, 0], self.data[:, 1], self.data[:, 2], color="b", label="data2"
-        )
+        ax.scatter(self.data[:, 0], self.data[:, 1], self.data[:, 2], color="b", label="data2")
 
         vec1 = self.Eigenvectors.T[0]
         ax.plot(
