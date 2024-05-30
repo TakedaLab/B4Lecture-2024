@@ -1,17 +1,17 @@
 import logging
-from typing import Dict, Any
-from tqdm import tqdm
+from typing import Any, Dict
 
-from datasets import load_dataset
 import diffusers
 import hydra
-from omegaconf import DictConfig
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import TensorBoardLogger
 import torch
 import torch.nn as nn
+from datasets import load_dataset
+from omegaconf import DictConfig
+from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 from torchvision import transforms
+from tqdm import tqdm
 
 
 class DiffusionModel(pl.LightningModule):
@@ -134,12 +134,7 @@ class DiffusionModel(pl.LightningModule):
     def generate(self, num_timesteps, shape):
         x = torch.randn(shape).to(self.device)
         for t in tqdm(range(num_timesteps - 1, -1, -1)):
-            t = torch.full(
-                (x.size(0),),
-                t,
-                dtype=torch.long,
-                device=self.device
-            )
+            t = torch.full((x.size(0),), t, dtype=torch.long, device=self.device)
             x = self.p_sample(x, t)
         return x
 
@@ -177,9 +172,7 @@ def main(cfg: DictConfig) -> None:
 
     # prepare dataset
     train_dataset = load_dataset(
-        "huggan/smithsonian_butterflies_subset",
-        split="train",
-        cache_dir=cfg.datadir
+        "huggan/smithsonian_butterflies_subset", split="train", cache_dir=cfg.datadir
     )
     # preprocess
     preprocess = transforms.Compose(
@@ -191,9 +184,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     def transform(examples):
-        images = [
-            preprocess(image.convert("RGB")) for image in examples["image"]
-        ]
+        images = [preprocess(image.convert("RGB")) for image in examples["image"]]
         return {"images": images}
 
     train_dataset.set_transform(transform)
@@ -219,11 +210,7 @@ def main(cfg: DictConfig) -> None:
     # configure logger
     tb_logger = TensorBoardLogger(outdir)
     # train
-    trainer = pl.Trainer(
-        max_epochs=cfg.train.num_epochs,
-        devices=1,
-        logger=tb_logger
-    )
+    trainer = pl.Trainer(max_epochs=cfg.train.num_epochs, devices=1, logger=tb_logger)
     trainer.fit(diffmodel, train_loader)
 
     # save model
