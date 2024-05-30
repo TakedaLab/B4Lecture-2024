@@ -1,3 +1,4 @@
+"""Train the diffusion model for image denoising."""
 import logging
 from typing import Any, Dict
 
@@ -15,6 +16,8 @@ from tqdm import tqdm
 
 
 class DiffusionModel(pl.LightningModule):
+    """Diffusion model for image denoising."""
+
     def __init__(
         self,
         model: torch.nn.Module,  # Noise prediction model
@@ -27,6 +30,7 @@ class DiffusionModel(pl.LightningModule):
         image_size: tuple,  # Image size
         every_n_epochs: int,  # Visualization interval
     ) -> None:
+        """Initialize the diffusion model."""
         super(DiffusionModel, self).__init__()
         self.model = model
         self.criterion = criterion
@@ -52,6 +56,7 @@ class DiffusionModel(pl.LightningModule):
         self.every_n_epochs = every_n_epochs
 
     def configure_optimizers(self):
+        """Configure optimizer."""
         return self.optimizer
 
     def forward(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
@@ -69,7 +74,7 @@ class DiffusionModel(pl.LightningModule):
     def q_sample(
         self, x0: torch.Tensor, t: torch.Tensor, noise: torch.Tensor = None
     ) -> torch.Tensor:
-        """Forward process of the diffusion model. x_t ~ q(x_t|x_0)
+        """Forward process of the diffusion model. x_t ~ q(x_t|x_0).
 
         Args:
             x0 (torch.Tensor): Clean image x_0 (B, C, H, W)
@@ -85,7 +90,7 @@ class DiffusionModel(pl.LightningModule):
         return x0 * a.sqrt() + noise * (1 - a).sqrt()
 
     def p_sample(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
-        """Inverse process of the diffusion model. x_t ~ p(x_t|x_{t+1})
+        """Inverse process of the diffusion model. x_t ~ p(x_t|x_{t+1}).
 
         Args:
             x (torch.Tensor): Noisy image x_{t+1} (B, C, H, W)
@@ -106,7 +111,7 @@ class DiffusionModel(pl.LightningModule):
             return x
 
     def training_step(self, batch, batch_idx):
-        """Training 1 step
+        """Training 1 step.
 
         Args:
             batch (tuple): Input batch
@@ -132,6 +137,7 @@ class DiffusionModel(pl.LightningModule):
         return loss
 
     def generate(self, num_timesteps, shape):
+        """Generate samples from the diffusion model."""
         x = torch.randn(shape).to(self.device)
         for t in tqdm(range(num_timesteps - 1, -1, -1)):
             t = torch.full((x.size(0),), t, dtype=torch.long, device=self.device)
@@ -139,6 +145,7 @@ class DiffusionModel(pl.LightningModule):
         return x
 
     def on_train_epoch_end(self):
+        """Generate images at the end of each epoch."""
         if self.current_epoch % self.every_n_epochs == self.every_n_epochs - 1:
             logging.info("Generating Images...")
             generated_image = self.generate(
@@ -163,6 +170,7 @@ class DiffusionModel(pl.LightningModule):
 
 @hydra.main(config_path="conf", config_name="default.yaml", version_base=None)
 def main(cfg: DictConfig) -> None:
+    """Train the diffusion model."""
     # fix seed
     torch.manual_seed(cfg.seed)
     torch.cuda.manual_seed(cfg.seed)
@@ -184,6 +192,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     def transform(examples):
+        """Transform function for the dataset."""
         images = [preprocess(image.convert("RGB")) for image in examples["image"]]
         return {"images": images}
 
