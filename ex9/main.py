@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import Dict, Any
 from tqdm import tqdm
 
@@ -7,7 +6,6 @@ from datasets import load_dataset
 import diffusers
 import hydra
 from omegaconf import DictConfig
-from matplotlib import pyplot as plt
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 import torch
@@ -18,16 +16,16 @@ from torchvision import transforms
 
 class DiffusionModel(pl.LightningModule):
     def __init__(
-        self, 
-        model : torch.nn.Module,                # Noise prediction model
-        criterion : torch.nn.Module,            # Loss function
-        optimizer : torch.optim.Optimizer,      # Optimizer
-        num_timesteps : int,                    # Time steps of the diffusion
-        noise_schedule : str,                   # Noise scheduler type
-        noise_schedule_kwargs : Dict[str, Any], # Arguments for noise scheduler
-        num_samples : tuple,                    # Number of samples for visualization
-        image_size : tuple,                     # Image size
-        every_n_epochs : int,                   # Visualization interval
+        self,
+        model: torch.nn.Module,  # Noise prediction model
+        criterion: torch.nn.Module,  # Loss function
+        optimizer: torch.optim.Optimizer,  # Optimizer
+        num_timesteps: int,  # Time steps of the diffusion
+        noise_schedule: str,  # Noise scheduler type
+        noise_schedule_kwargs: Dict[str, Any],  # Arguments for noise scheduler
+        num_samples: tuple,  # Number of samples for visualization
+        image_size: tuple,  # Image size
+        every_n_epochs: int,  # Visualization interval
     ) -> None:
         super(DiffusionModel, self).__init__()
         self.model = model
@@ -38,12 +36,12 @@ class DiffusionModel(pl.LightningModule):
 
         if noise_schedule == "linear":
             beta = torch.linspace(
-                noise_schedule_kwargs["start"], 
-                noise_schedule_kwargs["end"], 
-                num_timesteps, 
-                device=model.device
+                noise_schedule_kwargs["start"],
+                noise_schedule_kwargs["end"],
+                num_timesteps,
+                device=model.device,
             )
-            alpha = 1. - beta
+            alpha = 1.0 - beta
             alpha_prod = alpha.cumprod(dim=0)
             self.register_buffer("beta", beta)
             self.register_buffer("alpha", alpha)
@@ -56,7 +54,7 @@ class DiffusionModel(pl.LightningModule):
     def configure_optimizers(self):
         return self.optimizer
 
-    def forward(self, x : torch.Tensor, t : torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         """Forward noise prediction model.
 
         Args:
@@ -68,7 +66,9 @@ class DiffusionModel(pl.LightningModule):
         """
         return self.model(x, t).sample
 
-    def q_sample(self, x0 : torch.Tensor, t : torch.Tensor, noise : torch.Tensor=None) -> torch.Tensor:
+    def q_sample(
+        self, x0: torch.Tensor, t: torch.Tensor, noise: torch.Tensor = None
+    ) -> torch.Tensor:
         """Forward process of the diffusion model. x_t ~ q(x_t|x_0)
 
         Args:
@@ -81,8 +81,8 @@ class DiffusionModel(pl.LightningModule):
         """
         # TODO
 
-    def p_sample(self, x : torch.Tensor, t : torch.Tensor) -> torch.Tensor:
-        """Reverse process of the diffusion model. x_t ~ p(x_t|x_{t+1})
+    def p_sample(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
+        """Inverse process of the diffusion model. x_t ~ p(x_t|x_{t+1})
 
         Args:
             x (torch.Tensor): Noisy image x_{t+1} (B, C, H, W)
@@ -94,7 +94,7 @@ class DiffusionModel(pl.LightningModule):
         # TODO
 
     def training_step(self, batch, batch_idx):
-        """Training step.
+        """Training 1 step
 
         Args:
             batch (tuple): Input batch
@@ -109,33 +109,41 @@ class DiffusionModel(pl.LightningModule):
         # TODO
 
     def generate(self, num_timesteps, shape):
-        """Generate samples from the model.
-        Args:
-            num_timesteps (int): Number of time steps
-            shape (tuple): Shape of the generated samples
-        Returns:
-            torch.Tensor: Generated samples
-        """
-        # TODO
-    
+        x = torch.randn(shape).to(self.device)
+        for t in tqdm(range(num_timesteps - 1, -1, -1)):
+            t = torch.full(
+                (x.size(0),),
+                t,
+                dtype=torch.long,
+                device=self.device
+            )
+            x = self.p_sample(x, t)
+        return x
+
     def on_train_epoch_end(self):
-        if self.current_epoch % self.every_n_epochs == self.every_n_epochs-1:
+        if self.current_epoch % self.every_n_epochs == self.every_n_epochs - 1:
             logging.info("Generating Images...")
-            generated_image = self.generate(self.num_timesteps, (self.num_samples[0]*self.num_samples[1],) + self.image_size)
-            generated_image = (generated_image + 1)/2
-            generated_image = generated_image.reshape(
-                self.num_samples + self.image_size
-                ).permute([2, 0, 3, 1, 4]).flatten(-4,-3).flatten(-2,-1)
+            generated_image = self.generate(
+                self.num_timesteps,
+                (self.num_samples[0] * self.num_samples[1],) + self.image_size,
+            )
+            generated_image = (generated_image + 1) / 2
+            generated_image = (
+                generated_image.reshape(self.num_samples + self.image_size)
+                .permute([2, 0, 3, 1, 4])
+                .flatten(-4, -3)
+                .flatten(-2, -1)
+            )
             self.logger.experiment.add_image(
-                "Generated Images", 
-                generated_image, 
-                self.current_epoch, 
-                dataformats='HW' if generated_image.ndim == 2 else 'CHW'
+                "Generated Images",
+                generated_image,
+                self.current_epoch,
+                dataformats="HW" if generated_image.ndim == 2 else "CHW",
             )
             logging.info("Done.")
 
 
-@hydra.main(config_path='conf', config_name="default.yaml", version_base=None)
+@hydra.main(config_path="conf", config_name="default.yaml", version_base=None)
 def main(cfg: DictConfig) -> None:
     # fix seed
     torch.manual_seed(cfg.seed)
@@ -145,26 +153,38 @@ def main(cfg: DictConfig) -> None:
     outdir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir
 
     # prepare dataset
-    train_dataset = load_dataset("huggan/smithsonian_butterflies_subset", split="train", cache_dir=cfg.datadir)
+    train_dataset = load_dataset(
+        "huggan/smithsonian_butterflies_subset",
+        split="train",
+        cache_dir=cfg.datadir
+    )
     # preprocess
-    preprocess = transforms.Compose([
-        transforms.Resize(cfg.plot.image_size[-2:]),    # Resize
-        transforms.ToTensor(),                          # ToTensor
-        transforms.Normalize([0.5], [0.5]),             # Normalize to [-1, 1]
-    ])
+    preprocess = transforms.Compose(
+        [
+            transforms.Resize(cfg.plot.image_size[-2:]),  # Resize
+            transforms.ToTensor(),  # ToTensor
+            transforms.Normalize([0.5], [0.5]),  # Normalize to [-1, 1]
+        ]
+    )
+
     def transform(examples):
-        images = [preprocess(image.convert("RGB")) for image in examples["image"]]
+        images = [
+            preprocess(image.convert("RGB")) for image in examples["image"]
+        ]
         return {"images": images}
+
     train_dataset.set_transform(transform)
 
-    train_loader = DataLoader(train_dataset, batch_size=cfg.train.batch_size, shuffle=True)
+    train_loader = DataLoader(
+        train_dataset, batch_size=cfg.train.batch_size, shuffle=True
+    )
 
     model = diffusers.UNet2DModel(**cfg.model)
     criterion = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), **cfg.optimizer)
 
     diffmodel = DiffusionModel(
-        model, 
+        model,
         criterion,
         optimizer,
         **cfg.diffusion,
@@ -176,12 +196,16 @@ def main(cfg: DictConfig) -> None:
     # configure logger
     tb_logger = TensorBoardLogger(outdir)
     # train
-    trainer = pl.Trainer(max_epochs=cfg.train.num_epochs, devices=1, logger=tb_logger)
+    trainer = pl.Trainer(
+        max_epochs=cfg.train.num_epochs,
+        devices=1,
+        logger=tb_logger
+    )
     trainer.fit(diffmodel, train_loader)
 
     # save model
     torch.save(diffmodel.state_dict(), outdir + "/model.pth")
-    
+
 
 if __name__ == "__main__":
     main()
