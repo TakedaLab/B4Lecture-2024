@@ -1,4 +1,5 @@
 """Train the diffusion model for image denoising."""
+
 import logging
 from typing import Any, Dict
 
