@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-B4輪講最終課題 パターン認識に挑戦してみよう
-ベースラインスクリプト(Pytorch Lightning版)
-特徴量；MFCCの平均（0次項含まず）
-識別器；MLP
+B4輪講最終課題 パターン認識.
+ベースラインスクリプト: Pytorch Lightning版
+特徴量: MFCCの平均*5 + PCA
+識別器: MLP
 """
 import argparse
 import os
@@ -21,29 +21,39 @@ from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 from torch.utils.data import Dataset, random_split
 
+# root = ../ex7
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class my_MLP(pl.LightningModule):
-    def __init__(self, input_dim, output_dim):
+    """MLPによるパターン認識モデル."""
+
+    def __init__(self, input_dim: int, output_dim: int) -> None:
+        """モデルの初期化を行う.
+
+        Args:
+            input_dim (int): モデルの入力次元数.
+            output_dim (int): モデルの出力次元数.
+        """
         super().__init__()
         self.model = self.create_model(input_dim, output_dim)
-        self.loss_fn = torch.nn.CrossEntropyLoss()
-        self.train_acc = torchmetrics.Accuracy()
-        self.val_acc = torchmetrics.Accuracy()
-        self.test_acc = torchmetrics.Accuracy()
-        self.confm = torchmetrics.ConfusionMatrix(10, normalize="true")
-        self.test_step_outputs = []  # TODO:　新ver
-        self.validation_step_outputs = []  # TODO:　新ver
+        self.loss_fn = torch.nn.CrossEntropyLoss()  # 損失関数
+        self.train_acc = torchmetrics.Accuracy()  # trainデータのACC.
+        self.val_acc = torchmetrics.Accuracy()  # validationデータのACC.
+        self.test_acc = torchmetrics.Accuracy()  # testデータのACC.
+        self.confm = torchmetrics.ConfusionMatrix(10, normalize="true")  # 混同行列
+        self.validation_step_outputs = []  # validationデータの認識結果
+        self.test_step_outputs = []  # testデータの認識結果
 
-    def create_model(self, input_dim, output_dim):
-        """
-        MLPモデルの構築
+    def create_model(self, input_dim: int, output_dim: int) -> torch.nn.Sequential:
+        """MLPモデルを作成する.
+
         Args:
-            input_dim: 入力の形
-            output_dim: 出力次元
+            input_dim (int): モデルの入力次元数.
+            output_dim (int): モデルの出力次元数.
+
         Returns:
-            model: 定義済みモデル
+            torch.nn.Sequential: 定義済みモデル.
         """
         model = torch.nn.Sequential(
             torch.nn.Linear(input_dim, 256),
@@ -91,7 +101,7 @@ class my_MLP(pl.LightningModule):
         self.log("val/acc", self.val_acc(pred, y), prog_bar=True, logger=True)
         self.validation_step_outputs.append(
             {"pred": torch.argmax(pred, dim=-1), "target": y}
-        )  # TODO:　新ver
+        )
         return loss
 
     def test_step(self, batch, batch_idx, dataloader_id=None):
@@ -99,13 +109,11 @@ class my_MLP(pl.LightningModule):
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
         self.log("test/acc", self.test_acc(pred, y), prog_bar=True, logger=True)
-        self.test_step_outputs.append(
-            {"pred": torch.argmax(pred, dim=-1), "target": y}
-        )  # TODO:　新ver
+        self.test_step_outputs.append({"pred": torch.argmax(pred, dim=-1), "target": y})
         return {"pred": torch.argmax(pred, dim=-1), "target": y}
 
     def validation_epoch_end(self, outputs) -> None:
-        # 混同行列を tensorboard に出力
+        # validationデータの混同行列を tensorboard に出力
         preds = torch.cat([tmp["pred"] for tmp in self.validation_step_outputs])
         targets = torch.cat([tmp["target"] for tmp in self.validation_step_outputs])
         confusion_matrix = self.confm(preds, targets)
@@ -114,16 +122,13 @@ class my_MLP(pl.LightningModule):
         )
         plt.figure(figsize=(10, 7))
         fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
-        plt.savefig(
-            os.path.join(root, "h_miyaji", "figs", "result_validation_meanx5PCA39.png")
-        )
+        # plt.savefig(os.path.join(root, "h_miyaji", "figs", "result_validation.png"))
         plt.close(fig_)
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
         self.validation_step_outputs.clear()
 
-    # TODO: 新ver 旧：test_epoch_end(self, outputs)
-    def on_test_epoch_end(self) -> None:
-        # 混同行列を tensorboard に出力
+    def test_epoch_end(self, outputs) -> None:
+        # testデータの混同行列を tensorboard に出力
         preds = torch.cat([tmp["pred"] for tmp in self.test_step_outputs])
         targets = torch.cat([tmp["target"] for tmp in self.test_step_outputs])
         confusion_matrix = self.confm(preds, targets)
@@ -131,7 +136,7 @@ class my_MLP(pl.LightningModule):
             confusion_matrix.cpu().numpy(), index=range(10), columns=range(10)
         )
         plt.figure(figsize=(10, 7))
-        fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
+        fig_ = sns.heatmap(df_cm, annot=True, cmap="Blues").get_figure()
         plt.savefig(os.path.join(root, "h_miyaji", "figs", "result_test.png"))
         plt.close(fig_)
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
@@ -142,23 +147,31 @@ class my_MLP(pl.LightningModule):
 
 
 class FSDD(Dataset):
-    def __init__(self, path_list, label) -> None:
+    """認識に使用するデータセット."""
+
+    def __init__(self, path_list: list, label: list) -> None:
+        """データセットの初期化を行う.
+
+        Args:
+            path_list (list): データのパスリスト.
+            label (list): データの正解ラベル.
+        """
         super().__init__()
         self.features = self.feature_extraction(path_list)
         self.label = label
 
-    def feature_extraction(self, path_list):
-        """
-        wavファイルのリストから特徴抽出を行いリストで返す
-        扱う特徴量はMFCC13次元の平均（0次は含めない）
+    def feature_extraction(self, path_list: list) -> torch.Tensor:
+        """wavファイルのリストから特徴抽出を行う.
+
         Args:
-            root: dataset が存在するディレクトリ=ex7
-            path_list: 特徴抽出するファイルのパスリスト
+            path_list (list): 特徴抽出するファイルのパスリスト.
+
         Returns:
-            features: 特徴量
+            torch.Tensor: 特徴量(MFCC平均+PCA).
         """
         n_mfcc = 13  # MFCC13次元
         datasize = len(path_list)  # ファイルパスの個数
+
         # 特徴量を保存する配列(datasize, MFCC次元数*5)
         features = torch.zeros(datasize, n_mfcc * 5)
 
@@ -166,19 +179,21 @@ class FSDD(Dataset):
         transform = torchaudio.transforms.MFCC(
             n_mfcc=13, melkwargs={"n_mels": 64, "n_fft": 512}
         )
+
         for i, path in enumerate(path_list):
             # data.shape==(channel,time)
             data, _ = torchaudio.load(os.path.join(root, path))
             mfcc = transform(data[0])
             mean_all = torch.mean(mfcc, axis=1)
 
-            # MFCCの時間方向の次元が7未満の場合、パディングする
+            # MFCCの時間方向の次元が7未満の場合, パディングする
             if mfcc.shape[1] < 7:
                 pad_width = 7 - mfcc.shape[1]
                 mfcc = torch.nn.functional.pad(
                     mfcc, (0, pad_width), mode="constant", value=0.0
                 )
 
+            # 時間方向にデータを4分割し, それぞれで平均をとる
             split = [
                 int(mfcc.shape[1] * 0.25),
                 int(mfcc.shape[1] * 0.5),
@@ -190,17 +205,18 @@ class FSDD(Dataset):
             mean_4 = torch.mean(mfcc[:, split[2] + 1 :], axis=1)
             features[i] = torch.cat((mean_all, mean_1, mean_2, mean_3, mean_4))
 
-        # print("--break point--")
         features = self.apply_pca(features, 13 * 3)
         return features
 
-    def apply_pca(self, features, n_components):
-        """
-        特徴量にPCAを適用して主成分を取得する
+    def apply_pca(self, features: torch.Tensor, n_components: int) -> torch.Tensor:
+        """PCAを適用し, 主成分を取得する.
+
         Args:
-            n_components: 抽出する主成分の数
+            features (torch.Tensor): 特徴量.
+            n_components (_type_): 主成分の次元数.
+
         Returns:
-            principal_components: 主成分
+            torch.Tensor: PCA後の特徴量.
         """
         features_np = features.numpy()
         pca = PCA(n_components=n_components)
@@ -216,6 +232,9 @@ class FSDD(Dataset):
 
 
 def main():
+    """wavファイルに対して認識モデルを作成し, 学習とテストを行う."""
+
+    # 引数取得
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--path_to_truth", type=str, help="テストデータの正解ファイルCSVのパス"
@@ -230,10 +249,10 @@ def main():
 
     # Train/Validation 分割
     val_size = int(len(train_dataset) * 0.2)  # dataset内の20%をテストデータとする
-    train_size = len(train_dataset) - val_size  # すなわち80%で学習する
+    train_size = len(train_dataset) - val_size
     train_dataset, val_dataset = random_split(
         train_dataset, [train_size, val_size], torch.Generator().manual_seed(20200616)
-    )  # train_datasetを分ける
+    )
 
     if args.path_to_truth:  # 正解ファイルが実行時に指定されていたとき
         # Test Dataset の作成
@@ -254,9 +273,8 @@ def main():
     # モデルの構築 # 出力が10次元（0~9）
     model = my_MLP(input_dim=train_dataset[0][0].shape[0], output_dim=10)
 
-    # 学習の設定 # 学習エポック数とGPUorCPU設定？
-    # trainer = pl.Trainer(max_epochs=100, gpus=1) 旧ver
-    trainer = pl.Trainer(max_epochs=100, accelerator="gpu", devices=1)  # TODO:　新ver
+    # 学習の設定
+    trainer = pl.Trainer(max_epochs=100, accelerator="gpu", devices=1)
 
     # モデルの学習
     trainer.fit(model=model, datamodule=datamodule)
