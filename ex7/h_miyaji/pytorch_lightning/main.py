@@ -10,6 +10,7 @@ B4輪講最終課題 パターン認識に挑戦してみよう
 import argparse
 import os
 
+import numpy as np
 import pandas as pd
 import pytorch_lightning as pl
 import seaborn as sns
@@ -17,6 +18,7 @@ import torch
 import torchaudio
 import torchmetrics
 from matplotlib import pyplot as plt
+from sklearn.decomposition import PCA
 from torch.utils.data import Dataset, random_split
 
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -113,7 +115,7 @@ class my_MLP(pl.LightningModule):
         plt.figure(figsize=(10, 7))
         fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
         plt.savefig(
-            os.path.join(root, "h_miyaji", "figs", "result_validation_meanx3.png")
+            os.path.join(root, "h_miyaji", "figs", "result_validation_meanx5.png")
         )
         plt.close(fig_)
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
@@ -157,9 +159,8 @@ class FSDD(Dataset):
         """
         n_mfcc = 13  # MFCC13次元
         datasize = len(path_list)  # ファイルパスの個数
-        # 特徴量を保存する配列(datasize, MFCC次元数)
-        features = torch.zeros(datasize, n_mfcc * 3)
-        # features = []
+        # 特徴量を保存する配列(datasize, MFCC次元数*5)
+        features = torch.zeros(datasize, n_mfcc * 5)
 
         # waveform -> MFCC
         transform = torchaudio.transforms.MFCC(
@@ -170,16 +171,64 @@ class FSDD(Dataset):
             data, _ = torchaudio.load(os.path.join(root, path))
             mfcc = transform(data[0])
             mean_all = torch.mean(mfcc, axis=1)
-            mean_fh = torch.mean(mfcc[:, : int(mfcc.shape[1] / 2)], axis=1)
-            mean_lh = torch.mean(mfcc[:, int(mfcc.shape[1] / 2) + 1 :], axis=1)
-            features[i] = torch.cat((mean_all, mean_fh, mean_lh))
 
-            # features.append(mfcc.T)
+            # MFCCの時間方向の次元が7未満の場合、パディングする
+            shape = 10
+            if mfcc.shape[1] < 7:
+                shape = mfcc.shape[1]
+                pad_width = 7 - mfcc.shape[1]
+                mfcc = torch.nn.functional.pad(
+                    mfcc, (0, pad_width), mode="constant", value=0.0
+                )
 
-        # # list -> Tensor
-        # features = torch.nn.utils.rnn.pad_sequence(features, batch_first=True)
-        # print("--break point--")
+            split = [
+                int(mfcc.shape[1] * 0.25),
+                int(mfcc.shape[1] * 0.5),
+                int(mfcc.shape[1] * 0.75),
+            ]
+            mean_1 = torch.mean(mfcc[:, : split[0]], axis=1)
+            mean_2 = torch.mean(mfcc[:, split[0] + 1 : split[1]], axis=1)
+            mean_3 = torch.mean(mfcc[:, split[1] + 1 : split[2]], axis=1)
+            mean_4 = torch.mean(mfcc[:, split[2] + 1 :], axis=1)
+            features[i] = torch.cat((mean_all, mean_1, mean_2, mean_3, mean_4))
+
+            # NaNを確認する
+            if shape < 7:
+                print(f"NaN found in features for file {path}")
+                # デバッグ用に中間結果を出力
+                print(f"i: {i}")
+                print(f"mfcc[i]: {mfcc}")
+                print(f"split: {split}")
+                print(f"MFCC shape: {mfcc.shape}")
+                print(f"Mean_all: {mean_all}")
+                print(f"Mean_1: {mean_1}")
+                print(f"Mean_2: {mean_2}")
+                print(f"Mean_3: {mean_3}")
+                print(f"Mean_4: {mean_4}")
+                break
+
+        print("--break point--")
+        features = self.apply_pca(features, 13)
         return features
+
+    def apply_pca(self, features, n_components):
+        """
+        特徴量にPCAを適用して主成分を取得する
+        Args:
+            n_components: 抽出する主成分の数
+        Returns:
+            principal_components: 主成分
+        """
+        # # 標準化
+        features_np = features.numpy()
+        # features_np -= np.mean(features_np, axis=0)
+        # features_np /= np.std(features_np, axis=0)
+
+        # PCAの適用
+        pca = PCA(n_components=n_components)
+        principal_components = pca.fit_transform(features_np)
+
+        return torch.tensor(principal_components)
 
     def __len__(self):
         return self.features.shape[0]
