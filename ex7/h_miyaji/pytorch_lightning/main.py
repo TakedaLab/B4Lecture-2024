@@ -115,7 +115,7 @@ class my_MLP(pl.LightningModule):
         plt.figure(figsize=(10, 7))
         fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
         plt.savefig(
-            os.path.join(root, "h_miyaji", "figs", "result_validation_meanx5.png")
+            os.path.join(root, "h_miyaji", "figs", "result_validation_meanx5PCA39.png")
         )
         plt.close(fig_)
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
@@ -191,7 +191,7 @@ class FSDD(Dataset):
             features[i] = torch.cat((mean_all, mean_1, mean_2, mean_3, mean_4))
 
         # print("--break point--")
-        # features = self.apply_pca(features, 13)
+        features = self.apply_pca(features, 13 * 3)
         return features
 
     def apply_pca(self, features, n_components):
@@ -202,12 +202,7 @@ class FSDD(Dataset):
         Returns:
             principal_components: 主成分
         """
-        # # 標準化
         features_np = features.numpy()
-        # features_np -= np.mean(features_np, axis=0)
-        # features_np /= np.std(features_np, axis=0)
-
-        # PCAの適用
         pca = PCA(n_components=n_components)
         principal_components = pca.fit_transform(features_np)
 
