@@ -18,10 +18,10 @@ Trainer
     Docs: https://pytorch-lightning.readthedocs.io/en/stable/common/trainer.html
     API Refference: https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html
 """
+
+
 import argparse
 import os
-import pprint
-import sys
 
 import pandas as pd
 import pytorch_lightning as pl
@@ -33,7 +33,6 @@ from matplotlib import pyplot as plt
 from torch.utils.data import Dataset, random_split
 
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# 実行中ファイルの絶対パス取得→親ディレクトリを3回辿ってex7をrootとしている
 
 
 class my_MLP(pl.LightningModule):
@@ -45,6 +44,8 @@ class my_MLP(pl.LightningModule):
         self.val_acc = torchmetrics.Accuracy()
         self.test_acc = torchmetrics.Accuracy()
         self.confm = torchmetrics.ConfusionMatrix(10, normalize="true")
+        self.test_step_outputs = []  # TODO:　新ver
+        self.validation_step_outputs = []  # TODO:　新ver
 
     def create_model(self, input_dim, output_dim):
         """
@@ -99,6 +100,9 @@ class my_MLP(pl.LightningModule):
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
         self.log("val/acc", self.val_acc(pred, y), prog_bar=True, logger=True)
+        self.validation_step_outputs.append(
+            {"pred": torch.argmax(pred, dim=-1), "target": y}
+        )  # TODO:　新ver
         return loss
 
     def test_step(self, batch, batch_idx, dataloader_id=None):
@@ -106,18 +110,38 @@ class my_MLP(pl.LightningModule):
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
         self.log("test/acc", self.test_acc(pred, y), prog_bar=True, logger=True)
+        self.test_step_outputs.append(
+            {"pred": torch.argmax(pred, dim=-1), "target": y}
+        )  # TODO:　新ver
         return {"pred": torch.argmax(pred, dim=-1), "target": y}
 
-    def test_epoch_end(self, outputs) -> None:
+    def validation_epoch_end(self, outputs) -> None:
         # 混同行列を tensorboard に出力
-        preds = torch.cat([tmp["pred"] for tmp in outputs])
-        targets = torch.cat([tmp["target"] for tmp in outputs])
+        preds = torch.cat([tmp["pred"] for tmp in self.validation_step_outputs])
+        targets = torch.cat([tmp["target"] for tmp in self.validation_step_outputs])
         confusion_matrix = self.confm(preds, targets)
         df_cm = pd.DataFrame(
             confusion_matrix.cpu().numpy(), index=range(10), columns=range(10)
         )
         plt.figure(figsize=(10, 7))
         fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
+        plt.savefig(os.path.join(root, "h_miyaji", "figs", "result_validation.png"))
+        plt.close(fig_)
+        self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
+        self.validation_step_outputs.clear()
+
+    # TODO: 新ver 旧：test_epoch_end(self, outputs)
+    def on_test_epoch_end(self) -> None:
+        # 混同行列を tensorboard に出力
+        preds = torch.cat([tmp["pred"] for tmp in self.test_step_outputs])
+        targets = torch.cat([tmp["target"] for tmp in self.test_step_outputs])
+        confusion_matrix = self.confm(preds, targets)
+        df_cm = pd.DataFrame(
+            confusion_matrix.cpu().numpy(), index=range(10), columns=range(10)
+        )
+        plt.figure(figsize=(10, 7))
+        fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
+        plt.savefig(os.path.join(root, "h_miyaji", "figs", "result_test.png"))
         plt.close(fig_)
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
 
@@ -171,9 +195,6 @@ def main():
     )
     args = parser.parse_args()
 
-    # pprint.pprint(sys.path)
-    # print(f"{root=}") # ~ex7
-
     # データの読み込み
     training = pd.read_csv(os.path.join(root, "training.csv"))
 
@@ -207,7 +228,8 @@ def main():
     model = my_MLP(input_dim=train_dataset[0][0].shape[0], output_dim=10)
 
     # 学習の設定 # 学習エポック数とGPUorCPU設定？
-    trainer = pl.Trainer(max_epochs=100, gpus=1)
+    # trainer = pl.Trainer(max_epochs=100, gpus=1) 旧ver
+    trainer = pl.Trainer(max_epochs=100, accelerator="gpu", devices=1)  # TODO:　新ver
 
     # モデルの学習
     trainer.fit(model=model, datamodule=datamodule)
