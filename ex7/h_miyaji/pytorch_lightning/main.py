@@ -4,7 +4,7 @@
 """
 B4輪講最終課題 パターン認識.
 ベースラインスクリプト: Pytorch Lightning版
-特徴量: MFCCの平均*5 + PCA
+特徴量: MFCCの平均*5
 識別器: MLP
 """
 import argparse
@@ -124,7 +124,9 @@ class my_MLP(pl.LightningModule):
         fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
         # plt.savefig(os.path.join(root, "h_miyaji", "figs", "result_validation.png"))
         plt.close(fig_)
-        self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
+        self.logger.experiment.add_figure(
+            "Confusion matrix (val)", fig_, self.current_epoch
+        )
         self.validation_step_outputs.clear()
 
     def test_epoch_end(self, outputs) -> None:
@@ -139,7 +141,9 @@ class my_MLP(pl.LightningModule):
         fig_ = sns.heatmap(df_cm, annot=True, cmap="Blues").get_figure()
         plt.savefig(os.path.join(root, "h_miyaji", "figs", "result_test.png"))
         plt.close(fig_)
-        self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
+        self.logger.experiment.add_figure(
+            "Confusion matrix (test)", fig_, self.current_epoch
+        )
 
     def configure_optimizers(self):
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.002)
@@ -167,7 +171,7 @@ class FSDD(Dataset):
             path_list (list): 特徴抽出するファイルのパスリスト.
 
         Returns:
-            torch.Tensor: 特徴量(MFCC平均+PCA).
+            torch.Tensor: 特徴量(MFCC平均).
         """
         n_mfcc = 13  # MFCC13次元
         datasize = len(path_list)  # ファイルパスの個数
@@ -205,24 +209,7 @@ class FSDD(Dataset):
             mean_4 = torch.mean(mfcc[:, split[2] + 1 :], axis=1)
             features[i] = torch.cat((mean_all, mean_1, mean_2, mean_3, mean_4))
 
-        features = self.apply_pca(features, 13 * 3)
         return features
-
-    def apply_pca(self, features: torch.Tensor, n_components: int) -> torch.Tensor:
-        """PCAを適用し, 主成分を取得する.
-
-        Args:
-            features (torch.Tensor): 特徴量.
-            n_components (_type_): 主成分の次元数.
-
-        Returns:
-            torch.Tensor: PCA後の特徴量.
-        """
-        features_np = features.numpy()
-        pca = PCA(n_components=n_components)
-        principal_components = pca.fit_transform(features_np)
-
-        return torch.tensor(principal_components)
 
     def __len__(self):
         return self.features.shape[0]
