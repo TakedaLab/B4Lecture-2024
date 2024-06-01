@@ -7,19 +7,6 @@ B4輪講最終課題 パターン認識に挑戦してみよう
 特徴量；MFCCの平均（0次項含まず）
 識別器；MLP
 """
-
-"""
-pytorch-lightning 
-    Docs: https://pytorch-lightning.readthedocs.io/
-LightningModule
-    Docs: https://pytorch-lightning.readthedocs.io/en/stable/common/lightning_module.html
-    API Refference: https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.core.LightningModule.html
-Trainer
-    Docs: https://pytorch-lightning.readthedocs.io/en/stable/common/trainer.html
-    API Refference: https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html
-"""
-
-
 import argparse
 import os
 
@@ -125,7 +112,9 @@ class my_MLP(pl.LightningModule):
         )
         plt.figure(figsize=(10, 7))
         fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
-        plt.savefig(os.path.join(root, "h_miyaji", "figs", "result_validation.png"))
+        plt.savefig(
+            os.path.join(root, "h_miyaji", "figs", "result_validation_meanx3.png")
+        )
         plt.close(fig_)
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
         self.validation_step_outputs.clear()
@@ -169,7 +158,8 @@ class FSDD(Dataset):
         n_mfcc = 13  # MFCC13次元
         datasize = len(path_list)  # ファイルパスの個数
         # 特徴量を保存する配列(datasize, MFCC次元数)
-        features = torch.zeros(datasize, n_mfcc)
+        features = torch.zeros(datasize, n_mfcc * 3)
+        # features = []
 
         # waveform -> MFCC
         transform = torchaudio.transforms.MFCC(
@@ -178,7 +168,17 @@ class FSDD(Dataset):
         for i, path in enumerate(path_list):
             # data.shape==(channel,time)
             data, _ = torchaudio.load(os.path.join(root, path))
-            features[i] = torch.mean(transform(data[0]), axis=1)
+            mfcc = transform(data[0])
+            mean_all = torch.mean(mfcc, axis=1)
+            mean_fh = torch.mean(mfcc[:, : int(mfcc.shape[1] / 2)], axis=1)
+            mean_lh = torch.mean(mfcc[:, int(mfcc.shape[1] / 2) + 1 :], axis=1)
+            features[i] = torch.cat((mean_all, mean_fh, mean_lh))
+
+            # features.append(mfcc.T)
+
+        # # list -> Tensor
+        # features = torch.nn.utils.rnn.pad_sequence(features, batch_first=True)
+        # print("--break point--")
         return features
 
     def __len__(self):
