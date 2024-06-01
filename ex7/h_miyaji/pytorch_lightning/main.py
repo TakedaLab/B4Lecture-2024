@@ -173,9 +173,7 @@ class FSDD(Dataset):
             mean_all = torch.mean(mfcc, axis=1)
 
             # MFCCの時間方向の次元が7未満の場合、パディングする
-            shape = 10
             if mfcc.shape[1] < 7:
-                shape = mfcc.shape[1]
                 pad_width = 7 - mfcc.shape[1]
                 mfcc = torch.nn.functional.pad(
                     mfcc, (0, pad_width), mode="constant", value=0.0
@@ -192,23 +190,8 @@ class FSDD(Dataset):
             mean_4 = torch.mean(mfcc[:, split[2] + 1 :], axis=1)
             features[i] = torch.cat((mean_all, mean_1, mean_2, mean_3, mean_4))
 
-            # NaNを確認する
-            if shape < 7:
-                print(f"NaN found in features for file {path}")
-                # デバッグ用に中間結果を出力
-                print(f"i: {i}")
-                print(f"mfcc[i]: {mfcc}")
-                print(f"split: {split}")
-                print(f"MFCC shape: {mfcc.shape}")
-                print(f"Mean_all: {mean_all}")
-                print(f"Mean_1: {mean_1}")
-                print(f"Mean_2: {mean_2}")
-                print(f"Mean_3: {mean_3}")
-                print(f"Mean_4: {mean_4}")
-                break
-
-        print("--break point--")
-        features = self.apply_pca(features, 13)
+        # print("--break point--")
+        # features = self.apply_pca(features, 13)
         return features
 
     def apply_pca(self, features, n_components):
