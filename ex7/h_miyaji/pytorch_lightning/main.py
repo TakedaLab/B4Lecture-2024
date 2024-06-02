@@ -37,11 +37,13 @@ class my_MLP(pl.LightningModule):
         """
         super().__init__()
         self.model = self.create_model(input_dim, output_dim)
-        self.loss_fn = torch.nn.CrossEntropyLoss()  # 損失関数
-        self.train_acc = torchmetrics.Accuracy()  # trainデータのACC.
-        self.val_acc = torchmetrics.Accuracy()  # validationデータのACC.
-        self.test_acc = torchmetrics.Accuracy()  # testデータのACC.
-        self.confm = torchmetrics.ConfusionMatrix(10, normalize="true")  # 混同行列
+        self.loss_fn = torch.nn.CrossEntropyLoss()
+        self.train_acc = torchmetrics.Accuracy()
+        self.val_acc = torchmetrics.Accuracy()
+        self.val_acc_data: float = 0.0  # validationデータのACC.(値)
+        self.test_acc = torchmetrics.Accuracy()
+        self.test_acc_data: float = 0.0  # testデータのAcc.(値)
+        self.confm = torchmetrics.ConfusionMatrix(10, normalize="true")
         self.validation_step_outputs = []  # validationデータの認識結果
         self.test_step_outputs = []  # testデータの認識結果
 
@@ -98,6 +100,7 @@ class my_MLP(pl.LightningModule):
         x, y = batch
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
+        self.val_acc_data = self.val_acc(pred, y)
         self.log("val/acc", self.val_acc(pred, y), prog_bar=True, logger=True)
         self.validation_step_outputs.append(
             {"pred": torch.argmax(pred, dim=-1), "target": y}
@@ -108,6 +111,7 @@ class my_MLP(pl.LightningModule):
         x, y = batch
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
+        self.test_acc_data = self.test_acc(pred, y)
         self.log("test/acc", self.test_acc(pred, y), prog_bar=True, logger=True)
         self.test_step_outputs.append({"pred": torch.argmax(pred, dim=-1), "target": y})
         return {"pred": torch.argmax(pred, dim=-1), "target": y}
@@ -122,6 +126,14 @@ class my_MLP(pl.LightningModule):
         )
         plt.figure(figsize=(10, 7))
         fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
+        plt.rcParams["font.size"] = 14
+        plt.title(f"Acc. = {self.val_acc_data}", fontsize=20)
+        plt.xlabel("Predicted", fontsize=20)
+        plt.ylabel("Ground truth", fontsize=20)
+        plt.gca().spines["right"].set_visible(True)
+        plt.gca().spines["left"].set_visible(True)
+        plt.gca().spines["top"].set_visible(True)
+        plt.gca().spines["bottom"].set_visible(True)
         # plt.savefig(os.path.join(root, "h_miyaji", "figs", "result_validation.png"))
         plt.close(fig_)
         self.logger.experiment.add_figure(
@@ -139,6 +151,14 @@ class my_MLP(pl.LightningModule):
         )
         plt.figure(figsize=(10, 7))
         fig_ = sns.heatmap(df_cm, annot=True, cmap="Blues").get_figure()
+        plt.rcParams["font.size"] = 14
+        plt.title(f"Acc. = {self.test_acc_data}", fontsize=20)
+        plt.xlabel("Predicted", fontsize=20)
+        plt.ylabel("Ground truth", fontsize=20)
+        plt.gca().spines["right"].set_visible(True)
+        plt.gca().spines["left"].set_visible(True)
+        plt.gca().spines["top"].set_visible(True)
+        plt.gca().spines["bottom"].set_visible(True)
         plt.savefig(os.path.join(root, "h_miyaji", "figs", "result_test.png"))
         plt.close(fig_)
         self.logger.experiment.add_figure(
