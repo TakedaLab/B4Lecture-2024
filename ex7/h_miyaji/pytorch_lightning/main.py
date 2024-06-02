@@ -4,7 +4,7 @@
 """
 B4輪講最終課題 パターン認識.
 ベースラインスクリプト: Pytorch Lightning版
-特徴量: MFCCの平均*5
+特徴量: MFCC12次元の平均(0次含めず)*5
 識別器: MLP
 """
 import argparse
@@ -165,8 +165,11 @@ class my_MLP(pl.LightningModule):
         )
 
     def configure_optimizers(self):
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.002)
-        return self.optimizer
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.02)
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(
+            self.optimizer, milestones=[20, 50, 80], gamma=0.1
+        )
+        return [self.optimizer], [self.scheduler]
 
 
 class FSDD(Dataset):
@@ -190,7 +193,7 @@ class FSDD(Dataset):
             path_list (list): 特徴抽出するファイルのパスリスト.
 
         Returns:
-            torch.Tensor: 特徴量(MFCC平均).
+            torch.Tensor: 特徴量(MFCC12次元の平均,0次含めず).
         """
         n_mfcc = 13  # MFCC13次元
         datasize = len(path_list)  # ファイルパスの個数
@@ -200,7 +203,7 @@ class FSDD(Dataset):
 
         # waveform -> MFCC
         transform = torchaudio.transforms.MFCC(
-            n_mfcc=13, melkwargs={"n_mels": 64, "n_fft": 512}
+            n_mfcc=n_mfcc, melkwargs={"n_mels": 64, "n_fft": 512}
         )
 
         for i, path in enumerate(path_list):
