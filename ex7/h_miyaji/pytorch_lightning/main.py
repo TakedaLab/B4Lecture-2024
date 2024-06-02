@@ -167,7 +167,7 @@ class my_MLP(pl.LightningModule):
     def configure_optimizers(self):
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.02)
         self.scheduler = torch.optim.lr_scheduler.MultiStepLR(
-            self.optimizer, milestones=[20, 50, 80], gamma=0.1
+            self.optimizer, milestones=[50, 80], gamma=0.1
         )
         return [self.optimizer], [self.scheduler]
 
