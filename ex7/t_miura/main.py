@@ -2,28 +2,17 @@
 # -*- coding: utf-8 -*-
 
 """
-B4輪講最終課題 パターン認識に挑戦してみよう
-ベースラインスクリプト(Pytorch Lightning版)
-特徴量；MFCCの平均（0次項含まず）
-識別器；MLP
-"""
+単一数字発話の認識.
 
-"""
-pytorch-lightning 
-    Docs: https://pytorch-lightning.readthedocs.io/
-LightningModule
-    Docs: https://pytorch-lightning.readthedocs.io/en/stable/common/lightning_module.html
-    API Refference: https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.core.LightningModule.html
-Trainer
-    Docs: https://pytorch-lightning.readthedocs.io/en/stable/common/trainer.html
-    API Refference: https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html
+特徴量：MFCC
+識別機：CNN
 """
 
 
 import argparse
 import os
 
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 import pandas as pd
 import pytorch_lightning as pl
 import seaborn as sns
@@ -32,176 +21,220 @@ import torchaudio
 import torchmetrics
 from torch.utils.data import Dataset, random_split
 
+import net
+
+
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class my_MLP(pl.LightningModule):
-    def __init__(self, input_dim, output_dim):
+    """モデルの構築."""
+
+    def __init__(self, input_dim: list, output_dim: int):
+        """インスタンス."""
         super().__init__()
         self.model = self.create_model(input_dim, output_dim)
         self.loss_fn = torch.nn.CrossEntropyLoss()
         self.train_acc = torchmetrics.Accuracy()
         self.val_acc = torchmetrics.Accuracy()
         self.test_acc = torchmetrics.Accuracy()
-        self.confm = torchmetrics.ConfusionMatrix(10, normalize='true')
+        self.confm = torchmetrics.ConfusionMatrix(10, normalize="true")
 
-        # on_test_epoch_endのためにいるらしい
+        # on_test_epoch_endのためにいる
         self.test_step_outputs = []
-      
-    def create_model(self, input_dim, output_dim):
-        """
-        MLPモデルの構築
-        Args:
-            input_dim: 入力の形
-            output_dim: 出力次元
-        Returns:
-            model: 定義済みモデル
-        """
-        model = torch.nn.Sequential(
-            torch.nn.Linear(input_dim, 256),
-            torch.nn.ReLU(),
-            torch.nn.Dropout(0.2),
-            torch.nn.Linear(256, 256),
-            torch.nn.ReLU(),
-            torch.nn.Dropout(0.2),
-            torch.nn.Linear(256, output_dim),
-            torch.nn.Softmax(dim=-1)
-        )
+
+    def create_model(self, input_dim: list, output_dim: int):
+        """モデルの構築."""
+        model = net.Net(input_dim, output_dim)
         # モデル構成の表示
         print(model)
         return model
-      
+
     def forward(self, x):
+        """順伝搬の実装."""
         return self.model(x)
 
     def training_step(self, batch, batch_idx, dataloader_id=None):
+        """学習ステップの実装."""
         x, y = batch
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
-        self.log('train/loss', loss, on_epoch=True, on_step=False, prog_bar=False, logger=True)
-        self.log('train/acc', self.train_acc(pred,y), on_epoch=True, on_step=False, prog_bar=True, logger=True)
+        self.log(
+            "train/loss",
+            loss,
+            on_epoch=True,
+            on_step=False,
+            prog_bar=False,
+            logger=True,
+        )
+        self.log(
+            "train/acc",
+            self.train_acc(pred,y),
+            on_epoch=True,
+            on_step=False,
+            prog_bar=True,
+            logger=True,
+        )
         return loss
-        
+
     def validation_step(self, batch, batch_idx, dataloader_id=None):
+        """バリテーションステップの実装."""
         x, y = batch
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
-        self.log('val/acc', self.val_acc(pred,y), prog_bar=True, logger=True)
+        self.log(
+            "val/loss",
+            loss,
+            on_epoch=True,
+            on_step=False,
+            prog_bar=False,
+            logger=True,
+        )
+        self.log(
+            "val/acc",
+            self.val_acc(pred,y),
+            on_epoch=True,
+            on_step=False,
+            prog_bar=True,
+            logger=True,
+        )
         return loss
-    
+
     def test_step(self, batch, batch_idx, dataloader_id=None):
+        """テストステップの実装."""
         x, y = batch
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
-        self.log('test/acc', self.test_acc(pred, y), prog_bar=True, logger=True)
-        # on_test_epoch_endのためにいるらしい
-        self.test_step_outputs.append({'pred':torch.argmax(pred, dim=-1), 'target':y})
-        return {'pred':torch.argmax(pred, dim=-1), 'target':y}
-    
+        self.log("test/acc", self.test_acc(pred, y), prog_bar=True, logger=True)
+        # on_test_epoch_endのためにいる
+        self.test_step_outputs.append({"pred": torch.argmax(pred, dim=-1), "target": y})
+        return {"pred": torch.argmax(pred, dim=-1), "target": y}
+
     def on_test_epoch_end(self) -> None:
+        """テスト終了時の実装."""
         # 混同行列を tensorboard に出力
-        preds = torch.cat([tmp['pred'] for tmp in self.test_step_outputs])
-        targets = torch.cat([tmp['target'] for tmp in self.test_step_outputs])
+        preds = torch.cat([tmp["pred"] for tmp in self.test_step_outputs])
+        targets = torch.cat([tmp["target"] for tmp in self.test_step_outputs])
         confusion_matrix = self.confm(preds, targets)
         df_cm = pd.DataFrame(confusion_matrix.cpu().numpy(), index = range(10), columns=range(10))
         plt.figure(figsize = (10,7))
-        fig_ = sns.heatmap(df_cm, annot=True, cmap='gray_r').get_figure()
+        fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
         plt.close(fig_)
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
 
     def configure_optimizers(self):
+        """optimizerの実装."""
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.002)
         return self.optimizer
 
+
 class FSDD(Dataset):
+    """データセットの構築."""
     def __init__(self, path_list, label) -> None:
+        """インスタンス."""
         super().__init__()
         self.features = self.feature_extraction(path_list)
         self.label = label
 
     def feature_extraction(self, path_list):
+        """wavファイルのリストから特徴抽出を行いリストで返す.
+
+        特徴量：log-melスペクトル(64x32次元)
         """
-        wavファイルのリストから特徴抽出を行いリストで返す
-        扱う特徴量はMFCC13次元の平均（0次は含めない）
-        Args:
-            root: dataset が存在するディレクトリ
-            path_list: 特徴抽出するファイルのパスリスト
-        Returns:
-            features: 特徴量
-        """
-        n_mfcc = 13
+        n_mfcc = 64
+        n_time = 32
         datasize = len(path_list)
-        features = torch.zeros(datasize, n_mfcc)
-        transform = torchaudio.transforms.MFCC(n_mfcc=13, melkwargs={'n_mels':64, 'n_fft':512})
+        features = torch.zeros(datasize, 1, n_mfcc, n_time)
+        transform = torchaudio.transforms.MFCC(
+            n_mfcc=n_mfcc,
+            log_mels=True,
+            melkwargs={"n_mels":64, "n_fft":512, "hop_length": 64},
+        )
+
         for i, path in enumerate(path_list):
-            # data.shape==(channel,time)
             data, _ = torchaudio.load(os.path.join(root, path))
-            features[i] = torch.mean(transform(data[0]), axis=1)
+            mfcc = transform(data[0])
+            mfcc = (mfcc - torch.mean(mfcc)) / torch.std(mfcc)
+            n_step = mfcc.shape[1]
+            if n_step <= n_time:
+                features[i, 0, :, : n_step] = mfcc
+            else:
+                for j in range(n_time):
+                    features[i, 0, :, j] = torch.mean(
+                        mfcc[:, n_step * j // n_time: n_step * (j + 1) // n_time],
+                        axis=1,
+                    )
+
         return features
-    
+
     def __len__(self):
+        """len関数."""
         return self.features.shape[0]
-    
+
     def __getitem__(self, index):
+        """getitem関数."""
         return self.features[index], self.label[index]
 
+
 def main():
+    """main関数."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path_to_truth", type=str, help='テストデータの正解ファイルCSVのパス')
+    parser.add_argument("--path_to_truth", type=str, help="テストデータの正解ファイルCSVのパス")
     args = parser.parse_args()
 
     # データの読み込み
     training = pd.read_csv(os.path.join(root, "training.csv"))
-    
+
     # Dataset の作成
-    train_dataset = FSDD(training["path"].values, training['label'].values)
+    train_dataset = FSDD(training["path"].values, training["label"].values)
+
+    # Train/Validation 分割
+    val_size = int(len(train_dataset) * 0.2)
+    train_size = len(train_dataset) - val_size
+    train_dataset, val_dataset = random_split(
+        train_dataset,
+        [train_size, val_size],
+        torch.Generator().manual_seed(20200616),
+    )
 
     if args.path_to_truth:
-        # Train/Validation 分割
-        val_size = int(len(train_dataset)*0.2)
-        train_size = len(train_dataset)-val_size
-        train_dataset, val_dataset = random_split(
-            train_dataset,
-            [train_size, val_size],
-            torch.Generator().manual_seed(20200616)
-        )
-
         # Test Dataset の作成
-        test = pd.read_csv(args.path_to_truth)
-        test_dataset = FSDD(test["path"].values, test['label'].values)
+        test = pd.read_csv(os.path.join(root, args.path_to_truth))
+        test_dataset = FSDD(test["path"].values, test["label"].values)
     else:
-        # Train/Validation 分割
-        val_size = int(len(train_dataset)*0.2)
-        test_size = val_size
-        train_size = len(train_dataset)-val_size*2
-        train_dataset, val_dataset, test_dataset = random_split(
-            train_dataset,
-            [train_size, val_size, test_size],
-            torch.Generator().manual_seed(20200616)
-        )
+        test_dataset = None
 
     # DataModule の作成
     datamodule = pl.LightningDataModule.from_datasets(
         train_dataset=train_dataset,
         val_dataset=val_dataset,
         test_dataset=test_dataset,
-        batch_size=32,
-        num_workers=4)
-    
+        batch_size=8,
+        num_workers=1,
+    )
+
     # モデルの構築
-    model = my_MLP(input_dim=train_dataset[0][0].shape[0],
-                   output_dim=10)
-    
+    model = my_MLP(
+        input_dim=train_dataset[0][0][0].shape,
+        output_dim=10,
+    )
+
     # 学習の設定
-    trainer = pl.Trainer(max_epochs=500, accelerator="gpu", devices=1)
-    
+    trainer = pl.Trainer(
+        max_epochs=2000,
+        accelerator="gpu",
+        devices=1,
+        enable_progress_bar=False,
+    )
+
     # モデルの学習
     trainer.fit(model=model, datamodule=datamodule)
-    
+
     # バリデーション
     trainer.validate(model=model, datamodule=datamodule)
-    
+
     # テスト
-    trainer.test(model=model, datamodule=datamodule)
+    if args.path_to_truth:
+        trainer.test(model=model, datamodule=datamodule)
 
 
 if __name__ == "__main__":
