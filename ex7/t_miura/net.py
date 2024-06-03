@@ -15,7 +15,9 @@ class ResBlock(torch.nn.Module):
     def __init__(self, n_chans):
         """インスタンス."""
         super(ResBlock, self).__init__()
-        self.conv = torch.nn.Conv2d(n_chans, n_chans, kernel_size=3, padding=1, bias=False)
+        self.conv = torch.nn.Conv2d(
+            n_chans, n_chans, kernel_size=3, padding=1, bias=False
+        )
         self.batchnorm = torch.nn.BatchNorm2d(num_features=n_chans)
         torch.nn.init.kaiming_normal_(self.conv.weight, nonlinearity="relu")
         torch.nn.init.constant_(self.batchnorm.weight, 0.5)

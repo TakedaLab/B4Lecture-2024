@@ -20,7 +20,7 @@ import torch
 import torchaudio
 import torchmetrics
 
-from net import Net
+import net
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -43,7 +43,7 @@ class my_MLP(pl.LightningModule):
 
     def create_model(self, input_dim: list, output_dim: int):
         """モデルの構築."""
-        model = Net(input_dim, output_dim)
+        model = net.Net(input_dim, output_dim)
         # モデル構成の表示
         print(model)
         return model
