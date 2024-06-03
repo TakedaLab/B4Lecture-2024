@@ -15,6 +15,7 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import pytorch_lightning as pl
+import seaborn as sns
 import torch
 import torchaudio
 import torchmetrics
