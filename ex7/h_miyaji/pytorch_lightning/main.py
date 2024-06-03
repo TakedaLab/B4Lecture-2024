@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-B4輪講最終課題 パターン認識.
+"""B4輪講最終課題 パターン認識.
+
 ベースラインスクリプト: Pytorch Lightning版
 特徴量: MFCC12次元の平均(0次含めず)*5
 識別器: MLP
@@ -10,7 +10,6 @@ B4輪講最終課題 パターン認識.
 import argparse
 import os
 
-import numpy as np
 import pandas as pd
 import pytorch_lightning as pl
 import seaborn as sns
@@ -18,7 +17,6 @@ import torch
 import torchaudio
 import torchmetrics
 from matplotlib import pyplot as plt
-from sklearn.decomposition import PCA
 from torch.utils.data import Dataset, random_split
 
 # root = ../ex7
@@ -70,9 +68,27 @@ class my_MLP(pl.LightningModule):
         return model
 
     def forward(self, x):
+        """前向き学習を行う.
+
+        Args:
+            x (Tensor): 予測データ.
+
+        Returns:
+            Tensor: 予測モデル.
+        """
         return self.model(x)
 
     def training_step(self, batch, batch_idx, dataloader_id=None):
+        """モデルを学習する.
+
+        Args:
+            batch (tensor): trainデータのバッジ.
+            batch_idx (int): バッジのインデックス.
+            dataloader_id (optional): データローダのID. Defaults to None.
+
+        Returns:
+            Tensor: 学習のロス.
+        """
         x, y = batch
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
@@ -95,6 +111,16 @@ class my_MLP(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx, dataloader_id=None):
+        """validationデータでモデルを評価する.
+
+        Args:
+            batch (tensor): validationデータのバッジ.
+            batch_idx (int): バッジのインデックス.
+            dataloader_id (optional): データローダのID. Defaults to None.
+
+        Returns:
+            tensor: 学習のロス.
+        """
         x, y = batch
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
@@ -106,6 +132,13 @@ class my_MLP(pl.LightningModule):
         return loss
 
     def test_step(self, batch, batch_idx, dataloader_id=None):
+        """testデータでモデルを評価する.
+
+        Args:
+            batch (tensor): testデータのバッジ.
+            batch_idx (int): バッジのインデックス.
+            dataloader_id (optional): データローダのID. Defaults to None.
+        """
         x, y = batch
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
@@ -115,7 +148,11 @@ class my_MLP(pl.LightningModule):
         return {"pred": torch.argmax(pred, dim=-1), "target": y}
 
     def validation_epoch_end(self, outputs) -> None:
-        # validationデータの混同行列を tensorboard に出力
+        """validationデータの混同行列を tensorboard に出力する.
+
+        Args:
+            outputs (Tensor): 出力するデータ.
+        """
         preds = torch.cat([tmp["pred"] for tmp in self.validation_step_outputs])
         targets = torch.cat([tmp["target"] for tmp in self.validation_step_outputs])
         confusion_matrix = self.confm(preds, targets)
@@ -141,7 +178,11 @@ class my_MLP(pl.LightningModule):
         self.val_acc.reset()
 
     def test_epoch_end(self, outputs) -> None:
-        # testデータの混同行列を tensorboard に出力
+        """testデータの混同行列を tensorboard に出力する.
+
+        Args:
+            outputs (Tensor): 出力するデータ.
+        """
         preds = torch.cat([tmp["pred"] for tmp in self.test_step_outputs])
         targets = torch.cat([tmp["target"] for tmp in self.test_step_outputs])
         confusion_matrix = self.confm(preds, targets)
@@ -165,6 +206,12 @@ class my_MLP(pl.LightningModule):
         )
 
     def configure_optimizers(self):
+        """オプティマイザを設定する.
+
+        Returns:
+            torch.optim.sgd.SDG: 確率的勾配降下法.
+            MultiStepLR: 学習のスケジューラ.
+        """
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.02)
         self.scheduler = torch.optim.lr_scheduler.MultiStepLR(
             self.optimizer, milestones=[50, 80], gamma=0.1
@@ -193,7 +240,7 @@ class FSDD(Dataset):
             path_list (list): 特徴抽出するファイルのパスリスト.
 
         Returns:
-            torch.Tensor: 特徴量(MFCC12次元の平均,0次含めず).
+            Tensor: 特徴量(MFCC12次元の平均,0次含めず).
         """
         n_mfcc = 13  # MFCC13次元
         datasize = len(path_list)  # ファイルパスの個数
@@ -234,9 +281,23 @@ class FSDD(Dataset):
         return features
 
     def __len__(self):
+        """特徴量の次元を返す.
+
+        Returns:
+            int: 特徴量の次元.
+        """
         return self.features.shape[0]
 
     def __getitem__(self, index):
+        """特徴量と正解ラベルを返す.
+
+        Args:
+            index (int): 取り出したいデータのインデックス.
+
+        Returns:
+            Tensor: 特徴量.
+            list: 正解ラベル.
+        """
         return self.features[index], self.label[index]
 
 
