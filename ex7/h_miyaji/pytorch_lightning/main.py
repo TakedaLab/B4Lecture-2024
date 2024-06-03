@@ -303,7 +303,6 @@ class FSDD(Dataset):
 
 def main():
     """wavファイルに対して認識モデルを作成し, 学習とテストを行う."""
-
     # 引数取得
     parser = argparse.ArgumentParser()
     parser.add_argument(
