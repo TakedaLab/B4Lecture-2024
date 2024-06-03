@@ -22,7 +22,6 @@ import torchmetrics
 
 from net import Net
 
-
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
