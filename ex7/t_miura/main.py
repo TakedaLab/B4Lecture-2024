@@ -17,7 +17,6 @@ import pandas as pd
 import pytorch_lightning as pl
 import seaborn as sns
 import torch
-import torch.utils.data as utils_data
 import torchaudio
 import torchmetrics
 
@@ -130,7 +129,7 @@ class my_MLP(pl.LightningModule):
         return self.optimizer
 
 
-class FSDD(utils_data.Dataset):
+class FSDD(torch.utils.data.Dataset):
     """データセットの構築."""
 
     def __init__(self, path_list, label) -> None:
@@ -196,7 +195,7 @@ def main():
     # Train/Validation 分割
     val_size = int(len(train_dataset) * 0.2)
     train_size = len(train_dataset) - val_size
-    train_dataset, val_dataset = utils_data.random_split(
+    train_dataset, val_dataset = torch.utils.data.random_split(
         train_dataset,
         [train_size, val_size],
         torch.Generator().manual_seed(20200616),
