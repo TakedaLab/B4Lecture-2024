@@ -6,6 +6,7 @@
 
 特徴量：MFCC
 識別機：CNN
+isort:skip_file
 """
 
 
