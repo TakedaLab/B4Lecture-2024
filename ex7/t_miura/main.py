@@ -17,9 +17,9 @@ import pandas as pd
 import pytorch_lightning as pl
 import seaborn as sns
 import torch
+import torch.utils.data as utils_data
 import torchaudio
 import torchmetrics
-import torch.utils.data as utils_data
 
 import net
 
@@ -104,7 +104,7 @@ class my_MLP(pl.LightningModule):
         """テストステップの実装."""
         x, y = batch
         pred = self.forward(x)
-        loss = self.loss_fn(pred, y)
+        # loss = self.loss_fn(pred, y)
         self.log("test/acc", self.test_acc(pred, y), prog_bar=True, logger=True)
         # on_test_epoch_endのためにいる
         self.test_step_outputs.append({"pred": torch.argmax(pred, dim=-1), "target": y})
@@ -117,9 +117,9 @@ class my_MLP(pl.LightningModule):
         targets = torch.cat([tmp["target"] for tmp in self.test_step_outputs])
         confusion_matrix = self.confm(preds, targets)
         df_cm = pd.DataFrame(
-            confusion_matrix.cpu().numpy(), index = range(10), columns=range(10)
+            confusion_matrix.cpu().numpy(), index=range(10), columns=range(10)
         )
-        plt.figure(figsize = (10, 7))
+        plt.figure(figsize=(10, 7))
         fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
         plt.close(fig_)
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)

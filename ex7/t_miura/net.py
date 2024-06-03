@@ -23,6 +23,7 @@ class ResBlock(nn.Module):
         torch.nn.init.zeros_(self.batchnorm.bias)
 
     def forward(self, x):
+        """順伝搬を実装."""
         out = self.conv(x)
         out = self.batchnorm(out)
         out = nn.ReLU()(out)
