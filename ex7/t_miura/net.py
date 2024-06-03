@@ -12,6 +12,7 @@ import torch.nn as nn
 
 class ResBlock(nn.Module):
     """スキップ接続のグループ化."""
+
     def __init__(self, n_chans):
         """インスタンス."""
         super(ResBlock, self).__init__()
@@ -21,11 +22,11 @@ class ResBlock(nn.Module):
         torch.nn.init.constant_(self.batchnorm.weight, 0.5)
         torch.nn.init.zeros_(self.batchnorm.bias)
 
-    def forward(self,x):
+    def forward(self, x):
         out = self.conv(x)
         out = self.batchnorm(out)
         out = nn.ReLU()(out)
-        return out + x    
+        return out + x
 
 
 class Net(nn.Module):
@@ -37,9 +38,7 @@ class Net(nn.Module):
         self.conv1 = nn.Conv2d(1, 64, kernel_size=3, padding=1)
         self.batchnorm1 = nn.BatchNorm2d(num_features=64)
         self.pool1 = nn.MaxPool2d(2)
-        self.resblock1 = nn.Sequential(
-            *(2 * [ResBlock(64)])
-        )
+        self.resblock1 = nn.Sequential(*(2 * [ResBlock(64)]))
         self.conv2 = nn.Conv2d(64, 16, kernel_size=3, padding=1)
         self.batchnorm2 = nn.BatchNorm2d(num_features=16)
         self.pool2 = nn.MaxPool2d(2)

@@ -19,12 +19,13 @@ import seaborn as sns
 import torch
 import torchaudio
 import torchmetrics
-from torch.utils.data import Dataset, random_split
+import torch.utils.data as utils_data
 
 import net
 
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 class my_MLP(pl.LightningModule):
     """モデルの構築."""
@@ -68,7 +69,7 @@ class my_MLP(pl.LightningModule):
         )
         self.log(
             "train/acc",
-            self.train_acc(pred,y),
+            self.train_acc(pred, y),
             on_epoch=True,
             on_step=False,
             prog_bar=True,
@@ -91,7 +92,7 @@ class my_MLP(pl.LightningModule):
         )
         self.log(
             "val/acc",
-            self.val_acc(pred,y),
+            self.val_acc(pred, y),
             on_epoch=True,
             on_step=False,
             prog_bar=True,
@@ -115,8 +116,10 @@ class my_MLP(pl.LightningModule):
         preds = torch.cat([tmp["pred"] for tmp in self.test_step_outputs])
         targets = torch.cat([tmp["target"] for tmp in self.test_step_outputs])
         confusion_matrix = self.confm(preds, targets)
-        df_cm = pd.DataFrame(confusion_matrix.cpu().numpy(), index = range(10), columns=range(10))
-        plt.figure(figsize = (10,7))
+        df_cm = pd.DataFrame(
+            confusion_matrix.cpu().numpy(), index = range(10), columns=range(10)
+        )
+        plt.figure(figsize = (10, 7))
         fig_ = sns.heatmap(df_cm, annot=True, cmap="gray_r").get_figure()
         plt.close(fig_)
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
@@ -127,8 +130,9 @@ class my_MLP(pl.LightningModule):
         return self.optimizer
 
 
-class FSDD(Dataset):
+class FSDD(utils_data.Dataset):
     """データセットの構築."""
+
     def __init__(self, path_list, label) -> None:
         """インスタンス."""
         super().__init__()
@@ -147,7 +151,7 @@ class FSDD(Dataset):
         transform = torchaudio.transforms.MFCC(
             n_mfcc=n_mfcc,
             log_mels=True,
-            melkwargs={"n_mels":64, "n_fft":512, "hop_length": 64},
+            melkwargs={"n_mels": 64, "n_fft": 512, "hop_length": 64},
         )
 
         for i, path in enumerate(path_list):
@@ -156,11 +160,11 @@ class FSDD(Dataset):
             mfcc = (mfcc - torch.mean(mfcc)) / torch.std(mfcc)
             n_step = mfcc.shape[1]
             if n_step <= n_time:
-                features[i, 0, :, : n_step] = mfcc
+                features[i, 0, :, :n_step] = mfcc
             else:
                 for j in range(n_time):
                     features[i, 0, :, j] = torch.mean(
-                        mfcc[:, n_step * j // n_time: n_step * (j + 1) // n_time],
+                        mfcc[:, n_step * j // n_time : n_step * (j + 1) // n_time],
                         axis=1,
                     )
 
@@ -178,7 +182,9 @@ class FSDD(Dataset):
 def main():
     """main関数."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path_to_truth", type=str, help="テストデータの正解ファイルCSVのパス")
+    parser.add_argument(
+        "--path_to_truth", type=str, help="テストデータの正解ファイルCSVのパス"
+    )
     args = parser.parse_args()
 
     # データの読み込み
@@ -190,7 +196,7 @@ def main():
     # Train/Validation 分割
     val_size = int(len(train_dataset) * 0.2)
     train_size = len(train_dataset) - val_size
-    train_dataset, val_dataset = random_split(
+    train_dataset, val_dataset = utils_data.random_split(
         train_dataset,
         [train_size, val_size],
         torch.Generator().manual_seed(20200616),
