@@ -35,6 +35,7 @@ from sklearn.model_selection import train_test_split
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
 def my_CNN(input_dim, output_dim):
     """
     CNNモデルの構築
@@ -45,26 +46,26 @@ def my_CNN(input_dim, output_dim):
         model: 定義済みモデル
     """
     model = Sequential()
-    model.add(Conv2D(32, (3, 1), padding='same', input_shape=input_dim))
-    model.add(Activation('relu'))
+    model.add(Conv2D(32, (3, 1), padding="same", input_shape=input_dim))
+    model.add(Activation("relu"))
     model.add(Conv2D(32, (3, 1)))
-    model.add(Activation('relu'))
+    model.add(Activation("relu"))
     model.add(MaxPooling2D(pool_size=(2, 1)))
     model.add(Dropout(0.25))
 
-    model.add(Conv2D(64, (3, 1), padding='same'))
-    model.add(Activation('relu'))
+    model.add(Conv2D(64, (3, 1), padding="same"))
+    model.add(Activation("relu"))
     model.add(Conv2D(64, (3, 1)))
-    model.add(Activation('relu'))
+    model.add(Activation("relu"))
     model.add(MaxPooling2D(pool_size=(2, 1)))
     model.add(Dropout(0.25))
 
     model.add(Flatten())
     model.add(Dense(512))
-    model.add(Activation('relu'))
+    model.add(Activation("relu"))
     model.add(Dropout(0.5))
     model.add(Dense(output_dim))
-    model.add(Activation('softmax'))
+    model.add(Activation("softmax"))
 
     model.summary()
 
@@ -81,10 +82,12 @@ def feature_extraction(path_list):
         features: 特徴量
     """
     # """
-    load_data = (lambda path: librosa.load(os.path.join(root, path))[0])
+    load_data = lambda path: librosa.load(os.path.join(root, path))[0]
 
     data = list(map(load_data, path_list))
-    features = np.array([np.mean(librosa.feature.mfcc(y=y, n_mfcc=13), axis=1) for y in data])
+    features = np.array(
+        [np.mean(librosa.feature.mfcc(y=y, n_mfcc=13), axis=1) for y in data]
+    )
 
     return features
 
@@ -102,14 +105,21 @@ def plot_confusion_matrix(predict, ground_truth, title=None, cmap=plt.cm.Blues):
     """
     predicted_value = accuracy_score(ground_truth, predict)
     cm = confusion_matrix(predict, ground_truth)
-    
+
     sums = cm.sum(axis=1, keepdims=True)
     cm_percent = cm / sums
 
     fig = plt.figure(figsize=(10, 8))
 
     ax = fig.add_subplot(111)
-    sns.heatmap(cm_percent, annot=True, fmt=".2f", cmap="Blues", xticklabels=True, yticklabels=True)
+    sns.heatmap(
+        cm_percent,
+        annot=True,
+        fmt=".2f",
+        cmap="Blues",
+        xticklabels=True,
+        yticklabels=True
+    )
     ax.set_title(f"CNN Result\nAcc. {predicted_value * 100:.2f}%")
     ax.set_ylabel("Predicted")
     ax.set_xlabel("Ground truth")
@@ -141,7 +151,9 @@ def write_result(paths, outputs):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path_to_truth", type=str, help='テストデータの正解ファイルCSVのパス')
+    parser.add_argument(
+        "--path_to_truth", type=str, help='テストデータの正解ファイルCSVのパス'
+    )
     args = parser.parse_args()
 
     training_path = os.path.join(root, "training.csv")
@@ -163,7 +175,8 @@ def main():
 
     # 学習データを学習データとバリデーションデータに分割
     X_train, X_validation, Y_train, Y_validation = train_test_split(
-        X_train, Y_train,
+        X_train,
+        Y_train,
         test_size=0.2,
         random_state=20200616,
     )
@@ -176,16 +189,12 @@ def main():
     model = my_CNN((X_train.shape[1], 1, 1), output_dim=10)
 
     # モデルの学習基準の設定
-    model.compile(loss="categorical_crossentropy",
-                  optimizer=SGD(lr=0.002),
-                  metrics=["accuracy"])
+    model.compile(
+        loss="categorical_crossentropy", optimizer=SGD(lr=0.002), metrics=["accuracy"]
+    )
 
     # モデルの学習
-    model.fit(X_train,
-              Y_train,
-              batch_size=32,
-              epochs=500,
-              verbose=1)
+    model.fit(X_train, Y_train, batch_size=32, epochs=500, verbose=1)
 
     # モデル構成，学習した重みの保存
     model.save(os.path.join(root, "keras_model/my_model.h5"))
@@ -204,7 +213,7 @@ def main():
     # テストデータに対する正解ファイルが指定されていれば評価を行う
     if args.path_to_truth:
         test_truth = pd.read_csv(args.path_to_truth)
-        truth_values = test_truth['label'].values
+        truth_values = test_truth["label"].values
         plot_confusion_matrix(predicted_values, truth_values)
         print("Test accuracy: ", accuracy_score(truth_values, predicted_values))
 
