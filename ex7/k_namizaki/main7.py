@@ -1,28 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-バッチ正規化を追加
+バッチ正規化を追加.
 MLPモデルの層を増加
 Adamに変更
 ホワイトノイズデータ増殖
-"""
-
-"""
 B4輪講最終課題 パターン認識に挑戦してみよう
 ベースラインスクリプト(Pytorch Lightning版)
 特徴量；MFCCの平均（0次項含まず）
 識別器；MLP
-"""
-
-"""
-pytorch-lightning
-    Docs: https://pytorch-lightning.readthedocs.io/
-LightningModule
-    Docs: https://pytorch-lightning.readthedocs.io/en/stable/common/lightning_module.html
-    API Refference: https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.core.LightningModule.html
-Trainer
-    Docs: https://pytorch-lightning.readthedocs.io/en/stable/common/trainer.html
-    API Refference: https://pytorch-lightning.readthedocs.io/en/stable/api/pytorch_lightning.trainer.trainer.Trainer.html
 """
 
 import argparse
@@ -41,7 +27,9 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class my_MLP(pl.LightningModule):
+    """MLP."""
     def __init__(self, input_dim, output_dim):
+        """init."""
         super().__init__()
         # モデルを作成
         self.model = self.create_model(input_dim, output_dim)
@@ -84,10 +72,11 @@ class my_MLP(pl.LightningModule):
         return model
 
     def forward(self, x):
-        # モデルの前向き計算
+        """モデルの前向き計算."""
         return self.model(x)
 
     def training_step(self, batch, batch_idx, dataloader_id=None):
+        """training step."""
         x, y = batch
         pred = self.forward(x)
         # 損失の計算
@@ -113,6 +102,7 @@ class my_MLP(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx, dataloader_id=None):
+        """validation step."""
         x, y = batch
         pred = self.forward(x)
         # 損失の計算
@@ -122,6 +112,7 @@ class my_MLP(pl.LightningModule):
         return loss
 
     def test_step(self, batch, batch_idx, dataloader_id=None):
+        """test step."""
         x, y = batch
         pred = self.forward(x)
         # 損失の計算
@@ -131,7 +122,7 @@ class my_MLP(pl.LightningModule):
         return {"pred": torch.argmax(pred, dim=-1), "target": y}
 
     def test_epoch_end(self, outputs) -> None:
-        # 混同行列を tensorboard に出力
+        """混同行列を tensorboard に出力"""
         preds = torch.cat([tmp["pred"] for tmp in outputs])
         targets = torch.cat([tmp["target"] for tmp in outputs])
         confusion_matrix = self.confm(preds, targets)
@@ -144,13 +135,16 @@ class my_MLP(pl.LightningModule):
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
 
     def configure_optimizers(self):
+        """configure optimizers"""
         # 最適化手法の設定（Adam）
         self.optimizer = torch.optim.Adam(self.model.parameters())
         return self.optimizer
 
 
 class FSDD(Dataset):
+    """FSDD."""
     def __init__(self, path_list, label) -> None:
+        """init."""
         super().__init__()
         # 特徴抽出を実行
         self.features = self.feature_extraction(path_list)
@@ -179,15 +173,16 @@ class FSDD(Dataset):
         return features
 
     def __len__(self):
-        # データセットのサイズを返す
+        """データセットのサイズを返す."""
         return self.features.shape[0]
 
     def __getitem__(self, index):
-        # 指定されたインデックスの特徴量とラベルを返す
+        """指定されたインデックスの特徴量とラベルを返す."""
         return self.features[index], self.label[index]
 
 
 def augment_and_expand_dataset(dataset):
+    """データを拡張増殖."""
     augmented_features = []
     augmented_labels = []
     for features, label in dataset:
@@ -204,6 +199,7 @@ def augment_and_expand_dataset(dataset):
 
 
 def white_data(features):
+    """ホワイトノイズデータを作る."""
     # ホワイトノイズの追加
     noise = torch.randn_like(features) * 0.005
     augmented_features = features + noise
@@ -211,6 +207,7 @@ def white_data(features):
 
 
 def main():
+    """main."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--path_to_truth", type=str, help="テストデータの正解ファイルCSVのパス"
