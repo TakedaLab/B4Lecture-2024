@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
+
+r"""
+CNNを用いて音声データの分類を行うプログラム.
 
 特徴量；MFCCの平均（0次項含まず）
 識別器；CNN
@@ -14,7 +16,6 @@ python .\baseline_cnn.py --path_to_truth ..\test_truth.csv
 0.9466666666666667
 0.96
 0.9633333333333334
-
 """
 
 from __future__ import division, print_function
@@ -40,7 +41,6 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def my_CNN(input_dim, output_dim):
     """
-
     CNNモデルの構築.
 
     Args:
@@ -79,14 +79,13 @@ def my_CNN(input_dim, output_dim):
 
 def feature_extraction(path_list):
     """
-
     wavファイルのリストから特徴抽出を行い，リストで返す.
+
     扱う特徴量はMFCC13次元の平均（0次は含めない）
     Args:
         path_list: 特徴抽出するファイルのパスリスト
     Returns:
         features: 特徴量
-
     """
     # """
     load_data = lambda path: librosa.load(os.path.join(root, path))[0]
@@ -102,6 +101,7 @@ def feature_extraction(path_list):
 def plot_confusion_matrix(predict, ground_truth, title=None, cmap=plt.cm.Blues):
     """
     予測結果の混合行列をプロット.
+
     Args:
         predict: 予測結果
         ground_truth: 正解ラベル
@@ -125,7 +125,7 @@ def plot_confusion_matrix(predict, ground_truth, title=None, cmap=plt.cm.Blues):
         fmt=".2f",
         cmap="Blues",
         xticklabels=True,
-        yticklabels=True
+        yticklabels=True,
     )
     ax.set_title(f"CNN Result\nAcc. {predicted_value * 100:.2f}%")
     ax.set_ylabel("Predicted")
@@ -142,8 +142,8 @@ def plot_confusion_matrix(predict, ground_truth, title=None, cmap=plt.cm.Blues):
 
 def write_result(paths, outputs):
     """
-
     結果をcsvファイルで保存する.
+
     Args:
         paths: テストする音声ファイルリスト
         outputs:
@@ -159,9 +159,7 @@ def write_result(paths, outputs):
 
 
 def main():
-    """
-    main関数.
-    """
+    """main関数."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--path_to_truth", type=str, help="テストデータの正解ファイルCSVのパス"
