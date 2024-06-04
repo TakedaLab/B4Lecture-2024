@@ -4,13 +4,10 @@
 
 r"""
 CNNを用いて音声データの分類を行うプログラム.
-
 特徴量；MFCCの平均（0次項含まず）
 識別器；CNN
-
 実行コマンド
 python .\baseline_cnn.py --path_to_truth ..\test_truth.csv
-
 0.95
 0.9533333333333334
 0.9466666666666667
@@ -42,13 +39,11 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def my_CNN(input_dim, output_dim):
     """
     CNNモデルの構築.
-
     Args:
         shape: 入力の形
         output_dim: 出力次元
     Returns:
         model: 定義済みモデル
-
     """
     model = Sequential()
     model.add(Conv2D(32, (3, 1), padding="same", input_shape=input_dim))
@@ -77,20 +72,30 @@ def my_CNN(input_dim, output_dim):
     return model
 
 
+def load_data(path, root):
+    """
+    指定されたパスから音声データを取り出す関数.
+
+    flake8対策。
+    Args:
+        path: 読み込むファイルのパス
+        root: ルートディレクトリ
+    Returns:
+        y: 音声データ
+    """
+    return librosa.load(os.path.join(root, path))[0]
+
+
 def feature_extraction(path_list):
     """
     wavファイルのリストから特徴抽出を行い，リストで返す.
-
     扱う特徴量はMFCC13次元の平均（0次は含めない）
     Args:
         path_list: 特徴抽出するファイルのパスリスト
     Returns:
         features: 特徴量
     """
-    # """
-    load_data = lambda path: librosa.load(os.path.join(root, path))[0]
-
-    data = list(map(load_data, path_list))
+    data = [load_data(path, root) for path in path_list]
     features = np.array(
         [np.mean(librosa.feature.mfcc(y=y, n_mfcc=13), axis=1) for y in data]
     )
@@ -101,7 +106,6 @@ def feature_extraction(path_list):
 def plot_confusion_matrix(predict, ground_truth, title=None, cmap=plt.cm.Blues):
     """
     予測結果の混合行列をプロット.
-
     Args:
         predict: 予測結果
         ground_truth: 正解ラベル
@@ -143,13 +147,11 @@ def plot_confusion_matrix(predict, ground_truth, title=None, cmap=plt.cm.Blues):
 def write_result(paths, outputs):
     """
     結果をcsvファイルで保存する.
-
     Args:
         paths: テストする音声ファイルリスト
         outputs:
     Returns:
         Nothing
-
     """
     with open("result.csv", "w") as f:
         f.write("path,output\n")
