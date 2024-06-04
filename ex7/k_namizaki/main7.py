@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-バッチ正規化を追加.
+機械学習をしてみる.
+
+バッチ正規化を追加
 MLPモデルの層を増加
 Adamに変更
 ホワイトノイズデータ増殖
@@ -27,7 +29,8 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class my_MLP(pl.LightningModule):
-    """MLP."""
+    """MLPを作る."""
+
     def __init__(self, input_dim, output_dim):
         """init."""
         super().__init__()
@@ -44,7 +47,8 @@ class my_MLP(pl.LightningModule):
 
     def create_model(self, input_dim, output_dim):
         """
-        MLPモデルの構築
+        MLPモデルの構築.
+
         Args:
             input_dim: 入力の形
             output_dim: 出力次元
@@ -76,7 +80,7 @@ class my_MLP(pl.LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx, dataloader_id=None):
-        """training step."""
+        """train step."""
         x, y = batch
         pred = self.forward(x)
         # 損失の計算
@@ -102,7 +106,7 @@ class my_MLP(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx, dataloader_id=None):
-        """validation step."""
+        """validate step."""
         x, y = batch
         pred = self.forward(x)
         # 損失の計算
@@ -116,13 +120,13 @@ class my_MLP(pl.LightningModule):
         x, y = batch
         pred = self.forward(x)
         # 損失の計算
-        loss = self.loss_fn(pred, y)
+        #loss = self.loss_fn(pred, y)
         # テスト精度をログに記録
         self.log("test/acc", self.test_acc(pred, y), prog_bar=True, logger=True)
         return {"pred": torch.argmax(pred, dim=-1), "target": y}
 
     def test_epoch_end(self, outputs) -> None:
-        """混同行列を tensorboard に出力"""
+        """混同行列を tensorboard に出力."""
         preds = torch.cat([tmp["pred"] for tmp in outputs])
         targets = torch.cat([tmp["target"] for tmp in outputs])
         confusion_matrix = self.confm(preds, targets)
@@ -135,14 +139,15 @@ class my_MLP(pl.LightningModule):
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
 
     def configure_optimizers(self):
-        """configure optimizers"""
+        """configure optimizers."""
         # 最適化手法の設定（Adam）
         self.optimizer = torch.optim.Adam(self.model.parameters())
         return self.optimizer
 
 
 class FSDD(Dataset):
-    """FSDD."""
+    """FSDDを作る."""
+
     def __init__(self, path_list, label) -> None:
         """init."""
         super().__init__()
@@ -152,7 +157,8 @@ class FSDD(Dataset):
 
     def feature_extraction(self, path_list):
         """
-        wavファイルのリストから特徴抽出を行いリストで返す
+        wavファイルのリストから特徴抽出を行いリストで返す.
+
         扱う特徴量はMFCC13次元の平均（0次は含めない）
         Args:
             path_list: 特徴抽出するファイルのパスリスト
