@@ -80,7 +80,7 @@ class my_MLP(pl.LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx, dataloader_id=None):
-        """train step."""
+        """Train step."""
         x, y = batch
         pred = self.forward(x)
         # 損失の計算
@@ -106,7 +106,7 @@ class my_MLP(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx, dataloader_id=None):
-        """validate step."""
+        """Validate step."""
         x, y = batch
         pred = self.forward(x)
         # 損失の計算
@@ -116,11 +116,11 @@ class my_MLP(pl.LightningModule):
         return loss
 
     def test_step(self, batch, batch_idx, dataloader_id=None):
-        """test step."""
+        """Test step."""
         x, y = batch
         pred = self.forward(x)
         # 損失の計算
-        #loss = self.loss_fn(pred, y)
+        # loss = self.loss_fn(pred, y)
         # テスト精度をログに記録
         self.log("test/acc", self.test_acc(pred, y), prog_bar=True, logger=True)
         return {"pred": torch.argmax(pred, dim=-1), "target": y}
@@ -139,7 +139,7 @@ class my_MLP(pl.LightningModule):
         self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
 
     def configure_optimizers(self):
-        """configure optimizers."""
+        """Configure optimizers."""
         # 最適化手法の設定（Adam）
         self.optimizer = torch.optim.Adam(self.model.parameters())
         return self.optimizer
@@ -213,7 +213,7 @@ def white_data(features):
 
 
 def main():
-    """main."""
+    """メイン関数."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--path_to_truth", type=str, help="テストデータの正解ファイルCSVのパス"
