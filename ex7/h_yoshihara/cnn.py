@@ -4,6 +4,7 @@
 
 r"""
 CNNを用いて音声データの分類を行うプログラム.
+
 特徴量；MFCCの平均（0次項含まず）
 識別器；CNN
 実行コマンド
@@ -39,6 +40,7 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def my_CNN(input_dim, output_dim):
     """
     CNNモデルの構築.
+
     Args:
         shape: 入力の形
         output_dim: 出力次元
@@ -89,6 +91,7 @@ def load_data(path, root):
 def feature_extraction(path_list):
     """
     wavファイルのリストから特徴抽出を行い，リストで返す.
+
     扱う特徴量はMFCC13次元の平均（0次は含めない）
     Args:
         path_list: 特徴抽出するファイルのパスリスト
@@ -106,6 +109,7 @@ def feature_extraction(path_list):
 def plot_confusion_matrix(predict, ground_truth, title=None, cmap=plt.cm.Blues):
     """
     予測結果の混合行列をプロット.
+
     Args:
         predict: 予測結果
         ground_truth: 正解ラベル
@@ -147,6 +151,7 @@ def plot_confusion_matrix(predict, ground_truth, title=None, cmap=plt.cm.Blues):
 def write_result(paths, outputs):
     """
     結果をcsvファイルで保存する.
+
     Args:
         paths: テストする音声ファイルリスト
         outputs:
