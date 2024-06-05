@@ -14,7 +14,8 @@ import pandas as pd
 from PIL import Image
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.layers import Conv2D, Dense, Dropout, Flatten, MaxPooling2D
+from tensorflow.keras.layers import (Conv2D, Dense, Dropout, Flatten,
+                                     MaxPooling2D)
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.utils import to_categorical
