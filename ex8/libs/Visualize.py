@@ -12,7 +12,6 @@ from matplotlib.animation import ArtistAnimation
 class Visualize:
     """Visualize the results of the VAE model."""
 
-
     def __init__(self, z_dim, h_dim, dataloader_test, model, device):
         """Set constructors.
 
