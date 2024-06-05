@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""This file is for you to implement VAE."""
+"""This file is for you to implement VAE. Add variables as needed."""
 
 import numpy as np
 
@@ -44,26 +44,14 @@ class VAE(nn.Module):
         self.dec_fc3 = nn.Linear(self.h_dim, self.x_dim)
 
     def encoder(self):
-        """
-        # ToDo: Implement the encoder
-        ※引数は適宜追加してください
-        """
+        """# ToDo: Implement the encoder"""
 
     def sample_z(self):
-        """
-        # ToDo: Implement the sampling of the latent variable
-        ※引数は適宜追加してください
-        """
+        """# ToDo: Implement a function to sample latent variables"""
 
     def decoder(self):
-        """
-        # ToDo: Implement the decoder
-        ※引数は適宜追加してください
-        """
+        """# ToDo: Implement the decoder"""
 
     def forward(self):
-        """
-        # ToDo: Implement the forward pass
-        ※引数は適宜追加し、以下のreturn文に沿う形で結果を返すようにしてください
-        """
+        """# ToDo: Implement the forward function to return the following variables."""
         # return [KL, reconstruction], z, y

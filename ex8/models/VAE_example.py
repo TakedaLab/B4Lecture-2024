@@ -45,8 +45,7 @@ class VAE(nn.Module):
         self.dec_fc3 = nn.Linear(self.h_dim, self.x_dim)
 
     def encoder(self, x):
-        """
-        Encoder.
+        """Encoder.
 
         Parameters
         ----------
@@ -75,8 +74,7 @@ class VAE(nn.Module):
         return mean + epsilon * torch.exp(0.5 * log_var)
 
     def decoder(self, z):
-        """
-        Decoder.
+        """Decoder.
 
         Parameters
         ----------
@@ -89,8 +87,7 @@ class VAE(nn.Module):
         return torch.sigmoid(self.dec_fc3(z))
 
     def forward(self, x, device):
-        """
-        Forward propagation.
+        """Forward propagation.
 
         Parameters
         ----------
