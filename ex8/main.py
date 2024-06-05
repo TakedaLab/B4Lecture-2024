@@ -150,7 +150,7 @@ class Main:
             )
 
     def main(self):
-        """Main function for training and visualization."""
+        """Output the results of training and visualization."""
         self.createDirectories()
         self.createDataLoader()
 
