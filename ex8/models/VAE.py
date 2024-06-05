@@ -2,8 +2,10 @@
 """This file is for you to implement VAE."""
 
 import numpy as np
+
 # import torch
 import torch.nn as nn
+
 # import torch.nn.functional as F
 
 MNIST_SIZE = 28
@@ -11,6 +13,7 @@ MNIST_SIZE = 28
 
 class VAE(nn.Module):
     """VAE model."""
+
     def __init__(self, z_dim, h_dim, drop_rate):
         """
         Set constructors.

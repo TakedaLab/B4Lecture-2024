@@ -15,6 +15,7 @@ from models.VAE import VAE
 
 class Main:
     """Main class for training and visualization."""
+    
     def __init__(
         self,
         z_dim: int = 2,
