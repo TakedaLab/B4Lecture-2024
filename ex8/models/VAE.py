@@ -15,8 +15,7 @@ class VAE(nn.Module):
     """VAE model."""
 
     def __init__(self, z_dim, h_dim, drop_rate):
-        """
-        Set constructors.
+        """Set constructors.
 
         Parameters
         ----------
@@ -44,13 +43,13 @@ class VAE(nn.Module):
         self.dec_fc3 = nn.Linear(self.h_dim, self.x_dim)
 
     def encoder(self):
-        """# ToDo: Implement the encoder"""
+        """# ToDo: Implement the encoder."""
 
     def sample_z(self):
-        """# ToDo: Implement a function to sample latent variables"""
+        """# ToDo: Implement a function to sample latent variables."""
 
     def decoder(self):
-        """# ToDo: Implement the decoder"""
+        """# ToDo: Implement the decoder."""
 
     def forward(self):
         """# ToDo: Implement the forward function to return the following variables."""
