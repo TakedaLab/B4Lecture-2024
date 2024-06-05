@@ -181,10 +181,6 @@ class Main:
         self.Visualize.walkthrough()
         print("-----Stop Visualization-----")
 
-        import pdb
-
-        pdb.set_trace()
-
 
 if __name__ == "__main__":
     fire.Fire(Main)
