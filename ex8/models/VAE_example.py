@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""This file is an example of the VAE model."""
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -8,13 +11,17 @@ MNIST_SIZE = 28
 
 class VAE(nn.Module):
     def __init__(self, z_dim, h_dim, drop_rate):
-        """Constructor
+        """
+        Set constructors.
 
-        Args:
-            z_dim (int): Dimensions of the latent variable.
-
-        Returns:
-            None.
+        Parameters
+        ----------
+        z_dim : int
+            Dimensions of the latent variable.
+        h_dim : int
+            Dimensions of the hidden layer.
+        drop_rate : float
+            Dropout rate.
 
         Note:
             eps (float): Small amounts to prevent overflow and underflow.
@@ -36,14 +43,12 @@ class VAE(nn.Module):
         self.dec_fc3 = nn.Linear(self.h_dim, self.x_dim)
 
     def encoder(self, x):
-        """Encoder
+        """Encoder.
 
-        Args:
-            x (torch.tensor): Input data whose size is (Batch size, x_dim).
-
-        Returns:
-            mean (torch.tensor): Mean value of approximated posterior distribution whose size is (Batch size, z_dim).
-            logvar (torch.tensor): Log-variance of approximated posterior distribution (Batch size, z_dim).
+        Parameters
+        ----------
+        x : torch.tensor
+            Input data whose size is (batch size, x_dim).
         """
         x = x.view(-1, self.x_dim)
         x = F.relu(self.enc_fc1(x))
@@ -51,27 +56,27 @@ class VAE(nn.Module):
         return self.enc_fc3_mean(x), self.enc_fc3_logvar(x)
 
     def sample_z(self, mean, log_var, device):
-        """Sampling latent variables using reparametrization trick
+        """Sample latent variables using reparametrization trick.
 
-        Args:
-            mean (torch.tensor): Mean value of approximated posterior distribution whose size is (Batch size, z_dim).
-            logvar (torch.tensor): Log-variance of approximated posterior distribution (Batch size, z_dim).
-            device (String): "cuda" if GPU is available, or "cpu" otherwise.
-
-        Returns:
-            z (torch.tensor): Latent variable whose size is (Batch size, z_dim).
+        Parameters
+        ----------
+        mean : torch.tensor
+            Mean whose size is (batch size, z_dim).
+        log_var : torch.tensor
+            Logarithm of variance whose size is (batch size, z_dim).
+        device : torch.device
+            "cuda" if GPU is available, or "cpu" otherwise.
         """
         epsilon = torch.randn(mean.shape, device=device)
         return mean + epsilon * torch.exp(0.5 * log_var)
 
     def decoder(self, z):
-        """Decoder
+        """Decoder.
 
-        Args:
-            z (torch.tensor): Latent variable whose size is (Batch size, z_dim).
-
-        Returns:
-            (torch.tensor): Reconstruction data whose size is (batch size, x_dim).
+        Parameters
+        ----------
+        z : torch.tensor
+            Latent variable whose size is (batch size, z_dim).
         """
         z = F.relu(self.dec_fc1(z))
         z = F.relu(self.dec_fc2(z))
@@ -79,17 +84,23 @@ class VAE(nn.Module):
         return torch.sigmoid(self.dec_fc3(z))
 
     def forward(self, x, device):
-        """Forward propagation
+        """Forward propagation.
 
-        Args:
-            x (torch.tensor): Input data whose size is (batch size, x_dim).
-            device (String): "cuda" if GPU is available, or "cpu" otherwise.
+        Parameters
+        ----------
+        x : torch.tensor
+            Input data whose size is (batch size, x_dim).
+        device : torch.device
+            "cuda" if GPU is available, or "cpu" otherwise.
 
-        Returns:
-            KL (torch.float): KL divergence
-            reconstruction (torch.float): Reconstruction error
-            z (torch.tensor): Latent variable whose size is (Batch size, z_dim).
-            y (torch.tensor): Reconstruction data whose size is (batch size, x_dim).
+        Returns
+        -------
+        list
+            List of KL divergence and reconstruction loss.
+        z : torch.tensor
+            Latent variable.
+        y : torch.tensor
+            Output data whose size is (batch size, x_dim).
         """
         x = x.to(device)
         mean, log_var = self.encoder(x)

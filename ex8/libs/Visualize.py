@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+This file is used to visualize the reconstructed images, latent space, 
+and latent space generated from artificial lattice point.
+"""
+
 import os
 
 import matplotlib.pyplot as plt
@@ -8,8 +14,7 @@ from matplotlib.animation import ArtistAnimation
 
 class Visualize:
     def __init__(self, z_dim, h_dim, dataloader_test, model, device):
-        """
-        Constructor
+        """Set constructors.
 
         Parameters
         ----------
@@ -24,7 +29,6 @@ class Visualize:
         device : torch.device
             "cuda" if GPU is available, or "cpu" otherwise.
         """
-
         self.z_dim = z_dim
         self.h_dim = h_dim
         self.dataloader_test = dataloader_test
@@ -32,20 +36,14 @@ class Visualize:
         self.device = device
 
     def createDirectories(self):
-        """
-        Create directories for storing images
-        """
-
+        """Create directories for storing images."""
         os.makedirs("./images/reconstruction", exist_ok=True)
         os.makedirs("./images/latent_space", exist_ok=True)
         os.makedirs("./images/lattice_point", exist_ok=True)
         os.makedirs("./images/walkthrough", exist_ok=True)
 
     def reconstruction(self):
-        """
-        Visualization of the reconstructed images
-        """
-
+        """Visualize the reconstructed images."""
         for num_batch, data in enumerate(self.dataloader_test):
             fig, axes = plt.subplots(2, 10, figsize=(20, 4))
             for i in range(axes.shape[0]):
@@ -62,10 +60,7 @@ class Visualize:
             plt.close(fig)
 
     def latent_space(self):
-        """
-        Visualization of latent space
-        """
-
+        """Visualize latent space."""
         cm = plt.get_cmap("tab10")
         for num_batch, data in enumerate(self.dataloader_test):
             fig_plot, ax_plot = plt.subplots(figsize=(9, 9))
@@ -93,13 +88,11 @@ class Visualize:
             plt.close(fig_scatter)
 
     def lattice_point(self):
-        """
-        Visualization of latent space generated from artificial lattice point
-        """
+        """Visualize latent space generated from artificial lattice point."""
         # The size of Z must be (Batch size, z_dim)
-        l = 25
-        x = np.linspace(-2, 2, l)
-        y = np.linspace(-2, 2, l)
+        num_image = 25 # How many images per row (column)
+        x = np.linspace(-2, 2, num_image)
+        y = np.linspace(-2, 2, num_image)
         z_x, z_y = np.meshgrid(x, y)
         Z = (
             torch.tensor(np.array([z_x, z_y]), dtype=torch.float)
@@ -108,20 +101,18 @@ class Visualize:
             .reshape(-1, self.z_dim)
         )
         y = self.model.decoder(Z).cpu().detach().numpy().reshape(-1, 28, 28)
-        fig, axes = plt.subplots(l, l, figsize=(9, 9))
-        for i in range(l):
-            for j in range(l):
+        fig, axes = plt.subplots(num_image, num_image, figsize=(9, 9))
+        for i in range(num_image):
+            for j in range(num_image):
                 axes[i][j].set_xticks([])
                 axes[i][j].set_yticks([])
-                axes[i][j].imshow(y[l * (l - 1 - i) + j], "gray")
+                axes[i][j].imshow(y[num_image * (num_image - 1 - i) + j], "gray")
         fig.subplots_adjust(wspace=0, hspace=0)
         fig.savefig(f"./images/lattice_point/z_{self.z_dim}.png")
         plt.close(fig)
 
     def walkthrough(self):
-        """
-        Creating animations of the reconstructed images obtained by walking through the latent space
-        """
+        """Create animations of the reconstructed images obtained by walking through the latent space."""
         self.step = 50  # Step size of the animation
         self.z11 = torch.tensor([-3, 0], dtype=torch.float)
         self.z12 = torch.tensor([3, 0], dtype=torch.float)

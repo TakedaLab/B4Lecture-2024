@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""This file is for you to implement the main function."""
+
 import os
 
 import fire
@@ -22,13 +25,14 @@ class Main:
         train_size_rate: float = 0.8,
     ):
         """
-        Constructor
+        Set constructors.
 
         Parameters
         ----------
         z_dim : int
             Dimensions of the latent variable, by default 2
-            Attention: If you visualize the latent space with a dimension greater than 2, you need to change the code in libs/Visualize.py.
+            Attention: If you visualize the latent space with a dimension greater than 2, 
+            you need to change the code in libs/Visualize.py.
         h_dim : int, optional
             Dimensions of the hidden layer, by default 400
         drop_rate : float, optional
@@ -42,7 +46,6 @@ class Main:
         train_size_rate : float, optional
             The ratio of the training data to the validation data, by default 0.8
         """
-
         self.z_dim = z_dim
         self.h_dim = h_dim
         self.drop_rate = drop_rate
@@ -68,18 +71,12 @@ class Main:
         )
 
     def createDirectories(self):
-        """
-        Create directories for logs and parameters
-        """
-
+        """Create directories for logs and parameters."""
         os.makedirs("./logs", exist_ok=True)
         os.makedirs("./params", exist_ok=True)
 
     def createDataLoader(self):
-        """
-        Create dataloaders for training, validation, and test data
-        """
-
+        """Create dataloaders for training, validation, and test data."""
         transform = transforms.Compose(
             [transforms.ToTensor(), transforms.Lambda(lambda x: x.view(-1))]
         )  # Preprocessing for MNIST images
@@ -111,9 +108,7 @@ class Main:
         self.Visualize.dataloader_test = self.dataloader_test
 
     def train_batch(self):
-        """
-        Batch-based learning for training data
-        """
+        """Do batch-based learning for training data."""
         self.model.train()
         for x, _ in self.dataloader_train:
             lower_bound, _, _ = self.model(x, self.device)
@@ -125,9 +120,7 @@ class Main:
         self.num_batch_train -= 1
 
     def valid_batch(self):
-        """
-        Batch-based learning for validation data
-        """
+        """Do batch-based learning for validation data."""
         loss = []
         self.model.eval()
         for x, _ in self.dataloader_valid:
@@ -139,15 +132,17 @@ class Main:
         self.loss_valid_min = np.minimum(self.loss_valid_min, self.loss_valid)
 
     def early_stopping(self):
-        """
-        Early stopping
-        """
+        """Set a condition for early stopping."""
         if (
             self.loss_valid_min < self.loss_valid
-        ):  # If the loss of this iteration is greater than the minimum loss of the previous iterations, the counter variable is incremented.
+        ):
+            # If the loss of this iteration is greater than the minimum loss of 
+            # the previous iterations, the counter variable is incremented.
             self.num_no_improved += 1
             print(f"Validation got worse for the {self.num_no_improved} time in a row.")
-        else:  # If the loss of this iteration is the same or smaller than the minimum loss of the previous iterations, reset the counter variable and save parameters.
+        else:
+            # If the loss of this iteration is the same or smaller than the minimum loss of 
+            # the previous iterations, reset the counter variable and save parameters.
             self.num_no_improved = 0
             torch.save(
                 self.model.state_dict(),
@@ -164,7 +159,8 @@ class Main:
                 self.train_batch()
                 self.valid_batch()
                 print(
-                    f"[EPOCH{self.num_iter + 1}] loss_valid: {int(self.loss_valid)} | Loss_valid_min: {int(self.loss_valid_min)}"
+                    f"[EPOCH{self.num_iter + 1}] loss_valid: {int(self.loss_valid)}"
+                    + f" | Loss_valid_min: {int(self.loss_valid_min)}"
                 )
                 self.early_stopping()
                 if self.num_no_improved >= 10:

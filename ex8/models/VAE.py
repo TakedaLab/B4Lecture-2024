@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""This file is for you to implement VAE."""
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -9,7 +12,7 @@ MNIST_SIZE = 28
 class VAE(nn.Module):
     def __init__(self, z_dim, h_dim, drop_rate):
         """
-        Constructor
+        Set constructors.
 
         Parameters
         ----------
@@ -59,4 +62,4 @@ class VAE(nn.Module):
         # ToDo: Implement the forward pass
         ※引数は適宜追加し、以下のreturn文に沿う形で結果を返すようにしてください
         """
-        return [KL, reconstruction], z, y
+        # return [KL, reconstruction], z, y
