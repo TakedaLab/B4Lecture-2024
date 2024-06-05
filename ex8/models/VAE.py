@@ -2,7 +2,6 @@
 """This file is for you to implement VAE. Add variables as needed."""
 
 import numpy as np
-
 # import torch
 import torch.nn as nn
 
