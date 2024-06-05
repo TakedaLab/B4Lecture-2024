@@ -165,11 +165,11 @@ class FSDD(Dataset):
         Returns:
             features: 特徴量
         """
-        n_mfcc = 13
+        n_mfcc = 64
         datasize = len(path_list)
         features = torch.zeros(datasize, n_mfcc)
         transform = torchaudio.transforms.MFCC(
-            n_mfcc=13, melkwargs={"n_mels": 64, "n_fft": 512}
+            n_mfcc=64, melkwargs={"n_mels": 64, "n_fft": 512}
         )
         for i, path in enumerate(path_list):
             # データ読み込み (data.shape == (channel, time))
