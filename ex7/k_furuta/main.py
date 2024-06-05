@@ -207,7 +207,7 @@ def summary():
     )
 
     # 学習済みモデルの読み込み
-    model = load_model("keras_model/my_model.h5")
+    model = load_model("keras_model/my_model_5.h5")
 
     # 予測結果
     predict = model.predict(X_test)
