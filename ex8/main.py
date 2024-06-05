@@ -14,6 +14,7 @@ from models.VAE import VAE
 
 
 class Main:
+    """Main class for training and visualization."""
     def __init__(
         self,
         z_dim: int = 2,
@@ -30,21 +31,21 @@ class Main:
         Parameters
         ----------
         z_dim : int
-            Dimensions of the latent variable, by default 2
-            Attention: If you visualize the latent space with a dimension greater than 2, 
+            Dimensions of the latent variable, by default 2.
+            Attention: If you visualize the latent space with a dimension greater than 2,
             you need to change the code in libs/Visualize.py.
         h_dim : int, optional
-            Dimensions of the hidden layer, by default 400
+            Dimensions of the hidden layer, by default 400.
         drop_rate : float, optional
-            Dropout rate, by default 0.2
+            Dropout rate, by default 0.2.
         learning_rate : float, optional
-            Learning rate, by default 0.001
+            Learning rate, by default 0.001.
         num_max_epochs : int, optional
-            The number of epochs for training, by default 1000
+            The number of epochs for training, by default 1000.
         do_train : bool, optional
-            Whether to train the model, by default True
+            Whether to train the model, by default True.
         train_size_rate : float, optional
-            The ratio of the training data to the validation data, by default 0.8
+            The ratio of the training data to the validation data, by default 0.8.
         """
         self.z_dim = z_dim
         self.h_dim = h_dim
@@ -136,12 +137,12 @@ class Main:
         if (
             self.loss_valid_min < self.loss_valid
         ):
-            # If the loss of this iteration is greater than the minimum loss of 
+            # If the loss of this iteration is greater than the minimum loss of
             # the previous iterations, the counter variable is incremented.
             self.num_no_improved += 1
             print(f"Validation got worse for the {self.num_no_improved} time in a row.")
         else:
-            # If the loss of this iteration is the same or smaller than the minimum loss of 
+            # If the loss of this iteration is the same or smaller than the minimum loss of
             # the previous iterations, reset the counter variable and save parameters.
             self.num_no_improved = 0
             torch.save(
@@ -150,6 +151,7 @@ class Main:
             )
 
     def main(self):
+        """Main function for training and visualization."""
         self.createDirectories()
         self.createDataLoader()
 

@@ -10,6 +10,7 @@ MNIST_SIZE = 28
 
 
 class VAE(nn.Module):
+    """VAE model."""
     def __init__(self, z_dim, h_dim, drop_rate):
         """
         Set constructors.
@@ -43,7 +44,8 @@ class VAE(nn.Module):
         self.dec_fc3 = nn.Linear(self.h_dim, self.x_dim)
 
     def encoder(self, x):
-        """Encoder.
+        """
+        Encoder.
 
         Parameters
         ----------
@@ -56,7 +58,8 @@ class VAE(nn.Module):
         return self.enc_fc3_mean(x), self.enc_fc3_logvar(x)
 
     def sample_z(self, mean, log_var, device):
-        """Sample latent variables using reparametrization trick.
+        """
+        Sample latent variables using reparametrization trick.
 
         Parameters
         ----------
@@ -71,7 +74,8 @@ class VAE(nn.Module):
         return mean + epsilon * torch.exp(0.5 * log_var)
 
     def decoder(self, z):
-        """Decoder.
+        """
+        Decoder.
 
         Parameters
         ----------
@@ -84,7 +88,8 @@ class VAE(nn.Module):
         return torch.sigmoid(self.dec_fc3(z))
 
     def forward(self, x, device):
-        """Forward propagation.
+        """
+        Forward propagation.
 
         Parameters
         ----------

@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This file is used to visualize the reconstructed images, latent space, 
-and latent space generated from artificial lattice point.
-"""
+"""This file is used to visualize the results."""
 
 import os
 
@@ -13,6 +10,7 @@ from matplotlib.animation import ArtistAnimation
 
 
 class Visualize:
+    """Visualize the results of the VAE model."""
     def __init__(self, z_dim, h_dim, dataloader_test, model, device):
         """Set constructors.
 
@@ -90,7 +88,7 @@ class Visualize:
     def lattice_point(self):
         """Visualize latent space generated from artificial lattice point."""
         # The size of Z must be (Batch size, z_dim)
-        num_image = 25 # How many images per row (column)
+        num_image = 25  # How many images per row (column)
         x = np.linspace(-2, 2, num_image)
         y = np.linspace(-2, 2, num_image)
         z_x, z_y = np.meshgrid(x, y)
@@ -112,7 +110,7 @@ class Visualize:
         plt.close(fig)
 
     def walkthrough(self):
-        """Create animations of the reconstructed images obtained by walking through the latent space."""
+        """Create animations of the reconstructed images by walking through the latent space."""
         self.step = 50  # Step size of the animation
         self.z11 = torch.tensor([-3, 0], dtype=torch.float)
         self.z12 = torch.tensor([3, 0], dtype=torch.float)
