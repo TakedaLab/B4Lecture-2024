@@ -15,7 +15,8 @@ from models.VAE import VAE
 
 class Main:
     """Main class for training and visualization."""
-    
+
+
     def __init__(
         self,
         z_dim: int = 2,
@@ -135,9 +136,7 @@ class Main:
 
     def early_stopping(self):
         """Set a condition for early stopping."""
-        if (
-            self.loss_valid_min < self.loss_valid
-        ):
+        if self.loss_valid_min < self.loss_valid:
             # If the loss of this iteration is greater than the minimum loss of
             # the previous iterations, the counter variable is incremented.
             self.num_no_improved += 1
