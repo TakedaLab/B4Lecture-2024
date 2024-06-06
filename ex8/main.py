@@ -7,8 +7,8 @@ import fire
 import numpy as np
 import torch
 
-from models.VAE import VAE
 from torch import optim
+from models.VAE import VAE
 from torchvision import datasets, transforms
 
 from libs.Visualize import Visualize
