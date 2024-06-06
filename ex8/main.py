@@ -6,12 +6,11 @@ import os
 import fire
 import numpy as np
 import torch
-
 from torch import optim
-from models.VAE import VAE
 from torchvision import datasets, transforms
 
 from libs.Visualize import Visualize
+from model.VAE import VAE
 
 
 class Main:
