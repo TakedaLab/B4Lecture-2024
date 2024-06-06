@@ -14,13 +14,7 @@ import pandas as pd
 from PIL import Image
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.layers import (
-    Conv2D,
-    Dense,
-    Dropout,
-    Flatten,
-    MaxPooling2D,
-)
+from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.utils import to_categorical
@@ -37,24 +31,24 @@ def my_CNN(input_shape, output_dim):
     """
     model = Sequential()
     model.add(
-        Conv2D(
+        layers.Conv2D(
             32,
             (3, 3),
             activation="relu",
             input_shape=(input_shape[0], input_shape[0], 1),
         )
     )
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Conv2D(64, (3, 3), activation="relu"))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Conv2D(128, (3, 3), activation="relu"))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Flatten())
-    model.add(Dense(1024, activation="relu"))
-    model.add(Dropout(0.5)),
-    model.add(Dense(128, activation="relu"))
-    model.add(Dropout(0.5)),
-    model.add(Dense(output_dim, activation="softmax"))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Conv2D(64, (3, 3), activation="relu"))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Conv2D(128, (3, 3), activation="relu"))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Flatten())
+    model.add(layers.Dense(1024, activation="relu"))
+    model.add(layers.Dropout(0.5)),
+    model.add(layers.Dense(128, activation="relu"))
+    model.add(layers.Dropout(0.5)),
+    model.add(layers.Dense(output_dim, activation="softmax"))
     model.summary()  # モデル構成の表示
     return model
 
@@ -126,7 +120,7 @@ def write_result(paths, outputs):
         f.write("path,output\n")
         assert len(paths) == len(outputs)
         for path, output in zip(paths, outputs):
-            f.write("{path},{output}\n".format(path=path, output=output))
+            f.write(f"{path},{output}\n")
 
 
 def main():
