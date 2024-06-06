@@ -6,6 +6,7 @@ import os
 import fire
 import numpy as np
 import torch
+
 from models.VAE import VAE
 from torch import optim
 from torchvision import datasets, transforms
