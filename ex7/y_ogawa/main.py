@@ -6,6 +6,7 @@ B4輪講最終課題 パターン認識を行う.
 特徴量; MFCCの平均 (0次項含まず), PCAで次元削減
 識別器; MLP
 """
+
 import argparse
 import os
 
@@ -26,6 +27,7 @@ root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class my_MLP(pl.LightningModule):
     """MLPモデルを構築するクラス."""
+
     def __init__(self, input_dim: int, output_dim: int):
         """インスタンス."""
         super().__init__()
@@ -137,9 +139,10 @@ class FSDD(Dataset):
 
     def feature_extraction(self, data):
         """
-        音声データから特徴抽出を行いリストで返す
+        音声データから特徴抽出を行いリストで返す.
         扱う特徴量はMFCC64次元の平均 (0次は含めない)
         """
+
         transform = torchaudio.transforms.MFCC(
             n_mfcc=64, melkwargs={"n_mels": 64, "n_fft": 512}
         )
@@ -238,7 +241,7 @@ def time_masking(data, mask_length):
     """時間マスキングを行う."""
     # 0ではない地点を取得
     non_zero_indices = torch.nonzero(data[0]).flatten()
-    start = np.random.choice(non_zero_indices[:len(non_zero_indices) - mask_length])
+    start = np.random.choice(non_zero_indices[: len(non_zero_indices) - mask_length])
     # 選択された位置から mask_length 分のデータを無音で埋める
     data[:, start : start + mask_length] = 0
     return data
