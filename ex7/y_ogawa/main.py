@@ -3,6 +3,7 @@
 
 """
 B4輪講最終課題 パターン認識を行う.
+
 特徴量; MFCCの平均 (0次項含まず), PCAで次元削減
 識別器; MLP
 """
@@ -140,9 +141,9 @@ class FSDD(Dataset):
     def feature_extraction(self, data):
         """
         音声データから特徴抽出を行いリストで返す.
+
         扱う特徴量はMFCC64次元の平均 (0次は含めない)
         """
-
         transform = torchaudio.transforms.MFCC(
             n_mfcc=64, melkwargs={"n_mels": 64, "n_fft": 512}
         )
