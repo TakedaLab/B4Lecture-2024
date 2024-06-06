@@ -9,9 +9,8 @@ import torch
 from torch import optim
 from torchvision import datasets, transforms
 
-from model.VAE import VAE
-
 from libs.Visualize import Visualize
+from VAEs.VAE import VAE
 
 
 class Main:
