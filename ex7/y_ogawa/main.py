@@ -9,15 +9,15 @@ B4輪講最終課題 パターン認識を行う.
 import argparse
 import os
 
-from matplotlib import pyplot as plt
+import numpy as np
 import pandas as pd
 import pytorch_lightning as pl
 import seaborn as sns
-import numpy as np
 import torch
 import torchaudio
 import torchmetrics
-from torch.utils.data import Dataset, DataLoader, random_split
+from matplotlib import pyplot as plt
+from torch.utils.data import DataLoader, Dataset, random_split
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -34,7 +34,7 @@ class my_MLP(pl.LightningModule):
         self.train_acc = torchmetrics.Accuracy()
         self.val_acc = torchmetrics.Accuracy()
         self.test_acc = torchmetrics.Accuracy()
-        self.confm = torchmetrics.ConfusionMatrix(10, normalize='true')
+        self.confm = torchmetrics.ConfusionMatrix(10, normalize="true")
         self.test_step_outputs = []
 
     def create_model(self, input_dim: int, output_dim: int):
@@ -88,7 +88,7 @@ class my_MLP(pl.LightningModule):
         x, y = batch
         pred = self.forward(x)
         loss = self.loss_fn(pred, y)
-        self.log('val/acc', self.val_acc(pred, y), prog_bar=True, logger=True)
+        self.log("val/acc", self.val_acc(pred, y), prog_bar=True, logger=True)
 
         return loss
 
@@ -96,20 +96,16 @@ class my_MLP(pl.LightningModule):
         """テストステップの実装."""
         x, y = batch
         pred = self.forward(x)
-        self.log(
-            'test/acc', self.test_acc(pred, y), prog_bar=True, logger=True
-        )
-        self.test_step_outputs.append(
-            {'pred': torch.argmax(pred, dim=-1), 'target': y}
-        )
+        self.log("test/acc", self.test_acc(pred, y), prog_bar=True, logger=True)
+        self.test_step_outputs.append({"pred": torch.argmax(pred, dim=-1), "target": y})
 
-        return {'pred': torch.argmax(pred, dim=-1), 'target': y}
+        return {"pred": torch.argmax(pred, dim=-1), "target": y}
 
     def on_test_epoch_end(self) -> None:
         """テストエポック終了時の処理."""
         # 混同行列を tensorboard に出力
-        preds = torch.cat([tmp['pred'] for tmp in self.test_step_outputs])
-        targets = torch.cat([tmp['target'] for tmp in self.test_step_outputs])
+        preds = torch.cat([tmp["pred"] for tmp in self.test_step_outputs])
+        targets = torch.cat([tmp["target"] for tmp in self.test_step_outputs])
         confusion_matrix = self.confm(preds, targets)
         df_cm = pd.DataFrame(
             confusion_matrix.cpu().numpy(), index=range(10), columns=range(10)
@@ -121,9 +117,7 @@ class my_MLP(pl.LightningModule):
         plt.ylabel("True", fontsize=15)
         plt.savefig("100result_4.png")
         plt.close(fig_)
-        self.logger.experiment.add_figure(
-            "Confusion matrix", fig_, self.current_epoch
-        )
+        self.logger.experiment.add_figure("Confusion matrix", fig_, self.current_epoch)
 
     def configure_optimizers(self):
         """オプティマイザの設定."""
@@ -134,6 +128,7 @@ class my_MLP(pl.LightningModule):
 
 class FSDD(Dataset):
     """音声データからデータセットを作成するクラス."""
+
     def __init__(self, data, label) -> None:
         """インスタンス."""
         super().__init__()
@@ -146,7 +141,7 @@ class FSDD(Dataset):
         扱う特徴量はMFCC64次元の平均 (0次は含めない)
         """
         transform = torchaudio.transforms.MFCC(
-            n_mfcc=64, melkwargs={'n_mels': 64, 'n_fft': 512}
+            n_mfcc=64, melkwargs={"n_mels": 64, "n_fft": 512}
         )
         mfcc_features = transform(data)
         # フレームごとに計算されたMFCCを結合して64次元の特徴量を得る
@@ -168,13 +163,14 @@ class FSDD(Dataset):
 
 class FSDDDataModule(pl.LightningDataModule):
     """データモジュールを構築するクラス."""
+
     def __init__(
-            self,
-            train_dataset,
-            val_dataset,
-            test_dataset=None,
-            batch_size=32,
-            num_workers=4,
+        self,
+        train_dataset,
+        val_dataset,
+        test_dataset=None,
+        batch_size=32,
+        num_workers=4,
     ):
         """インスタンス."""
         super().__init__()
@@ -208,7 +204,7 @@ class FSDDDataModule(pl.LightningDataModule):
             self.test_dataset,
             batch_size=self.batch_size,
             shuffle=False,
-            num_workers=self.num_workers
+            num_workers=self.num_workers,
         )
 
 
@@ -242,11 +238,9 @@ def time_masking(data, mask_length):
     """時間マスキングを行う."""
     # 0ではない地点を取得
     non_zero_indices = torch.nonzero(data[0]).flatten()
-    start = np.random.choice(
-        non_zero_indices[:len(non_zero_indices) - mask_length]
-    )
+    start = np.random.choice(non_zero_indices[:len(non_zero_indices) - mask_length])
     # 選択された位置から mask_length 分のデータを無音で埋める
-    data[:, start:start+mask_length] = 0
+    data[:, start : start + mask_length] = 0
     return data
 
 
@@ -271,7 +265,7 @@ def expand_data(path_list, labels):
         expanded_data.append((whitenoisy_data, int(label)))
         shift_data = time_shift(data)
         expanded_data.append((shift_data, int(label)))
-        time_mask_data = time_masking(data, int(len(data[0])*0.05))
+        time_mask_data = time_masking(data, int(len(data[0]) * 0.05))
         expanded_data.append((time_mask_data, int(label)))
 
     # データとラベルをそれぞれ別々のリストに分割
@@ -325,21 +319,20 @@ def main():
     training = pd.read_csv(os.path.join(root, "training.csv"))
 
     # Dataset の作成
-    expanded_data = expand_data(training["path"].values, training['label'].values)
+    expanded_data = expand_data(training["path"].values, training["label"].values)
     train_dataset = FSDD(expanded_data[0], expanded_data[1])
 
     # Train/Validation 分割
-    val_size = int(len(train_dataset)*0.2)
-    train_size = len(train_dataset)-val_size
+    val_size = int(len(train_dataset) * 0.2)
+    train_size = len(train_dataset) - val_size
     train_dataset, val_dataset = random_split(
-            train_dataset,
-            [train_size, val_size],
-            torch.Generator().manual_seed(20200616))
+        train_dataset, [train_size, val_size], torch.Generator().manual_seed(20200616)
+    )
 
     if args.path_to_truth:
         # Test Dataset の作成
         test = pd.read_csv(args.path_to_truth)
-        test_data = make_testdata(test["path"].values, test['label'].values)
+        test_data = make_testdata(test["path"].values, test["label"].values)
         test_dataset = FSDD(test_data[0], test_data[1])
     else:
         test_dataset = None
