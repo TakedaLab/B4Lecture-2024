@@ -154,7 +154,7 @@ class Main:
         self.createDataLoader()
 
         if self.do_train:
-            print("-----Start training-----")
+            # print("-----Start training-----")
             for self.num_iter in range(self.num_max_epochs):
                 self.train_batch()
                 self.valid_batch()
@@ -164,11 +164,11 @@ class Main:
                 )
                 self.early_stopping()
                 if self.num_no_improved >= 10:
-                    print("Apply early stopping")
+                    # print("Apply early stopping")
                     break
-            print("-----Stop training-----")
+            # print("-----Stop training-----")
 
-        print("-----Start Visualization-----")
+        # print("-----Start Visualization-----")
         self.model.load_state_dict(
             torch.load(f"./params/model_z_{self.z_dim}_h_{self.h_dim}.pth")
         )
@@ -178,7 +178,7 @@ class Main:
         self.Visualize.latent_space()
         self.Visualize.lattice_point()
         self.Visualize.walkthrough()
-        print("-----Stop Visualization-----")
+        # print("-----Stop Visualization-----")
 
 
 if __name__ == "__main__":

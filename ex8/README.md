@@ -43,7 +43,7 @@ poetry env use {Pythonのバージョンがあるフォルダ}/bin/{Pythonのバ
 poetry env info
 poetry install 
 ```
-`pyproject.toml`に記載されているパッケージには開発環境のパッケージも含まれているため，自分の開発環境でやりたい場合は`poetry install --no-dev`を実行してください．
+`pyproject.toml`に記載されているパッケージには formatter (balck, isort) が含まれているため，自分の開発環境でやりたい場合は`poetry install --no-dev`を実行してください．
 
 ## 実行例
 `run.sh`にも実行例が記載されています．
