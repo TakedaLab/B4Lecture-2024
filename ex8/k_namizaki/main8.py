@@ -8,14 +8,15 @@ import random
 import fire
 import numpy as np
 import torch
+from libs.Visualize import Visualize
 from torch import optim
 from torchvision import datasets, transforms
 
 from k_namizaki.VAE8 import VAE
-from libs.Visualize import Visualize
 
 
 def set_seed(seed_value=42):
+    """Set the seed for reproducibility."""
     # 乱数生成器のシードを設定する
     np.random.seed(seed_value)
     torch.manual_seed(seed_value)
@@ -26,6 +27,7 @@ def set_seed(seed_value=42):
         torch.cuda.manual_seed_all(seed_value)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
+
 
 # 乱数生成器のシードを設定
 set_seed(42)

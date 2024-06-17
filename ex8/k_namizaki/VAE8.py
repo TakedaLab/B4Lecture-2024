@@ -8,10 +8,12 @@ import torch.nn.functional as F
 
 
 def set_seed(seed=42):
+    """Set the seed for reproducibility."""
     np.random.seed(seed)
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+
 
 set_seed(42)  # この関数をモデル定義やデータローダーの初期化前に呼び出す
 
@@ -56,7 +58,7 @@ class VAE(nn.Module):
         self.dec_fc3 = nn.Linear(self.h_dim, self.x_dim)  # 画像を再構築するための出力層
 
     def encoder(self, x):
-        """入力画像を潜在空間にエンコードする。
+        """入力画像を潜在空間にエンコードする.
 
         Parameters
         ----------
@@ -82,7 +84,7 @@ class VAE(nn.Module):
         return mean, logvar
 
     def sample_z(self, mean, logvar, device):
-        """平均と対数分散で定義された分布から潜在変数zをサンプリングする。
+        """平均と対数分散で定義された分布から潜在変数zをサンプリングする.
 
         Parameters
         ----------
@@ -97,13 +99,13 @@ class VAE(nn.Module):
             サンプリングされた潜在変数。
         """
         """# ToDo: Implement a function to sample latent variables."""
-        epsilon = torch.randn(mean.shape, device = device)  # 標準正規分布からε
+        epsilon = torch.randn(mean.shape, device=device)  # 標準正規分布からε
         # 0.5はlog_varがlog(sigma^2)で、使いたいのはlog(sigma)だから
         z = mean + epsilon * torch.exp(0.5 * logvar)  # 潜在変数をサンプリング
         return z
 
     def decoder(self, z):
-        """潜在変数zを画像空間にデコードする。
+        """潜在変数zを画像空間にデコードする.
 
         Parameters
         ----------
@@ -126,7 +128,7 @@ class VAE(nn.Module):
         return y
 
     def forward(self, x, device):
-        """ネットワークを前向きに通過させる。
+        """ネットワークを前向きに通過させる.
 
         Parameters
         ----------
