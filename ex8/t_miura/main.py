@@ -7,15 +7,16 @@ import fire
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from Visualize import Visualize
 from torch import optim
 from torchvision import datasets, transforms
 from VAE import VAE
+from Visualize import Visualize
 
 SEED = 0
 torch.manual_seed(SEED)
 torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
+
 
 class Main:
     """Main class for training and visualization."""

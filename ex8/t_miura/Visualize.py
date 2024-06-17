@@ -122,7 +122,7 @@ class Visualize:
         distance = np.zeros((10, 10))
         for i in range(10):
             for j in range(10):
-                distance[i, j] = np.sqrt(np.sum((centroid[i] - centroid[j])**2))
+                distance[i, j] = np.sqrt(np.sum((centroid[i] - centroid[j]) ** 2))
         print("distance")
         print(distance)
 
@@ -134,9 +134,13 @@ class Visualize:
         y = np.linspace(-2, 2, num_image)
         z_x, z_y = np.meshgrid(x, y)
         Z = (
-            torch.tensor(np.array(
-                [z_x for i in range(self.z_dim // 2)] + [z_y for i in range(self.z_dim - self.z_dim // 2)]
-                ), dtype=torch.float)
+            torch.tensor(
+                np.array(
+                    [z_x for i in range(self.z_dim // 2)]
+                    + [z_y for i in range(self.z_dim - self.z_dim // 2)]
+                ),
+                dtype=torch.float,
+            )
             .permute(1, 2, 0)
             .to(self.device)
             .reshape(-1, self.z_dim)
@@ -155,14 +159,38 @@ class Visualize:
     def walkthrough(self):
         """Create animations of the reconstructed images by walking through the latent space."""
         self.step = 50  # Step size of the animation
-        self.z11 = torch.tensor([-3] * (self.z_dim // 2) + [0] * (self.z_dim - self.z_dim // 2), dtype=torch.float)
-        self.z12 = torch.tensor([3] * (self.z_dim // 2) + [0] * (self.z_dim - self.z_dim // 2), dtype=torch.float)
-        self.z21 = torch.tensor([-3] * (self.z_dim // 2) + [3] * (self.z_dim - self.z_dim // 2), dtype=torch.float)
-        self.z22 = torch.tensor([3] * (self.z_dim // 2) + [-3] * (self.z_dim - self.z_dim // 2), dtype=torch.float)
-        self.z31 = torch.tensor([0] * (self.z_dim // 2) + [3] * (self.z_dim - self.z_dim // 2), dtype=torch.float)
-        self.z32 = torch.tensor([0] * (self.z_dim // 2) + [-3] * (self.z_dim - self.z_dim // 2), dtype=torch.float)
-        self.z41 = torch.tensor([3] * (self.z_dim // 2) + [3] * (self.z_dim - self.z_dim // 2), dtype=torch.float)
-        self.z42 = torch.tensor([-3] * (self.z_dim // 2) + [-3] * (self.z_dim - self.z_dim // 2), dtype=torch.float)
+        self.z11 = torch.tensor(
+            [-3] * (self.z_dim // 2) + [0] * (self.z_dim - self.z_dim // 2),
+            dtype=torch.float,
+        )
+        self.z12 = torch.tensor(
+            [3] * (self.z_dim // 2) + [0] * (self.z_dim - self.z_dim // 2),
+            dtype=torch.float,
+        )
+        self.z21 = torch.tensor(
+            [-3] * (self.z_dim // 2) + [3] * (self.z_dim - self.z_dim // 2),
+            dtype=torch.float,
+        )
+        self.z22 = torch.tensor(
+            [3] * (self.z_dim // 2) + [-3] * (self.z_dim - self.z_dim // 2),
+            dtype=torch.float,
+        )
+        self.z31 = torch.tensor(
+            [0] * (self.z_dim // 2) + [3] * (self.z_dim - self.z_dim // 2),
+            dtype=torch.float,
+        )
+        self.z32 = torch.tensor(
+            [0] * (self.z_dim // 2) + [-3] * (self.z_dim - self.z_dim // 2),
+            dtype=torch.float,
+        )
+        self.z41 = torch.tensor(
+            [3] * (self.z_dim // 2) + [3] * (self.z_dim - self.z_dim // 2),
+            dtype=torch.float,
+        )
+        self.z42 = torch.tensor(
+            [-3] * (self.z_dim // 2) + [-3] * (self.z_dim - self.z_dim // 2),
+            dtype=torch.float,
+        )
         z1_list = [self.z11, self.z21, self.z31, self.z41]
         z2_list = [self.z12, self.z22, self.z32, self.z42]
 
