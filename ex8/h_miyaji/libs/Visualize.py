@@ -62,6 +62,7 @@ class Visualize:
             plt.close(fig)
 
     def convert_to_two_dim(self, z):
+        """PCAを適用し, 潜在空間の次元数を2まで削減する."""
         autoscaled_z = (z - z.mean()) / z.std()
         pca = PCA(n_components=2)
         z_dim2 = pca.fit_transform(autoscaled_z)
