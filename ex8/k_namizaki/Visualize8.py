@@ -55,7 +55,9 @@ class Visualize:
             y = y.cpu().detach().numpy().reshape(-1, 28, 28)
             for i, im in enumerate(y[:10]):
                 axes[1][i].imshow(im, "gray")
-            fig.savefig(f"./images_lrate001/reconstruction/z_{self.z_dim}_{num_batch}.png")
+            fig.savefig(
+                f"./images_lrate001/reconstruction/z_{self.z_dim}_{num_batch}.png"
+            )
             plt.close(fig)
 
     def latent_space(self):
@@ -111,7 +113,7 @@ class Visualize:
         plt.close(fig)
 
     def walkthrough(self):
-        """Create animations of the reconstructed images_lrate001 by walking through the latent space."""
+        """Create animations of the reconstructed images by walking through the latent space."""
         self.step = 50  # Step size of the animation
         self.z11 = torch.tensor([-3, 0], dtype=torch.float)
         self.z12 = torch.tensor([3, 0], dtype=torch.float)
