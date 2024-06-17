@@ -6,13 +6,12 @@ import os
 import random
 
 import fire
+from k_namizaki.VAE8 import VAE
+from k_namizaki.Visualize8 import Visualize
 import numpy as np
 import torch
 from torch import optim
 from torchvision import datasets, transforms
-
-from k_namizaki.VAE8 import VAE
-from k_namizaki.Visualize8 import Visualize
 
 
 def set_seed(seed_value=42):
