@@ -2,6 +2,7 @@
 """This file is for you to implement VAE. Add variables as needed."""
 
 import numpy as np
+import torch
 import torch.nn as nn
 
 MNIST_SIZE = 28
@@ -38,15 +39,33 @@ class VAE(nn.Module):
         self.dec_drop = nn.Dropout(self.drop_rate)
         self.dec_fc3 = nn.Linear(self.h_dim, self.x_dim)
 
-    def encoder(self):
+    def encoder(self, x: torch.Tensor):
         """# ToDo: Implement the encoder."""
+        x = x.view(-1, self.x_dim)
+        x = nn.functional.relu(self.enc_fc1(x))
+        x = nn.functional.relu(self.enc_fc2(x))
+        return self.enc_fc3_mean(x), self.enc_fc3_logvar(x)
 
-    def sample_z(self):
+    def sample_z(self, mean: torch.Tensor, log_var: torch.Tensor, device: torch.device):
         """# ToDo: Implement a function to sample latent variables."""
+        epsilon = torch.randn(mean.shape, device=device)
+        return mean + epsilon * torch.exp(0.5 * log_var)
 
-    def decoder(self):
+    def decoder(self, z: torch.Tensor):
         """# ToDo: Implement the decoder."""
+        z = nn.functional.relu(self.dec_fc1(z))
+        z = nn.functional.relu(self.dec_fc2(z))
+        z = self.dec_drop(z)
+        return torch.sigmoid(self.dec_fc3(z))
 
-    def forward(self):
+    def forward(self, x: torch.Tensor, device: torch.device):
         """# ToDo: Implement the forward function to return the following variables."""
-        # return [KL, reconstruction], z, y
+        x = x.to(device)
+        mean, log_var = self.encoder(x)
+        z = self.sample_z(mean, log_var, device)
+        y = self.decoder(z)
+        KL = 0.5 * torch.sum(1 + log_var - mean**2 - torch.exp(log_var))
+        reconstruction = torch.sum(
+            x * torch.log(y + self.eps) + (1 - x) * torch.log(1 - y + self.eps)
+        )
+        return [KL, reconstruction], z, y
