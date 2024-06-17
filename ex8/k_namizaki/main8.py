@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """This file is for you to implement the main function."""
 
-# createDataLoaderに乱数シードを追加。（これをして再現といえる？）
+# 乱数シードを設定できるように追加。（これをして再現といえる？）
 import os
 import random
 
