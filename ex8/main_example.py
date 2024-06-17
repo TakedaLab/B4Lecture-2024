@@ -6,10 +6,9 @@ import os
 import fire
 import numpy as np
 import torch
+from libs.Visualize import Visualize
 from torch import optim
 from torchvision import datasets, transforms
-
-from libs.Visualize import Visualize
 from VAEs.VAE_example import VAE
 
 
