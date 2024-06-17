@@ -6,6 +6,16 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
+def set_seed(seed=42):
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+set_seed(42)  # この関数をモデル定義やデータローダーの初期化前に呼び出す
+
+
 MNIST_SIZE = 28  # MNIST画像は28x28ピクセル
 
 
@@ -62,7 +72,7 @@ class VAE(nn.Module):
         """
         """# ToDo: Implement the encoder."""
         h = x.view(-1, self.x_dim)  # テンソルを２次元にリサイズ
-        h = F.relu(self.enc_fc1(x))  # 最初の全結合層をReLU活性化関数で通過
+        h = F.relu(self.enc_fc1(h))  # 最初の全結合層をReLU活性化関数で通過
         h = F.relu(self.enc_fc2(h))  # 2番目の全結合層をReLU活性化関数で通過
 
         # どのサイトでもこのままだけど、これで平均と対数分散が分かれているのか？
@@ -71,7 +81,7 @@ class VAE(nn.Module):
 
         return mean, logvar
 
-    def sample_z(self, mean, logvar):
+    def sample_z(self, mean, logvar, device):
         """平均と対数分散で定義された分布から潜在変数zをサンプリングする。
 
         Parameters
@@ -87,7 +97,7 @@ class VAE(nn.Module):
             サンプリングされた潜在変数。
         """
         """# ToDo: Implement a function to sample latent variables."""
-        epsilon = torch.randn(mean.shape)  # 標準正規分布からε
+        epsilon = torch.randn(mean.shape, device = device)  # 標準正規分布からε
         # 0.5はlog_varがlog(sigma^2)で、使いたいのはlog(sigma)だから
         z = mean + epsilon * torch.exp(0.5 * logvar)  # 潜在変数をサンプリング
         return z
@@ -111,11 +121,11 @@ class VAE(nn.Module):
         h = F.relu(self.dec_fc2(h))  # 2番目の全結合層をReLU活性化関数で通過
         h = self.dec_drop(h)  # ドロップアウト層を通過
         y = torch.sigmoid(
-            self.dec_fc3(z)
+            self.dec_fc3(h)
         )  # 出力層をシグモイド活性化関数で通過し、再構築された画像を出力
         return y
 
-    def forward(self, x):
+    def forward(self, x, device):
         """ネットワークを前向きに通過させる。
 
         Parameters
@@ -133,9 +143,10 @@ class VAE(nn.Module):
             再構築された画像。
         """
         # TODO: 次の変数を返すためのforward関数を実装する
+        x = x.to(device)
         mean, logvar = self.encoder(x)  # エンコーダで平均と対数分散を計算
         z = self.sample_z(
-            mean, logvar
+            mean, logvar, device
         )  # リパラメトリゼーショントリックを用いて潜在変数をサンプリング
         y = self.decoder(z)  # デコーダで潜在変数から再構築された画像を生成
         KL = 0.5 * torch.sum(

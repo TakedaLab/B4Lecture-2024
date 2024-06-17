@@ -1,0 +1,10 @@
+シード設定なし
+[EPOCH136] loss_valid: 85175 | Loss_valid_min: 84984
+シードをセットして他は初期（シード42）
+[EPOCH133] loss_valid: 84911 | Loss_valid_min: 84812
+learning_rateを0.002に変更
+[EPOCH101] loss_valid: 83929 | Loss_valid_min: 83766
+learning_rateを0.005に変更
+[EPOCH85] loss_valid: 84352 | Loss_valid_min: 84297
+learning_rateを0.01に変更
+[EPOCH81] loss_valid: 109550 | Loss_valid_min: 109494

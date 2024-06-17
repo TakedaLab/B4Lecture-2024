@@ -3,14 +3,32 @@
 
 # createDataLoaderに乱数シードを追加。（これをして再現といえる？）
 import os
+import random
 
 import fire
 import numpy as np
 import torch
-from libs.Visualize import Visualize
 from torch import optim
 from torchvision import datasets, transforms
+
 from k_namizaki.VAE8 import VAE
+from libs.Visualize import Visualize
+
+
+def set_seed(seed_value=42):
+    # 乱数生成器のシードを設定する
+    np.random.seed(seed_value)
+    torch.manual_seed(seed_value)
+    random.seed(seed_value)
+    # CUDAの乱数生成器のシードも設定
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed_value)
+        torch.cuda.manual_seed_all(seed_value)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+# 乱数生成器のシードを設定
+set_seed(42)
 
 
 class Main:
@@ -94,9 +112,7 @@ class Main:
         size_train = int(size_train_valid * self.train_size_rate)
         size_valid = size_train_valid - size_train
         dataset_train, dataset_valid = torch.utils.data.random_split(
-            dataset_train_valid,
-            [size_train, size_valid],
-            torch.Generator().manual_seed(20240616),  # 乱数シードの設定(追加要素)
+            dataset_train_valid, [size_train, size_valid]
         )
 
         # Create dataloaders from the datasets
