@@ -3,25 +3,27 @@
 
 import os
 import random
+
 import fire
 import numpy as np
 import torch
 from torch import optim
 from torchvision import datasets, transforms
+
 from k_namizaki.VAE8 import VAE
 from k_namizaki.Visualize8 import Visualize
 
 
-def set_seed(seed_value=42):
+def set_seed(seed=42):
     """Set the seed for reproducibility."""
     # 乱数生成器のシードを設定する（これをして再現といえる？）
-    np.random.seed(seed_value)
-    torch.manual_seed(seed_value)
-    random.seed(seed_value)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    random.seed(seed)
     # CUDAの乱数生成器のシードも設定
     if torch.cuda.is_available():
-        torch.cuda.manual_seed(seed_value)
-        torch.cuda.manual_seed_all(seed_value)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
