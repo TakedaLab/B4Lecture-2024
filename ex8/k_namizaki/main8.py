@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
 """This file is for you to implement the main function."""
-# 乱数シードを設定できるように追加。（これをして再現といえる？）
 
 import os
 import random
-
 import fire
-from k_namizaki.VAE8 import VAE
-from k_namizaki.Visualize8 import Visualize
 import numpy as np
 import torch
 from torch import optim
 from torchvision import datasets, transforms
+from k_namizaki.VAE8 import VAE
+from k_namizaki.Visualize8 import Visualize
 
 
 def set_seed(seed_value=42):
     """Set the seed for reproducibility."""
-    # 乱数生成器のシードを設定する
+    # 乱数生成器のシードを設定する（これをして再現といえる？）
     np.random.seed(seed_value)
     torch.manual_seed(seed_value)
     random.seed(seed_value)
