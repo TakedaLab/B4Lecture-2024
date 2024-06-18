@@ -3,8 +3,8 @@
 """This file is for you to implement VAE. Add variables as needed."""
 
 import numpy as np
-import torch.nn as nn
 import torch
+import torch.nn as nn
 
 MNIST_SIZE = 28
 
