@@ -41,7 +41,7 @@ class VAE(nn.Module):
         self.enc_fc3_logvar = nn.Linear(int(self.h_dim / 2), z_dim)
         self.dec_fc1 = nn.Linear(z_dim, int(self.h_dim / 2))
         self.dec_fc2 = nn.Linear(int(self.h_dim / 2), self.h_dim)
-        self.dec_drop = nn.Dropout(self.drop_rate)
+        self.dropout_layer = nn.Dropout(self.drop_rate)
         self.dec_fc3 = nn.Linear(self.h_dim, self.x_dim)
 
     def encoder(self, x):
@@ -54,10 +54,10 @@ class VAE(nn.Module):
         """
         x = x.view(-1, self.x_dim)
         x = self.enc_fc1(x)
-        x = self.dec_drop(x)
+        x = self.dropout_layer(x)
         x = F.relu(x)
         x = self.enc_fc2(x)
-        x = self.dec_drop(x)
+        x = self.dropout_layer(x)
         x = F.relu(x)
         return self.enc_fc3_mean(x), self.enc_fc3_logvar(x)
 
@@ -85,10 +85,10 @@ class VAE(nn.Module):
             Latent variable whose size is (batch size, z_dim).
         """
         z = self.dec_fc1(z)
-        z = self.dec_drop(z)
+        z = self.dropout_layer(z)
         z = F.relu(z)
         z = self.dec_fc2(z)
-        z = self.dec_drop(z)
+        z = self.dropout_layer(z)
         z = F.relu(z)
         z = self.dec_fc3(z)
         return torch.sigmoid(z)
