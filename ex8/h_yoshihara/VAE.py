@@ -67,5 +67,7 @@ class VAE(nn.Module):
         z = self.sample_z(mean, log_var, device)
         y = self.decoder(z)
         KL = 0.5 * torch.sum(1 + log_var - mean**2 - torch.exp(log_var))
-        reconstruction = torch.sum(x * torch.log(y + self.eps) + (1 - x) * torch.log(1 - y + self.eps))
+        reconstruction = torch.sum(
+            x * torch.log(y + self.eps) + (1 - x) * torch.log(1 - y + self.eps)
+        )
         return [KL, reconstruction], z, y

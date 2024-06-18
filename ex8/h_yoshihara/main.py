@@ -2,8 +2,8 @@
 """This file is for you to implement the main function."""
 
 import os
-
 import random
+
 import fire
 import numpy as np
 import torch
