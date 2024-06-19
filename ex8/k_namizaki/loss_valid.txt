@@ -1,0 +1,78 @@
+シード設定なし
+[EPOCH136] loss_valid: 85175 | Loss_valid_min: 84984
+
+シードをセットして他は初期（シード42）
+[EPOCH133] loss_valid: 84911 | Loss_valid_min: 84812
+learning_rateを0.002に変更
+[EPOCH101] loss_valid: 83929 | Loss_valid_min: 83766
+learning_rateを0.003に変更
+[EPOCH82] loss_valid: 83926 | Loss_valid_min: 83920
+[EPOCH82] loss_valid: 83926 | Loss_valid_min: 83920
+learning_rateを0.004に変更
+[EPOCH55] loss_valid: 85322 | Loss_valid_min: 85037
+learning_rateを0.005に変更
+[EPOCH85] loss_valid: 84352 | Loss_valid_min: 84297
+learning_rateを0.006に変更
+[EPOCH94] loss_valid: 86697 | Loss_valid_min: 86071
+learning_rateを0.01に変更
+[EPOCH81] loss_valid: 109550 | Loss_valid_min: 109494
+learning_rateを0.0005に変更
+[EPOCH135] loss_valid: 86564 | Loss_valid_min: 86492
+
+シード１１）
+learning_rateを0.0005に変更
+[EPOCH119] loss_valid: 85480 | Loss_valid_min: 85424
+learning_rateを0.001に変更
+[EPOCH101] loss_valid: 85087 | Loss_valid_min: 85080
+[EPOCH101] loss_valid: 85087 | Loss_valid_min: 85080
+[EPOCH101] loss_valid: 85087 | Loss_valid_min: 85080
+learning_rateを0.002に変更
+[EPOCH109] loss_valid: 83486 | Loss_valid_min: 83157
+learning_rateを0.003に変更
+[EPOCH75] loss_valid: 84076 | Loss_valid_min: 83451
+learning_rateを0.004に変更
+[EPOCH121] loss_valid: 83809 | Loss_valid_min: 83067
+learning_rateを0.005に変更
+[EPOCH43] loss_valid: 85682 | Loss_valid_min: 84924
+learning_rateを0.006に変更
+[EPOCH90] loss_valid: 86298 | Loss_valid_min: 86136
+learning_rateを0.01に変更
+[EPOCH71] loss_valid: 98444 | Loss_valid_min: 98412
+
+シード51）
+learning_rateを0.0005に変更
+[EPOCH135] loss_valid: 87673 | Loss_valid_min: 87535
+learning_rateを0.001に変更
+[EPOCH147] loss_valid: 85809 | Loss_valid_min: 85644
+learning_rateを0.002に変更
+[EPOCH168] loss_valid: 83849 | Loss_valid_min: 83327
+learning_rateを0.003に変更
+[EPOCH90] loss_valid: 84168 | Loss_valid_min: 84116
+learning_rateを0.004に変更
+[EPOCH75] loss_valid: 84710 | Loss_valid_min: 84666
+learning_rateを0.005に変更
+[EPOCH89] loss_valid: 93631 | Loss_valid_min: 93109
+learning_rateを0.006に変更
+[EPOCH65] loss_valid: 86704 | Loss_valid_min: 85145
+learning_rateを0.01に変更
+[EPOCH32] loss_valid: 95735 | Loss_valid_min: 95456
+
+[h_dimを変更]
+(seed =42)
+h_dim=200
+[EPOCH139] loss_valid: 85709 | Loss_valid_min: 85624
+
+[z_dimを変更]
+(seed = 42)
+z_dim = 3
+[EPOCH128] loss_valid: 78150 | Loss_valid_min: 78149
+z_dim = 4
+[EPOCH131] loss_valid: 72803 | Loss_valid_min: 72728
+z_dim = 5
+[EPOCH132] loss_valid: 68997 | Loss_valid_min: 68880
+z_dim = 10
+[EPOCH212] loss_valid: 61383 | Loss_valid_min: 61288
+z_dim = 20
+[EPOCH127] loss_valid: 61102 | Loss_valid_min: 61024
+z_dim = 100
+[EPOCH147] loss_valid: 60462 | Loss_valid_min: 60380
