@@ -26,6 +26,8 @@
 
 
 ## 準備
+1. [INSTALLING PREVIOUS VERSIONS OF PYTORCH](https://pytorch.org/get-started/previous-versions/) を参考に、実行環境でのCUDAバージョンに合致した torch, torchvision をインストール
+2. その他パッケージをインストール
 
 ```sh
 pip install -r requirements.txt
