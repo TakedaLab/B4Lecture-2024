@@ -48,4 +48,8 @@ python main.py
 
 ![Result](figs/result.png)
 
+## 参考資料
+
+[Diffusers (別のノイズ推定モデルを使いたい場合)](https://huggingface.co/docs/diffusers/api/models/overview)
+[Hydra（ハイパーパラメータの設定）](https://hydra.cc/docs/intro/)
 
