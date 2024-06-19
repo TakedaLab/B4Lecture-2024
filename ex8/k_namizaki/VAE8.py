@@ -151,6 +151,8 @@ class VAE(nn.Module):
         # KLダイバージェンスを計算
         KL = 0.5 * torch.sum(1 + logvar - mean**2 - torch.exp(logvar))
         # 再構築誤差を計算
-        reconstruction = torch.sum(x * torch.log(y + self.eps) + (1 - x) * torch.log(1 - y + self.eps))
+        reconstruction = torch.sum(
+            x * torch.log(y + self.eps) + (1 - x) * torch.log(1 - y + self.eps)
+        )
         # KLダイバージェンスと再構築誤差、潜在変数、再構築された画像を返す
-        return ([KL, reconstruction], z, y,)
+        return [KL, reconstruction], z, y
