@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def set_seed(seed=42):
+def set_seed(seed):
     """Set the seed for reproducibility."""
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -15,7 +15,7 @@ def set_seed(seed=42):
         torch.cuda.manual_seed_all(seed)
 
 
-set_seed(51)  # この関数をモデル定義やデータローダーの初期化前に呼び出す
+set_seed(42)  # この関数をモデル定義やデータローダーの初期化前に呼び出す
 
 
 MNIST_SIZE = 28  # MNIST画像は28x28ピクセル

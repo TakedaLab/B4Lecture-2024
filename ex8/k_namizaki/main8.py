@@ -13,7 +13,7 @@ from torch import optim
 from torchvision import datasets, transforms
 
 
-def set_seed(seed=42):
+def set_seed(seed):
     """Set the seed for reproducibility."""
     # 乱数生成器のシードを設定する（これをして再現といえる？）
     np.random.seed(seed)
