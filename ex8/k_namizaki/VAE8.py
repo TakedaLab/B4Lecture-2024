@@ -15,7 +15,7 @@ def set_seed(seed=42):
         torch.cuda.manual_seed_all(seed)
 
 
-set_seed(42)  # この関数をモデル定義やデータローダーの初期化前に呼び出す
+set_seed(51)  # この関数をモデル定義やデータローダーの初期化前に呼び出す
 
 
 MNIST_SIZE = 28  # MNIST画像は28x28ピクセル
@@ -77,7 +77,6 @@ class VAE(nn.Module):
         h = F.relu(self.enc_fc1(h))  # 最初の全結合層をReLU活性化関数で通過
         h = F.relu(self.enc_fc2(h))  # 2番目の全結合層をReLU活性化関数で通過
 
-        # どのサイトでもこのままだけど、これで平均と対数分散が分かれているのか？
         mean = self.enc_fc3_mean(h)  # 平均
         logvar = self.enc_fc3_logvar(h)  # 対数分散
 
@@ -118,13 +117,12 @@ class VAE(nn.Module):
             再構築された画像。
         """
         """# ToDo: Implement the decoder."""
-        # TODO: デコーダのロジックを実装する
         h = F.relu(self.dec_fc1(z))  # 最初の全結合層をReLU活性化関数で通過
         h = F.relu(self.dec_fc2(h))  # 2番目の全結合層をReLU活性化関数で通過
         h = self.dec_drop(h)  # ドロップアウト層を通過
         y = torch.sigmoid(
             self.dec_fc3(h)
-        )  # 出力層をシグモイド活性化関数で通過し、再構築された画像を出力
+        )  # 出力層をシグモイド活性化関数で通過し、出力
         return y
 
     def forward(self, x, device):
@@ -147,19 +145,12 @@ class VAE(nn.Module):
         # TODO: 次の変数を返すためのforward関数を実装する
         x = x.to(device)
         mean, logvar = self.encoder(x)  # エンコーダで平均と対数分散を計算
-        z = self.sample_z(
-            mean, logvar, device
-        )  # リパラメトリゼーショントリックを用いて潜在変数をサンプリング
+        # リパラメトリゼーショントリックを用いて潜在変数をサンプリング
+        z = self.sample_z(mean, logvar, device)
         y = self.decoder(z)  # デコーダで潜在変数から再構築された画像を生成
-        KL = 0.5 * torch.sum(
-            1 + logvar - mean**2 - torch.exp(logvar)
-        )  # KLダイバージェンスを計算
-        # 資料のramda_sigumaがyの部分
-        reconstruction = torch.sum(
-            x * torch.log(y + self.eps) + (1 - x) * torch.log(1 - y + self.eps)
-        )  # 再構築誤差を計算(クロスエントロピー？)
-        return (
-            [KL, reconstruction],
-            z,
-            y,
-        )  # KLダイバージェンスと再構築誤差、潜在変数、再構築された画像を返す
+        # KLダイバージェンスを計算
+        KL = 0.5 * torch.sum(1 + logvar - mean**2 - torch.exp(logvar))
+        # 再構築誤差を計算
+        reconstruction = torch.sum(x * torch.log(y + self.eps) + (1 - x) * torch.log(1 - y + self.eps))
+        # KLダイバージェンスと再構築誤差、潜在変数、再構築された画像を返す
+        return ([KL, reconstruction], z, y,)
