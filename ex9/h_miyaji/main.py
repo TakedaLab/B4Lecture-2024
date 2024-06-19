@@ -48,7 +48,7 @@ class DiffusionModel(pl.LightningModule):
             )
             alpha = 1.0 - beta
             alpha_prod = alpha.cumprod(dim=0)
-            self.register_buffer("beta", beta)
+            self.register_buffer("beta", beta)  # register_buffer: 値固定
             self.register_buffer("alpha", alpha)
             self.register_buffer("alpha_prod", alpha_prod)
 
@@ -85,7 +85,11 @@ class DiffusionModel(pl.LightningModule):
         Returns:
             torch.Tensor: Noisy image x_t (B, C, H, W)
         """
-        # TODO
+        if noise is None:  # noiseのデータが無い場合
+            # x0と同じサイズで平均0/分散1の正規分布乱数を作成
+            noise = torch.randn_like(x0)
+        a = self.alpha_prod[t].view(-1, 1, 1, 1)
+        return x0 * a.sqrt() + noise * (1 - a).sqrt()  # noise付加の定義式
 
     def p_sample(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         """Inverse process of the diffusion model. x_t ~ p(x_t|x_{t+1}).
@@ -97,7 +101,19 @@ class DiffusionModel(pl.LightningModule):
         Returns:
             torch.Tensor: Denoised image x_t (B, C, H, W)
         """
-        # TODO
+        # ↓tensorに保存されている勾配値を保持しない設定にできる
+        with torch.no_grad():
+            noise_pred = self.forward(x, t)  # noise予測値
+            alpha_t = self.alpha[t].view(-1, 1, 1, 1)  # 1-beta(np.linspace)
+            alpha_prod_t = self.alpha_prod[t].view(-1, 1, 1, 1)
+
+            # ノイズ除去の定義式
+            x = (
+                x - noise_pred * (1 - alpha_t) / (1 - alpha_prod_t).sqrt()
+            ) / alpha_t.sqrt()
+            if t[0].item() != 0:
+                x = x + torch.randn_like(x) * (1 - alpha_t).sqrt()
+            return x
 
     def training_step(self, batch, batch_idx):
         """Training 1 step.
@@ -109,10 +125,23 @@ class DiffusionModel(pl.LightningModule):
         Returns:
             torch.Tensor: Loss
         """
+        # 画像読み込み
         images = batch["images"]
         images = images.to(self.device)
 
-        # TODO
+        # 0~1000(timesteps)のrandintをとる
+        t = torch.randint(
+            0, self.num_timesteps, (images.size(0),), device=self.device
+        ).long()
+
+        noise = torch.randn_like(images)  # randomノイズ生成
+        noisy_images = self.q_sample(images, t, noise)  # ノイズ画像にするステップ
+
+        outputs = self.forward(noisy_images, t)  # 出力=forwardした結果(予測ノイズ？)
+        loss = self.criterion(outputs, noise)  # loss=noiseと出力の差
+        self.log("train_loss", loss, prog_bar=True)  # log出力
+
+        return loss
 
     def generate(self, num_timesteps, shape):
         """Generate samples from the diffusion model."""
@@ -165,7 +194,9 @@ def main(cfg: DictConfig) -> None:
         [
             transforms.Resize(cfg.plot.image_size[-2:]),  # Resize
             transforms.ToTensor(),  # ToTensor
-            transforms.Normalize([0.5], [0.5]),  # Normalize to [-1, 1]
+            transforms.Normalize(
+                [0.5], [0.5]
+            ),  # Normalize to [-1, 1]　平均0.5, 標準偏差0.5で標準化
         ]
     )
 
@@ -181,7 +212,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     model = diffusers.UNet2DModel(**cfg.model)
-    criterion = nn.MSELoss()
+    criterion = nn.MSELoss()  # 判断するための条件や基準：平均二乗誤差
     optimizer = torch.optim.Adam(model.parameters(), **cfg.optimizer)
 
     diffmodel = DiffusionModel(
@@ -197,7 +228,9 @@ def main(cfg: DictConfig) -> None:
     # configure logger
     tb_logger = TensorBoardLogger(outdir)
     # train
-    trainer = pl.Trainer(max_epochs=cfg.train.num_epochs, devices=1, logger=tb_logger)
+    trainer = pl.Trainer(
+        max_epochs=cfg.train.num_epochs, accelerator="gpu", devices=1, logger=tb_logger
+    )
     trainer.fit(diffmodel, train_loader)
 
     # save model
