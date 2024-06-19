@@ -72,7 +72,6 @@ class VAE(nn.Module):
         logvar : torch.Tensor
             潜在変数の対数分散。
         """
-        """# ToDo: Implement the encoder."""
         h = x.view(-1, self.x_dim)  # テンソルを２次元にリサイズ
         h = F.relu(self.enc_fc1(h))  # 最初の全結合層をReLU活性化関数で通過
         h = F.relu(self.enc_fc2(h))  # 2番目の全結合層をReLU活性化関数で通過
@@ -97,7 +96,6 @@ class VAE(nn.Module):
         z : torch.Tensor
             サンプリングされた潜在変数。
         """
-        """# ToDo: Implement a function to sample latent variables."""
         epsilon = torch.randn(mean.shape, device=device)  # 標準正規分布からε
         # 0.5はlog_varがlog(sigma^2)で、使いたいのはlog(sigma)だから
         z = mean + epsilon * torch.exp(0.5 * logvar)  # 潜在変数をサンプリング
@@ -116,7 +114,6 @@ class VAE(nn.Module):
         reconstruction : torch.Tensor
             再構築された画像。
         """
-        """# ToDo: Implement the decoder."""
         h = F.relu(self.dec_fc1(z))  # 最初の全結合層をReLU活性化関数で通過
         h = F.relu(self.dec_fc2(h))  # 2番目の全結合層をReLU活性化関数で通過
         h = self.dec_drop(h)  # ドロップアウト層を通過
@@ -142,7 +139,6 @@ class VAE(nn.Module):
         y : torch.Tensor
             再構築された画像。
         """
-        # TODO: 次の変数を返すためのforward関数を実装する
         x = x.to(device)
         mean, logvar = self.encoder(x)  # エンコーダで平均と対数分散を計算
         # リパラメトリゼーショントリックを用いて潜在変数をサンプリング
