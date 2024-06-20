@@ -1,6 +1,7 @@
 """Train the diffusion model for image denoising."""
 
 import logging
+import os
 from typing import Any, Dict
 
 import diffusers
@@ -14,6 +15,8 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from tqdm import tqdm
+
+os.environ["HYDRA_FULL_ERROR"] = "1"
 
 
 class DiffusionModel(pl.LightningModule):
@@ -208,7 +211,7 @@ def main(cfg: DictConfig) -> None:
     train_dataset.set_transform(transform)
 
     train_loader = DataLoader(
-        train_dataset, batch_size=cfg.train.batch_size, shuffle=True
+        train_dataset, batch_size=cfg.train.batch_size, shuffle=True, num_workers=2
     )
 
     model = diffusers.UNet2DModel(**cfg.model)
@@ -229,7 +232,11 @@ def main(cfg: DictConfig) -> None:
     tb_logger = TensorBoardLogger(outdir)
     # train
     trainer = pl.Trainer(
-        max_epochs=cfg.train.num_epochs, accelerator="gpu", devices=1, logger=tb_logger
+        max_epochs=cfg.train.num_epochs,
+        accelerator="gpu",
+        devices=1,
+        logger=tb_logger,
+        log_every_n_steps=1,
     )
     trainer.fit(diffmodel, train_loader)
 
