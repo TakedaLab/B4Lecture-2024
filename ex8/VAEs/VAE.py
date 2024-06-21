@@ -2,6 +2,7 @@
 """This file is for you to implement VAE. Add variables as needed."""
 
 import numpy as np
+import torch
 import torch.nn as nn
 
 import torch
@@ -37,6 +38,7 @@ class VAE(nn.Module):
         self.enc_fc3_mean = nn.Linear(int(self.h_dim / 2), z_dim)  # 潜在変数の平均の層
         self.enc_fc3_logvar = nn.Linear(int(self.h_dim / 2), z_dim)  # 潜在変数の対数分散の層
 
+<<<<<<< HEAD
         # デコーダの層
         self.dec_fc1 = nn.Linear(z_dim, int(self.h_dim / 2))  # 全結合層1
         self.dec_fc2 = nn.Linear(int(self.h_dim / 2), self.h_dim)  # 全結合層2
@@ -138,3 +140,35 @@ class VAE(nn.Module):
         # 資料のramda_sigumaがyの部分
         reconstruction = torch.sum(x * torch.log(y + self.eps) + (1 - x) * torch.log(1 - y + self.eps))  # 再構築誤差を計算(クロスエントロピー？)
         return [KL, reconstruction], z, y  # KLダイバージェンスと再構築誤差、潜在変数、再構築された画像を返す
+=======
+    def encoder(self, x: torch.Tensor):
+        """# ToDo: Implement the encoder."""
+        x = x.view(-1, self.x_dim)
+        x = nn.functional.relu(self.enc_fc1(x))
+        x = nn.functional.relu(self.enc_fc2(x))
+        return self.enc_fc3_mean(x), self.enc_fc3_logvar(x)
+
+    def sample_z(self, mean: torch.Tensor, log_var: torch.Tensor, device: torch.device):
+        """# ToDo: Implement a function to sample latent variables."""
+        epsilon = torch.randn(mean.shape, device=device)
+        return mean + epsilon * torch.exp(0.5 * log_var)
+
+    def decoder(self, z: torch.Tensor):
+        """# ToDo: Implement the decoder."""
+        z = nn.functional.relu(self.dec_fc1(z))
+        z = nn.functional.relu(self.dec_fc2(z))
+        z = self.dec_drop(z)
+        return torch.sigmoid(self.dec_fc3(z))
+
+    def forward(self, x: torch.Tensor, device: torch.device):
+        """# ToDo: Implement the forward function to return the following variables."""
+        x = x.to(device)
+        mean, log_var = self.encoder(x)
+        z = self.sample_z(mean, log_var, device)
+        y = self.decoder(z)
+        KL = 0.5 * torch.sum(1 + log_var - mean**2 - torch.exp(log_var))
+        reconstruction = torch.sum(
+            x * torch.log(y + self.eps) + (1 - x) * torch.log(1 - y + self.eps)
+        )
+        return [KL, reconstruction], z, y
+>>>>>>> e80e126c6833a04fcf3e898485e9784d49b85aa3
