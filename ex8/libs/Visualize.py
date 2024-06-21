@@ -35,14 +35,14 @@ class Visualize:
         self.device = device
 
     def createDirectories(self):
-        """Create directories for storing images."""
-        os.makedirs("./images/reconstruction", exist_ok=True)
-        os.makedirs("./images/latent_space", exist_ok=True)
-        os.makedirs("./images/lattice_point", exist_ok=True)
-        os.makedirs("./images/walkthrough", exist_ok=True)
+        """Create directories for storing images_lrate001."""
+        os.makedirs("./images_lrate001/reconstruction", exist_ok=True)
+        os.makedirs("./images_lrate001/latent_space", exist_ok=True)
+        os.makedirs("./images_lrate001/lattice_point", exist_ok=True)
+        os.makedirs("./images_lrate001/walkthrough", exist_ok=True)
 
     def reconstruction(self):
-        """Visualize the reconstructed images."""
+        """Visualize the reconstructed images_lrate001."""
         for num_batch, data in enumerate(self.dataloader_test):
             fig, axes = plt.subplots(2, 10, figsize=(20, 4))
             for i in range(axes.shape[0]):
@@ -55,7 +55,7 @@ class Visualize:
             y = y.cpu().detach().numpy().reshape(-1, 28, 28)
             for i, im in enumerate(y[:10]):
                 axes[1][i].imshow(im, "gray")
-            fig.savefig(f"./images/reconstruction/z_{self.z_dim}_{num_batch}.png")
+            fig.savefig(f"./images_lrate001/reconstruction/z_{self.z_dim}_{num_batch}.png")
             plt.close(fig)
 
     def latent_space(self):
@@ -78,10 +78,10 @@ class Visualize:
                     color=cm(k),
                 )
             fig_plot.savefig(
-                f"./images/latent_space/z_{self.z_dim}_{num_batch}_plot.png"
+                f"./images_lrate001/latent_space/z_{self.z_dim}_{num_batch}_plot.png"
             )
             fig_scatter.savefig(
-                f"./images/latent_space/z_{self.z_dim}_{num_batch}_scatter.png"
+                f"./images_lrate001/latent_space/z_{self.z_dim}_{num_batch}_scatter.png"
             )
             plt.close(fig_plot)
             plt.close(fig_scatter)
@@ -89,7 +89,7 @@ class Visualize:
     def lattice_point(self):
         """Visualize latent space generated from artificial lattice point."""
         # The size of Z must be (Batch size, z_dim)
-        num_image = 25  # How many images per row (column)
+        num_image = 25  # How many images_lrate001 per row (column)
         x = np.linspace(-2, 2, num_image)
         y = np.linspace(-2, 2, num_image)
         z_x, z_y = np.meshgrid(x, y)
@@ -107,11 +107,11 @@ class Visualize:
                 axes[i][j].set_yticks([])
                 axes[i][j].imshow(y[num_image * (num_image - 1 - i) + j], "gray")
         fig.subplots_adjust(wspace=0, hspace=0)
-        fig.savefig(f"./images/lattice_point/z_{self.z_dim}.png")
+        fig.savefig(f"./images_lrate001/lattice_point/z_{self.z_dim}.png")
         plt.close(fig)
 
     def walkthrough(self):
-        """Create animations of the reconstructed images by walking through the latent space."""
+        """Create animations of the reconstructed images_lrate001 by walking through the latent space."""
         self.step = 50  # Step size of the animation
         self.z11 = torch.tensor([-3, 0], dtype=torch.float)
         self.z12 = torch.tensor([3, 0], dtype=torch.float)
@@ -149,13 +149,13 @@ class Visualize:
             fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
             ax.set_xticks([])
             ax.set_yticks([])
-            images = []
+            images_lrate001 = []
             for _, im in enumerate(y1_to_y2_list[n]):
-                images.append([ax.imshow(im, "gray")])
+                images_lrate001.append([ax.imshow(im, "gray")])
             animation = ArtistAnimation(
-                fig, images, interval=100, blit=True, repeat_delay=1000
+                fig, images_lrate001, interval=100, blit=True, repeat_delay=1000
             )
             animation.save(
-                f"./images/walkthrough/z_{self.z_dim}_{n}.gif", writer="pillow"
+                f"./images_lrate001/walkthrough/z_{self.z_dim}_{n}.gif", writer="pillow"
             )
             plt.close(fig)

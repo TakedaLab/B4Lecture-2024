@@ -177,8 +177,8 @@ def main():
     model = my_MLP(input_dim=train_dataset[0][0].shape[0],
                    output_dim=10)
     
-    # 学習の設定
-    trainer = pl.Trainer(max_epochs=100, gpus=1)
+    # 学習の設定(gpus=0で動くはず？)
+    trainer = pl.Trainer(max_epochs=100, gpus=0)
     
     # モデルの学習
     trainer.fit(model=model, datamodule=datamodule)
