@@ -6,6 +6,7 @@ from typing import Any, Dict
 
 import diffusers
 import hydra
+import numpy as np
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -27,6 +28,7 @@ class DiffusionModel(pl.LightningModule):
         model: torch.nn.Module,  # Noise prediction model
         criterion: torch.nn.Module,  # Loss function
         optimizer: torch.optim.Optimizer,  # Optimizer
+        num_epochs: int,  # max num epochs
         num_timesteps: int,  # Time steps of the diffusion
         noise_schedule: str,  # Noise scheduler type
         noise_schedule_kwargs: Dict[str, Any],  # Arguments for noise scheduler
@@ -51,13 +53,18 @@ class DiffusionModel(pl.LightningModule):
             )
             alpha = 1.0 - beta
             alpha_prod = alpha.cumprod(dim=0)
-            self.register_buffer("beta", beta)  # register_buffer: 値固定
+
+            self.register_buffer("beta", beta)
             self.register_buffer("alpha", alpha)
             self.register_buffer("alpha_prod", alpha_prod)
 
         self.num_samples = tuple(num_samples)
         self.image_size = tuple(image_size)
         self.every_n_epochs = every_n_epochs
+
+        # GIF作成用
+        self.num_epochs = num_epochs
+        self.generated_images = []
 
     def configure_optimizers(self):
         """Configure optimizer."""
@@ -158,6 +165,8 @@ class DiffusionModel(pl.LightningModule):
         """Generate images at the end of each epoch."""
         if self.current_epoch % self.every_n_epochs == self.every_n_epochs - 1:
             logging.info("Generating Images...")
+
+            # 画像生成
             generated_image = self.generate(
                 self.num_timesteps,
                 (self.num_samples[0] * self.num_samples[1],) + self.image_size,
@@ -169,13 +178,83 @@ class DiffusionModel(pl.LightningModule):
                 .flatten(-4, -3)
                 .flatten(-2, -1)
             )
+            # Tensorboard出力
             self.logger.experiment.add_image(
                 "Generated Images",
                 generated_image,
                 self.current_epoch,
                 dataformats="HW" if generated_image.ndim == 2 else "CHW",
             )
+
+            # GIF作成用
+            self.generated_images.append(transforms.ToPILImage()(generated_image.cpu()))
             logging.info("Done.")
+
+        if self.current_epoch == self.num_epochs - 1:
+            # モデルの成長過程GIF
+            logging.info("Generating GIF Images...")
+            gif_path = os.path.join("figs", "generated_images.gif")
+            os.makedirs(os.path.dirname(gif_path), exist_ok=True)
+
+            self.generated_images[0].save(
+                gif_path,
+                save_all=True,
+                append_images=self.generated_images[1:],
+                duration=200,  # フレーム数(ms)/1画像
+                loop=0,  # 無限ループ
+            )
+
+            # 最終結果の逆拡散課程GIF
+            self.generate_gif()
+            logging.info("Done. GIF saved to figs")
+
+    def generate_gif(self):
+        """Generate GIF images at the end of train."""
+        # GIF作成用
+        images = []
+
+        times = np.linspace(1, self.num_timesteps, 20)
+
+        for t in times:
+            generated_image = self.generate(
+                int(t),
+                (self.num_samples[0] * self.num_samples[1],) + self.image_size,
+            )
+            generated_image = (generated_image + 1) / 2
+            generated_image = (
+                generated_image.reshape(self.num_samples + self.image_size)
+                .permute([2, 0, 3, 1, 4])
+                .flatten(-4, -3)
+                .flatten(-2, -1)
+            )
+
+            # tensor -> PIL 画像
+            pil_image = transforms.ToPILImage()(generated_image.cpu())
+            images.append(pil_image)
+        images.append(pil_image)
+
+        # GIF保存
+        gif_path = os.path.join(
+            "figs", f"generated_images_epoch_{self.current_epoch+1}_loop.gif"
+        )
+        gif_path_stop = os.path.join(
+            "figs", f"generated_images_epoch_{self.current_epoch+1}_stop.gif"
+        )
+        os.makedirs(os.path.dirname(gif_path), exist_ok=True)
+
+        images[0].save(
+            gif_path,
+            save_all=True,
+            append_images=images[1:],
+            duration=100,  # フレーム数(ms)/1画像
+            loop=0,
+        )
+        images[0].save(
+            gif_path_stop,
+            save_all=True,
+            append_images=images[1:],
+            duration=100,  # フレーム数(ms)/1画像
+        )
 
 
 @hydra.main(config_path="conf", config_name="default.yaml", version_base=None)
@@ -211,7 +290,7 @@ def main(cfg: DictConfig) -> None:
     train_dataset.set_transform(transform)
 
     train_loader = DataLoader(
-        train_dataset, batch_size=cfg.train.batch_size, shuffle=True, num_workers=2
+        train_dataset, batch_size=cfg.train.batch_size, shuffle=True, num_workers=4
     )
 
     model = diffusers.UNet2DModel(**cfg.model)
@@ -222,6 +301,7 @@ def main(cfg: DictConfig) -> None:
         model,
         criterion,
         optimizer,
+        cfg.train.num_epochs,
         **cfg.diffusion,
         **cfg.plot,
     )
@@ -236,7 +316,6 @@ def main(cfg: DictConfig) -> None:
         accelerator="gpu",
         devices=1,
         logger=tb_logger,
-        log_every_n_steps=1,
     )
     trainer.fit(diffmodel, train_loader)
 
