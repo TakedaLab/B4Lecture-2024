@@ -86,11 +86,12 @@ class DiffusionModel(pl.LightningModule):
             torch.Tensor: ノイズのある画像 x_t (B, C, H, W)
         """
         if noise is None:
-            noise = torch.randn_like(x0)
+            noise = torch.randn_like(x0)  # ノイズがNoneの場合、新たにランダムなノイズを生成
+        # タイムステップに対応するアルファ値(形状を [batch_size, 1, 1, 1] に変換)
         alpha_t = self.alpha_prod[t].view(-1, 1, 1, 1)
-        beta_t = self.beta[t].view(-1, 1, 1, 1)
-        x_t = torch.sqrt(alpha_t) * x0 + torch.sqrt(beta_t) * noise
-        return x_t
+        beta_t = self.beta[t].view(-1, 1, 1, 1)  # タイムステップに対応するベータ値
+        x_t = torch.sqrt(alpha_t) * x0 + torch.sqrt(beta_t) * noise  # 拡散プロセスを適用してノイズを追加
+        return x_t  # ノイズのある画像を返す
 
     def p_sample(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         """拡散モデルの逆プロセス。 x_t ~ p(x_t|x_{t+1}).
@@ -102,15 +103,14 @@ class DiffusionModel(pl.LightningModule):
         Returns:
             torch.Tensor: ノイズ除去された画像 x_t (B, C, H, W)
         """
-        noise_pred = self.forward(x, t)
-        # alpha = 1 - beta
-        beta_t = self.beta[t].view(-1, 1, 1, 1)
-        alpha_t = self.alpha[t].view(-1, 1, 1, 1)
-        alpha_prod_t = self.alpha_prod[t].view(-1, 1, 1, 1)
-        x = (x - (beta_t / torch.sqrt(1 - alpha_prod_t)) * noise_pred) / (torch.sqrt(alpha_t))
+        noise_pred = self.forward(x, t)  # ノイズを予測
+        beta_t = self.beta[t].view(-1, 1, 1, 1)  # タイムステップに対応するベータ値
+        alpha_t = self.alpha[t].view(-1, 1, 1, 1)  # タイムステップに対応するアルファ値
+        alpha_prod_t = self.alpha_prod[t].view(-1, 1, 1, 1)  # タイムステップに対応する累積アルファ値
+        x = (x - (beta_t / torch.sqrt(1 - alpha_prod_t)) * noise_pred) / (torch.sqrt(alpha_t))  # ノイズを除去
         if t[0].item() != 0:
-            x = x + torch.randn_like(x) * torch.sqrt(beta_t)
-        return x
+            x = x + torch.randn_like(x) * torch.sqrt(beta_t)  # 最初のタイムステップ以外の場合、追加ノイズを加える
+        return x  # ノイズ除去された画像を返す
 
 
     def training_step(self, batch, batch_idx):
@@ -123,21 +123,25 @@ class DiffusionModel(pl.LightningModule):
         Returns:
             torch.Tensor: 損失
         """
-        images = batch["images"]
-        images = images.to(self.device)
-        batch_size = images.size(0)
+        images = batch["images"]  # バッチから画像を取得
+        images = images.to(self.device)  # デバイスに移動
+        batch_size = images.size(0)  # バッチサイズを取得
         t = torch.randint(0, self.num_timesteps, (batch_size,), device=self.device).long()
-        noise = torch.randn_like(images)
-        noisy_images = self.q_sample(images, t, noise)
-        noise_pred = self.forward(noisy_images, t)
-        loss = self.criterion(noise_pred, noise)
-        self.log("train_loss", loss)
-        return loss
+        # random integer(最小、最大（含まない）、テンソルの形状) -> ランダムなタイムステップを生成
+        # .long(): 生成されたテンソルを長整数型 (int64) に変換。タイムステップは整数である必要があるため、この変換が必要
+        noise = torch.randn_like(images)  # 画像と同じサイズのランダムノイズを生成
+        noisy_images = self.q_sample(images, t, noise)  # 画像にノイズを加える
+        noise_pred = self.forward(noisy_images, t)  # ノイズを予測
+        loss = self.criterion(noise_pred, noise)  # criterion(平均二乗誤差)で損失を計算
+        self.log("train_loss", loss)  # 損失をログに記録
+        return loss  # 損失を返す
 
     def generate(self, num_timesteps, shape):
         """拡散モデルからサンプルを生成。"""
         x = torch.randn(shape).to(self.device)
+        # tqdm は、ループの進行状況を表示するためのツール
         for t in tqdm(range(num_timesteps - 1, -1, -1)):
+            # full(テンソルサイズ、埋める値) -> タイムステップの値を持つテンソルを生成
             t = torch.full((x.size(0),), t, dtype=torch.long, device=self.device)
             x = self.p_sample(x, t)
         return x
@@ -150,13 +154,15 @@ class DiffusionModel(pl.LightningModule):
                 self.num_timesteps,
                 (self.num_samples[0] * self.num_samples[1],) + self.image_size,
             )
+            # [-1, 1] の範囲から [0, 1] の範囲に変換
             generated_image = (generated_image + 1) / 2
             generated_image = (
-                generated_image.reshape(self.num_samples + self.image_size)
-                .permute([2, 0, 3, 1, 4])
-                .flatten(-4, -3)
-                .flatten(-2, -1)
-            )
+                generated_image.reshape(self.num_samples + self.image_size) # (num_samples[0], num_samples[1], image_size[0], image_size[1], channels)
+                .permute([2, 0, 3, 1, 4]) # [image_size[0], num_samples[0], image_size[1], num_samples[1], channels]になる
+                .flatten(-4, -3) # 画像が横方向に連続
+                .flatten(-2, -1) # 画像が縦方向に連続
+            )  # 画像を適切な形状に変換
+            # add_image メソッドは、指定された画像をTensorBoardに追加
             self.logger.experiment.add_image(
                 "Generated Images",
                 generated_image,
@@ -166,6 +172,7 @@ class DiffusionModel(pl.LightningModule):
             logging.info("Done.")
 
 
+# HydraというPythonの設定管理ライブラリを使用して、設定ファイルから簡単に設定を読み込むためのもの
 @hydra.main(config_path="conf", config_name="default.yaml", version_base=None)
 def main(cfg: DictConfig) -> None:
     """拡散モデルのトレーニング。"""
@@ -174,6 +181,7 @@ def main(cfg: DictConfig) -> None:
     torch.cuda.manual_seed(cfg.seed)
     torch.cuda.manual_seed_all(cfg.seed)
 
+    # 出力ディレクトリを取得
     outdir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir
 
     # データセットの準備
