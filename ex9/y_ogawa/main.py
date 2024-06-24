@@ -176,7 +176,7 @@ class DiffusionModel(pl.LightningModule):
             )
 
             image_path = os.path.join(
-                "./figs2", f"generated_epoch_{self.current_epoch}.png"
+                "./figs", f"generated_epoch_{self.current_epoch}.png"
             )
             save_image(
                 generated_image,
@@ -191,7 +191,7 @@ class DiffusionModel(pl.LightningModule):
     def on_train_end(self):
         """Create a GIF after training ends."""
         logging.info("Creating GIF...")
-        gif_path = os.path.join("./figs2", "animation.gif")
+        gif_path = os.path.join("./figs", "animation.gif")
         images = [imageio.imread(image_path) for image_path in self.generated_images]
         imageio.mimsave(gif_path, images, fps=1)
         logging.info(f"GIF saved to {gif_path}")
@@ -248,7 +248,7 @@ def main(cfg: DictConfig) -> None:
     # configure logger
     tb_logger = TensorBoardLogger(outdir)
     # train
-    trainer = pl.Trainer(max_epochs=cfg.train.num_epochs, accelerator="gpu", devices=3, logger=tb_logger)
+    trainer = pl.Trainer(max_epochs=cfg.train.num_epochs, accelerator="gpu", devices=1, logger=tb_logger)
     trainer.fit(diffmodel, train_loader)
 
     # save model
