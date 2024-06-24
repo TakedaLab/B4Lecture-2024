@@ -141,7 +141,7 @@ class DiffusionModel(pl.LightningModule):
         self.log("train_loss", loss, prog_bar=True)
 
         return loss
-    
+
     def generate(self, num_timesteps, shape):
         """Generate samples from the diffusion model."""
         fig, ax = plt.subplots(1, 1, figsize=(9, 9))
@@ -157,7 +157,7 @@ class DiffusionModel(pl.LightningModule):
             .flatten(-4, -3)
             .flatten(-2, -1)
         )
-        generated_image = generated_image.to('cpu').detach().numpy().copy()
+        generated_image = generated_image.to("cpu").detach().numpy().copy()
         generated_image = np.where(generated_image < 0, 0, generated_image)
         generated_image = np.where(generated_image > 1, 1, generated_image)
         images.append([ax.imshow(generated_image.transpose(1, 2, 0))])
@@ -172,16 +172,14 @@ class DiffusionModel(pl.LightningModule):
                     .flatten(-4, -3)
                     .flatten(-2, -1)
                 )
-                generated_image = generated_image.to('cpu').detach().numpy().copy()
+                generated_image = generated_image.to("cpu").detach().numpy().copy()
                 generated_image = np.where(generated_image < 0, 0, generated_image)
                 generated_image = np.where(generated_image > 1, 1, generated_image)
                 images.append([ax.imshow(generated_image.transpose(1, 2, 0))])
         animation = ArtistAnimation(
             fig, images, interval=100, blit=True, repeat_delay=1000
         )
-        animation.save(
-            "generate_process.gif", writer="pillow"
-        )
+        animation.save("generate_process.gif", writer="pillow")
         plt.close(fig)
         return x
 
@@ -260,7 +258,12 @@ def main(cfg: DictConfig) -> None:
     # configure logger
     tb_logger = TensorBoardLogger(outdir)
     # train
-    trainer = pl.Trainer(max_epochs=cfg.train.num_epochs, devices=1, logger=tb_logger, enable_progress_bar = False)
+    trainer = pl.Trainer(
+        max_epochs=cfg.train.num_epochs,
+        devices=1,
+        logger=tb_logger,
+        enable_progress_bar=False,
+    )
     trainer.fit(diffmodel, train_loader)
 
     # save model
