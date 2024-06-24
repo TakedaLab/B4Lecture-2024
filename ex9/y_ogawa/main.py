@@ -2,10 +2,12 @@
 """Train the diffusion model for image denoising."""
 
 import logging
+import os
 from typing import Any, Dict
 
 import diffusers
 import hydra
+import imageio
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -16,8 +18,6 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.utils import save_image
 from tqdm import tqdm
-import os
-import imageio
 
 
 class DiffusionModel(pl.LightningModule):
@@ -248,7 +248,9 @@ def main(cfg: DictConfig) -> None:
     # configure logger
     tb_logger = TensorBoardLogger(outdir)
     # train
-    trainer = pl.Trainer(max_epochs=cfg.train.num_epochs, accelerator="gpu", devices=1, logger=tb_logger)
+    trainer = pl.Trainer(
+        max_epochs=cfg.train.num_epochs, accelerator="gpu", devices=1, logger=tb_logger
+    )
     trainer.fit(diffmodel, train_loader)
 
     # save model
