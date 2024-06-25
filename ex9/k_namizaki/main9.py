@@ -5,6 +5,7 @@ from typing import Any, Dict
 
 import diffusers
 import hydra
+import imageio
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -38,6 +39,8 @@ class DiffusionModel(pl.LightningModule):
         self.optimizer = optimizer
 
         self.num_timesteps = num_timesteps
+
+        self.generated_images = []  # 生成された画像を保存するリスト
 
         if noise_schedule == "linear":
             beta = torch.linspace(
@@ -112,7 +115,6 @@ class DiffusionModel(pl.LightningModule):
             x = x + torch.randn_like(x) * torch.sqrt(beta_t)  # 最初のタイムステップ以外の場合、追加ノイズを加える
         return x  # ノイズ除去された画像を返す
 
-
     def training_step(self, batch, batch_idx):
         """トレーニングの1ステップ。
 
@@ -146,6 +148,18 @@ class DiffusionModel(pl.LightningModule):
             x = self.p_sample(x, t)
         return x
 
+    def generate_and_save_gif(self, images, filename='output.gif'):
+        """画像のリストからGIFを生成し、保存する。
+
+        Args:
+            images (List[torch.Tensor]): 画像のリスト (各画像は (C, H, W) 形式)
+            filename (str, optional): 保存するGIFのファイル名。デフォルトは 'output.gif'。
+        """
+        # PyTorchテンソルをNumPy配列に変換し、値を[0, 255]にスケーリング
+        images_np = [(img.permute(1, 2, 0).numpy() * 255).astype('uint8') for img in images]
+        # GIFを保存
+        imageio.mimsave(filename, images_np, fps=10)  # fpsはフレームレート
+
     def on_train_epoch_end(self):
         """各エポック終了時に画像を生成。"""
         if self.current_epoch % self.every_n_epochs == self.every_n_epochs - 1:
@@ -169,7 +183,14 @@ class DiffusionModel(pl.LightningModule):
                 self.current_epoch,
                 dataformats="HW" if generated_image.ndim == 2 else "CHW",
             )
+            self.generated_images.append(generated_image)
             logging.info("Done.")
+
+    def on_train_end(self):
+        """訓練終了時に全ての生成画像をGIFとして保存。"""
+        logging.info("Saving generated images as a GIF...")
+        # 画像のリストからGIFを生成し、保存
+        self.generate_and_save_gif(self.generated_images, 'final_generated_images.gif')
 
 
 # HydraというPythonの設定管理ライブラリを使用して、設定ファイルから簡単に設定を読み込むためのもの
