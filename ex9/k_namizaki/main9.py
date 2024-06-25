@@ -5,7 +5,8 @@ from typing import Any, Dict
 
 import diffusers
 import hydra
-import imageio
+from PIL import Image
+import torch
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
@@ -106,13 +107,14 @@ class DiffusionModel(pl.LightningModule):
         Returns:
             torch.Tensor: ノイズ除去された画像 x_t (B, C, H, W)
         """
-        noise_pred = self.forward(x, t)  # ノイズを予測
-        beta_t = self.beta[t].view(-1, 1, 1, 1)  # タイムステップに対応するベータ値
-        alpha_t = self.alpha[t].view(-1, 1, 1, 1)  # タイムステップに対応するアルファ値
-        alpha_prod_t = self.alpha_prod[t].view(-1, 1, 1, 1)  # タイムステップに対応する累積アルファ値
-        x = (x - (beta_t / torch.sqrt(1 - alpha_prod_t)) * noise_pred) / (torch.sqrt(alpha_t))  # ノイズを除去
-        if t[0].item() != 0:
-            x = x + torch.randn_like(x) * torch.sqrt(beta_t)  # 最初のタイムステップ以外の場合、追加ノイズを加える
+        with torch.no_grad():# これがないとGPU不足でエラーでる
+            noise_pred = self.forward(x, t)  # ノイズを予測
+            beta_t = self.beta[t].view(-1, 1, 1, 1)  # タイムステップに対応するベータ値
+            alpha_t = self.alpha[t].view(-1, 1, 1, 1)  # タイムステップに対応するアルファ値
+            alpha_prod_t = self.alpha_prod[t].view(-1, 1, 1, 1)  # タイムステップに対応する累積アルファ値
+            x = (x - (beta_t / torch.sqrt(1 - alpha_prod_t)) * noise_pred) / (torch.sqrt(alpha_t))  # ノイズを除去
+            if t[0].item() != 0:
+                x = x + torch.randn_like(x) * torch.sqrt(beta_t)  # 最初のタイムステップ以外の場合、追加ノイズを加える
         return x  # ノイズ除去された画像を返す
 
     def training_step(self, batch, batch_idx):
@@ -135,7 +137,7 @@ class DiffusionModel(pl.LightningModule):
         noisy_images = self.q_sample(images, t, noise)  # 画像にノイズを加える
         noise_pred = self.forward(noisy_images, t)  # ノイズを予測
         loss = self.criterion(noise_pred, noise)  # criterion(平均二乗誤差)で損失を計算
-        self.log("train_loss", loss)  # 損失をログに記録
+        self.log("train_loss", loss, prog_bar=True)  # 損失をログに記録
         return loss  # 損失を返す
 
     def generate(self, num_timesteps, shape):
@@ -148,17 +150,18 @@ class DiffusionModel(pl.LightningModule):
             x = self.p_sample(x, t)
         return x
 
-    def generate_and_save_gif(self, images, filename='output.gif'):
+    def generate_and_save_gif(self, images, filename):
         """画像のリストからGIFを生成し、保存する。
 
         Args:
             images (List[torch.Tensor]): 画像のリスト (各画像は (C, H, W) 形式)
             filename (str, optional): 保存するGIFのファイル名。デフォルトは 'output.gif'。
         """
-        # PyTorchテンソルをNumPy配列に変換し、値を[0, 255]にスケーリング
-        images_np = [(img.permute(1, 2, 0).numpy() * 255).astype('uint8') for img in images]
+        # PyTorchテンソルをPILイメージに変換し、値を[0, 255]にスケーリング
+        images_pil = [Image.fromarray((img.permute(1, 2, 0) * 255).byte().cpu().numpy()) for img in images]
+
         # GIFを保存
-        imageio.mimsave(filename, images_np, fps=10)  # fpsはフレームレート
+        images_pil[0].save(filename, save_all=True, append_images=images_pil[1:], duration=100, loop=0)
 
     def on_train_epoch_end(self):
         """各エポック終了時に画像を生成。"""
@@ -246,7 +249,9 @@ def main(cfg: DictConfig) -> None:
     # ロガーの設定
     tb_logger = TensorBoardLogger(outdir)
     # トレーニング
-    trainer = pl.Trainer(max_epochs=cfg.train.num_epochs, devices=1, logger=tb_logger)
+    trainer = pl.Trainer(
+        max_epochs=cfg.train.num_epochs, devices=1, logger=tb_logger, accelerator="gpu"
+        )
     trainer.fit(diffmodel, train_loader)
 
     # モデルの保存

@@ -1,4 +1,4 @@
-datadir: C:\Users\kyskn\B4Lecture-2024\ex9\k_namizaki\data 
+datadir: /work6/k_namizaki/B4Lecture-2024/ex9/k_namizaki/data
 seed: 42
 
 # To check configurable parameters, see https://huggingface.co/docs/diffusers/api/models/unet2d
