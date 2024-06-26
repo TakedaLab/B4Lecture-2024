@@ -5,13 +5,12 @@ from typing import Any, Dict
 
 import diffusers
 import hydra
-from PIL import Image
-import torch
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 from datasets import load_dataset
 from omegaconf import DictConfig
+from PIL import Image
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 from torchvision import transforms
@@ -90,11 +89,15 @@ class DiffusionModel(pl.LightningModule):
             torch.Tensor: ノイズのある画像 x_t (B, C, H, W)
         """
         if noise is None:
-            noise = torch.randn_like(x0)  # ノイズがNoneの場合、新たにランダムなノイズを生成
+            noise = torch.randn_like(
+                x0
+            )  # ノイズがNoneの場合、新たにランダムなノイズを生成
         # タイムステップに対応するアルファ値(形状を [batch_size, 1, 1, 1] に変換)
         alpha_t = self.alpha_prod[t].view(-1, 1, 1, 1)
         beta_t = self.beta[t].view(-1, 1, 1, 1)  # タイムステップに対応するベータ値
-        x_t = torch.sqrt(alpha_t) * x0 + torch.sqrt(beta_t) * noise  # 拡散プロセスを適用してノイズを追加
+        x_t = (
+            torch.sqrt(alpha_t) * x0 + torch.sqrt(beta_t) * noise
+        )  # 拡散プロセスを適用してノイズを追加
         return x_t  # ノイズのある画像を返す
 
     def p_sample(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
@@ -107,14 +110,22 @@ class DiffusionModel(pl.LightningModule):
         Returns:
             torch.Tensor: ノイズ除去された画像 x_t (B, C, H, W)
         """
-        with torch.no_grad():# これがないとGPU不足でエラーでる
+        with torch.no_grad():  # これがないとGPU不足でエラーでる
             noise_pred = self.forward(x, t)  # ノイズを予測
             beta_t = self.beta[t].view(-1, 1, 1, 1)  # タイムステップに対応するベータ値
-            alpha_t = self.alpha[t].view(-1, 1, 1, 1)  # タイムステップに対応するアルファ値
-            alpha_prod_t = self.alpha_prod[t].view(-1, 1, 1, 1)  # タイムステップに対応する累積アルファ値
-            x = (x - (beta_t / torch.sqrt(1 - alpha_prod_t)) * noise_pred) / (torch.sqrt(alpha_t))  # ノイズを除去
+            alpha_t = self.alpha[t].view(
+                -1, 1, 1, 1
+            )  # タイムステップに対応するアルファ値
+            alpha_prod_t = self.alpha_prod[t].view(
+                -1, 1, 1, 1
+            )  # タイムステップに対応する累積アルファ値
+            x = (x - (beta_t / torch.sqrt(1 - alpha_prod_t)) * noise_pred) / (
+                torch.sqrt(alpha_t)
+            )  # ノイズを除去
             if t[0].item() != 0:
-                x = x + torch.randn_like(x) * torch.sqrt(beta_t)  # 最初のタイムステップ以外の場合、追加ノイズを加える
+                x = x + torch.randn_like(x) * torch.sqrt(
+                    beta_t
+                )  # 最初のタイムステップ以外の場合、追加ノイズを加える
         return x  # ノイズ除去された画像を返す
 
     def training_step(self, batch, batch_idx):
@@ -130,7 +141,9 @@ class DiffusionModel(pl.LightningModule):
         images = batch["images"]  # バッチから画像を取得
         images = images.to(self.device)  # デバイスに移動
         batch_size = images.size(0)  # バッチサイズを取得
-        t = torch.randint(0, self.num_timesteps, (batch_size,), device=self.device).long()
+        t = torch.randint(
+            0, self.num_timesteps, (batch_size,), device=self.device
+        ).long()
         # random integer(最小、最大（含まない）、テンソルの形状) -> ランダムなタイムステップを生成
         # .long(): 生成されたテンソルを長整数型 (int64) に変換。タイムステップは整数である必要があるため、この変換が必要
         noise = torch.randn_like(images)  # 画像と同じサイズのランダムノイズを生成
@@ -158,10 +171,15 @@ class DiffusionModel(pl.LightningModule):
             filename (str, optional): 保存するGIFのファイル名。デフォルトは 'output.gif'。
         """
         # PyTorchテンソルをPILイメージに変換し、値を[0, 255]にスケーリング
-        images_pil = [Image.fromarray((img.permute(1, 2, 0) * 255).byte().cpu().numpy()) for img in images]
+        images_pil = [
+            Image.fromarray((img.permute(1, 2, 0) * 255).byte().cpu().numpy())
+            for img in images
+        ]
 
         # GIFを保存
-        images_pil[0].save(filename, save_all=True, append_images=images_pil[1:], duration=100, loop=0)
+        images_pil[0].save(
+            filename, save_all=True, append_images=images_pil[1:], duration=100, loop=0
+        )
 
     def on_train_epoch_end(self):
         """各エポック終了時に画像を生成。"""
@@ -174,10 +192,14 @@ class DiffusionModel(pl.LightningModule):
             # [-1, 1] の範囲から [0, 1] の範囲に変換
             generated_image = (generated_image + 1) / 2
             generated_image = (
-                generated_image.reshape(self.num_samples + self.image_size) # (num_samples[0], num_samples[1], image_size[0], image_size[1], channels)
-                .permute([2, 0, 3, 1, 4]) # [image_size[0], num_samples[0], image_size[1], num_samples[1], channels]になる
-                .flatten(-4, -3) # 画像が横方向に連続
-                .flatten(-2, -1) # 画像が縦方向に連続
+                generated_image.reshape(
+                    self.num_samples + self.image_size
+                )  # (num_samples[0], num_samples[1], image_size[0], image_size[1], channels)
+                .permute(
+                    [2, 0, 3, 1, 4]
+                )  # [image_size[0], num_samples[0], image_size[1], num_samples[1], channels]になる
+                .flatten(-4, -3)  # 画像が横方向に連続
+                .flatten(-2, -1)  # 画像が縦方向に連続
             )  # 画像を適切な形状に変換
             # add_image メソッドは、指定された画像をTensorBoardに追加
             self.logger.experiment.add_image(
@@ -193,7 +215,7 @@ class DiffusionModel(pl.LightningModule):
         """訓練終了時に全ての生成画像をGIFとして保存。"""
         logging.info("Saving generated images as a GIF...")
         # 画像のリストからGIFを生成し、保存
-        self.generate_and_save_gif(self.generated_images, 'final_generated_images.gif')
+        self.generate_and_save_gif(self.generated_images, "final_generated_images.gif")
 
 
 # HydraというPythonの設定管理ライブラリを使用して、設定ファイルから簡単に設定を読み込むためのもの
@@ -251,7 +273,7 @@ def main(cfg: DictConfig) -> None:
     # トレーニング
     trainer = pl.Trainer(
         max_epochs=cfg.train.num_epochs, devices=1, logger=tb_logger, accelerator="gpu"
-        )
+    )
     trainer.fit(diffmodel, train_loader)
 
     # モデルの保存
