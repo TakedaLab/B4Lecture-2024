@@ -1,0 +1,7 @@
+#!/bin/bash
+# セットアップで作成した自分のvirtualenv環境をロード
+source ${HOME}/workspace6/venvs/py3venv/bin/activate
+# 使用スレッド数を1に指定する場合
+export OMP_NUM_THREADS=1
+# 作成したPythonスクリプトを実行
+python3 -u main.py --path_to_truth test_truth.csv
