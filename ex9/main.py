@@ -85,7 +85,11 @@ class DiffusionModel(pl.LightningModule):
         Returns:
             torch.Tensor: Noisy image x_t (B, C, H, W)
         """
-        # TODO
+        if noise is None:
+            noise = torch.randn_like(x0)
+        a = self.alpha_prod[t].view(-1, 1, 1, 1)
+        # 正規分布の和が成立するように
+        return x0 * a.sqrt() + noise * (1 - a).sqrt()
 
     def p_sample(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         """Inverse process of the diffusion model. x_t ~ p(x_t|x_{t+1}).
@@ -97,7 +101,16 @@ class DiffusionModel(pl.LightningModule):
         Returns:
             torch.Tensor: Denoised image x_t (B, C, H, W)
         """
-        # TODO
+        with torch.no_grad():
+            noise_pred = self.forward(x, t)
+            alpha_t = self.alpha[t].view(-1, 1, 1, 1)
+            alpha_prod_t = self.alpha_prod[t].view(-1, 1, 1, 1)
+            x = (
+                x - noise_pred * (1 - alpha_t) / (1 - alpha_prod_t).sqrt()
+            ) / alpha_t.sqrt()
+            if t[0].item() != 0:
+                x = x + torch.randn_like(x) * (1 - alpha_t).sqrt()
+            return x
 
     def training_step(self, batch, batch_idx):
         """Training 1 step.
@@ -112,7 +125,18 @@ class DiffusionModel(pl.LightningModule):
         images = batch["images"]
         images = images.to(self.device)
 
-        # TODO
+        t = torch.randint(
+            0, self.num_timesteps, (images.size(0),), device=self.device
+        ).long()
+
+        noise = torch.randn_like(images)
+        noisy_images = self.q_sample(images, t, noise)
+
+        outputs = self.forward(noisy_images, t)
+        loss = self.criterion(outputs, noise)
+        self.log("train_loss", loss, prog_bar=True)
+
+        return loss
 
     def generate(self, num_timesteps, shape):
         """Generate samples from the diffusion model."""
@@ -197,7 +221,9 @@ def main(cfg: DictConfig) -> None:
     # configure logger
     tb_logger = TensorBoardLogger(outdir)
     # train
-    trainer = pl.Trainer(max_epochs=cfg.train.num_epochs, devices=1, logger=tb_logger)
+    trainer = pl.Trainer(
+        max_epochs=cfg.train.num_epochs, devices=1, accelerator="gpu", logger=tb_logger
+    )
     trainer.fit(diffmodel, train_loader)
 
     # save model

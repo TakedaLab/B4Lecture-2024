@@ -1,4 +1,4 @@
-datadir: null
+datadir: /home/matsumoto24/nas01home/bm-ex_09/data
 seed: 42
 
 # To check configurable parameters, see https://huggingface.co/docs/diffusers/api/models/unet2d

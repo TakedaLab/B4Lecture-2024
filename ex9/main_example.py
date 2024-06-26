@@ -220,7 +220,10 @@ def main(cfg: DictConfig) -> None:
     # configure logger
     tb_logger = TensorBoardLogger(outdir)
     # train
-    trainer = pl.Trainer(max_epochs=cfg.train.num_epochs, devices=1, logger=tb_logger)
+    # mod
+    trainer = pl.Trainer(
+        max_epochs=cfg.train.num_epochs, devices=1, accelerator="gpu", logger=tb_logger
+    )
     trainer.fit(diffmodel, train_loader)
 
     # save model
