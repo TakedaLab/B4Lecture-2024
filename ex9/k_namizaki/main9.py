@@ -18,7 +18,7 @@ from tqdm import tqdm
 
 
 class DiffusionModel(pl.LightningModule):
-    """画像のノイズ除去のための拡散モデル。"""
+    """画像のノイズ除去のための拡散モデル."""
 
     def __init__(
         self,
@@ -32,7 +32,7 @@ class DiffusionModel(pl.LightningModule):
         image_size: tuple,  # 画像サイズ
         every_n_epochs: int,  # 可視化のインターバル
     ) -> None:
-        """拡散モデルの初期化。"""
+        """拡散モデルの初期化."""
         super(DiffusionModel, self).__init__()
         self.model = model
         self.criterion = criterion
@@ -60,11 +60,11 @@ class DiffusionModel(pl.LightningModule):
         self.every_n_epochs = every_n_epochs
 
     def configure_optimizers(self):
-        """オプティマイザーを設定。"""
+        """オプティマイザーを設定."""
         return self.optimizer
 
     def forward(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
-        """ノイズ予測モデルのフォワード。
+        """ノイズ予測モデルのフォワード.
 
         Args:
             x (torch.Tensor): 入力画像 (B, C, H, W)
@@ -129,7 +129,7 @@ class DiffusionModel(pl.LightningModule):
         return x  # ノイズ除去された画像を返す
 
     def training_step(self, batch, batch_idx):
-        """トレーニングの1ステップ。
+        """トレーニングの1ステップ.
 
         Args:
             batch (tuple): 入力バッチ
@@ -154,7 +154,7 @@ class DiffusionModel(pl.LightningModule):
         return loss  # 損失を返す
 
     def generate(self, num_timesteps, shape):
-        """拡散モデルからサンプルを生成。"""
+        """拡散モデルからサンプルを生成."""
         x = torch.randn(shape).to(self.device)
         # tqdm は、ループの進行状況を表示するためのツール
         for t in tqdm(range(num_timesteps - 1, -1, -1)):
@@ -164,7 +164,7 @@ class DiffusionModel(pl.LightningModule):
         return x
 
     def generate_and_save_gif(self, images, filename):
-        """画像のリストからGIFを生成し、保存する。
+        """画像のリストからGIFを生成し、保存する.
 
         Args:
             images (List[torch.Tensor]): 画像のリスト (各画像は (C, H, W) 形式)
@@ -182,7 +182,7 @@ class DiffusionModel(pl.LightningModule):
         )
 
     def on_train_epoch_end(self):
-        """各エポック終了時に画像を生成。"""
+        """各エポック終了時に画像を生成."""
         if self.current_epoch % self.every_n_epochs == self.every_n_epochs - 1:
             logging.info("Generating Images...")
             generated_image = self.generate(
@@ -212,7 +212,7 @@ class DiffusionModel(pl.LightningModule):
             logging.info("Done.")
 
     def on_train_end(self):
-        """訓練終了時に全ての生成画像をGIFとして保存。"""
+        """訓練終了時に全ての生成画像をGIFとして保存."""
         logging.info("Saving generated images as a GIF...")
         # 画像のリストからGIFを生成し、保存
         self.generate_and_save_gif(self.generated_images, "final_generated_images.gif")
@@ -221,7 +221,7 @@ class DiffusionModel(pl.LightningModule):
 # HydraというPythonの設定管理ライブラリを使用して、設定ファイルから簡単に設定を読み込むためのもの
 @hydra.main(config_path="conf", config_name="default.yaml", version_base=None)
 def main(cfg: DictConfig) -> None:
-    """拡散モデルのトレーニング。"""
+    """拡散モデルのトレーニング."""
     # シードを固定
     torch.manual_seed(cfg.seed)
     torch.cuda.manual_seed(cfg.seed)
@@ -244,7 +244,7 @@ def main(cfg: DictConfig) -> None:
     )
 
     def transform(examples):
-        """データセットを変換。"""
+        """データセットを変換."""
         images = [preprocess(image.convert("RGB")) for image in examples["image"]]
         return {"images": images}
 
