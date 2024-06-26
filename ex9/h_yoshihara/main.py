@@ -118,7 +118,7 @@ class DiffusionModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         """Training 1 step.
-        
+
         Args:
             batch (tuple): Input batch
             batch_idx (int): Batch index
