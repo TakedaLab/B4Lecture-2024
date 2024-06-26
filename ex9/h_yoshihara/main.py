@@ -67,6 +67,7 @@ class DiffusionModel(pl.LightningModule):
 
     def forward(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         """Forward noise prediction model.
+
         Args:
             x (torch.Tensor): Input image (B, C, H, W)
             t (torch.Tensor): Time step (B,)
@@ -79,6 +80,7 @@ class DiffusionModel(pl.LightningModule):
         self, x0: torch.Tensor, t: torch.Tensor, noise: torch.Tensor = None
     ) -> torch.Tensor:
         """Forward process of the diffusion model. x_t ~ q(x_t|x_0).
+
         Args:
             x0 (torch.Tensor): Clean image x_0 (B, C, H, W)
             t (torch.Tensor): Time step (B,)
@@ -95,6 +97,7 @@ class DiffusionModel(pl.LightningModule):
 
     def p_sample(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         """Inverse process of the diffusion model. x_t ~ p(x_t|x_{t+1}).
+
         Args:
             x (torch.Tensor): Noisy image x_{t+1} (B, C, H, W)
             t (torch.Tensor): Time step (B,)
@@ -115,6 +118,7 @@ class DiffusionModel(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         """Training 1 step.
+        
         Args:
             batch (tuple): Input batch
             batch_idx (int): Batch index
