@@ -1,0 +1,11 @@
+torch==1.10.1
+torchvision==0.11.2
+torchaudio==0.10.1
+pytorch-lightning==1.8.6
+matplotlib
+diffusers
+hydra-core
+omegaconf
+tensorboard
+datasets
+protobuf
